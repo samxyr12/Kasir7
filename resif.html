@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+    <title>Penerimaan Barang</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        max-width: 1200px;
+        background-color: #f4f4f4;
+        color: #333;
+    }
+
+    h1 {
+        text-align: center;
+        color: #4CAF50;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+    }
+
+    .btn {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.2s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+        background-color: #45a049;
+        transform: translateY(-2px);
+    }
+
+    .btn-kembali {
+        background-color: #2196F3;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-kembali:hover {
+        background-color: #1976D2;
+        transform: translateY(-2px);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        background-color: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden; /* To ensure rounded corners */
+    }
+
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 12px;
+        transition: background-color 0.3s;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        color: #333;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+        transition: border-color 0.3s;
+    }
+
+    input[type="number"] {
+        text-align: right;
+    }
+
+    input[readonly] {
+        background-color: #f9f9f9;
+    }
+
+    #tabelPenerimaan tbody tr:nth-child(even) {
+        background-color: #f8f8f8;
+    }
+
+    #tabelPenerimaan tbody tr:hover {
+        background-color: #e0f7fa; /* Light blue on hover */
+    }
+
+    tr td:last-child button {
+        background-color: #f44336;
+        width: 100%;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    tr td:last-child button:hover {
+        background-color: #d32f2f;
+        transform: translateY(-2px);
+    }
+
+    @media screen and (max-width: 768px) {
+        table {
+            font-size: 14px;
+        }
+
+        .btn {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        button {
+            width: 100%;
+        }
+    }
+
+    /* Additional styling for modal tables */
+    .swal2-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .swal2-table th, .swal2-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .swal2-table th {
+        background-color: #f2f2f2;
+    }
+</style>
+</head>
+<body>
+<button class="btn-kembali" onclick="window.location.href='barang.html'">
+    <i class="fas fa-arrow-left"></i> Kembali
+</button>
+   <h1>Penerimaan Barang</h1>
+    
+    <div class="btn">
+        <button onclick="tambahBaris()">Tambah Baris</button>
+        <button onclick="simpanPenerimaan()">Simpan Penerimaan</button>
+    </div>
+
+    <table id="tabelPenerimaan">
+        <thead>
+            <tr>
+                <th>Tanggal</th>
+                <th>Kode Barang</th>
+                <th>Nama Barang</th>
+                <th>Kategori</th>
+                <th>Kode Toko</th>
+                <th>Jumlah Diterima</th>
+                <th>Harga Beli</th>
+                <th>Harga Jual</th>
+                <th>Total</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="bodyPenerimaan">
+            <!-- Baris akan ditambahkan secara dinamis -->
+        </tbody>
+        <button onclick="hitungTotalKeseluruhan()">Hitung Total</button>
+    </table>
+
+    <div class="btn">
+        <button onclick="tampilkanRiwayatPenerimaan()">Lihat Riwayat Penerimaan</button>
+        <button onclick="tampilkanStok()">Lihat Stok Barang</button>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <script>
+ function tambahBaris() {
+    // Use SweetAlert2 to prompt the user for the number of rows to add
+    Swal.fire({
+        title: 'Masukkan jumlah baris yang ingin ditambahkan',
+        input: 'number',
+        inputAttributes: {
+            min: 1,
+            step: 1
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Tambah',
+        cancelButtonText: 'Batal',
+        inputValidator: (value) => {
+            if (!value || value < 1) {
+                return 'Silakan masukkan jumlah baris yang valid';
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const jumlahBaris = parseInt(result.value, 10);
+            const tbody = document.getElementById('bodyPenerimaan');
+
+            for (let i = 0; i < jumlahBaris; i++) {
+                const newRow = tbody.insertRow();
+
+                const cellTanggal = newRow.insertCell(0);
+                const tanggalInput = document.createElement('input');
+                tanggalInput.type = 'date';
+                tanggalInput.value = new Date().toISOString().split('T')[0];
+                cellTanggal.appendChild(tanggalInput);
+
+                // Kode Barang with autocomplete feature
+                const cellKode = newRow.insertCell(1);
+                const kodeInput = document.createElement('input');
+                kodeInput.type = 'text';
+                kodeInput.placeholder = 'Kode Barang';
+                kodeInput.addEventListener('change', function() {
+                    cariAtauTambahBarang(this);
+                });
+                cellKode.appendChild(kodeInput);
+
+                // Nama Barang
+                const cellNama = newRow.insertCell(2);
+                const namaInput = document.createElement('input');
+                namaInput.type = 'text';
+                cellNama.appendChild(namaInput);
+
+                // Kategori
+                const cellKategori = newRow.insertCell(3);
+                const kategoriInput = document.createElement('select');
+                const kategoriOptions = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7'];
+                kategoriOptions.forEach(kategori => {
+                    const option = document.createElement('option');
+                    option.value = kategori;
+                    option.text = kategori;
+                    kategoriInput.appendChild(option);
+                });
+                cellKategori.appendChild(kategoriInput);
+
+                // Kode Toko
+                const cellKodeToko = newRow.insertCell(4);
+                const kodeTokoInput = document.createElement('input');
+                kodeTokoInput.type = 'text';
+                kodeTokoInput.placeholder = 'Kode Toko';
+                cellKodeToko.appendChild(kodeTokoInput);
+
+                // Jumlah Diterima
+                const cellJumlah = newRow.insertCell(5);
+                const jumlahInput = document.createElement('input');
+                jumlahInput.type = 'number';
+                jumlahInput.min = '1';
+                jumlahInput.addEventListener('change', hitungTotal);
+                cellJumlah.appendChild(jumlahInput);
+
+                // Harga Beli
+                const cellHargaBeli = newRow.insertCell(6);
+                const hargaBeliInput = document.createElement('input');
+                hargaBeliInput.type = 'number';
+                hargaBeliInput.addEventListener('change', hitungTotal);
+                cellHargaBeli.appendChild(hargaBeliInput);
+
+                // Harga Jual
+                const cellHargaJual = newRow.insertCell(7);
+                const hargaJualInput = document.createElement('input');
+                hargaJualInput.type = 'number';
+                hargaJualInput.addEventListener('change', hitungTotal);
+                cellHargaJual.appendChild(hargaJualInput);
+
+                // Total
+                const cellTotal = newRow.insertCell(8);
+                const totalInput = document.createElement('input');
+                totalInput.type = 'number';
+                totalInput.readOnly = true;
+                cellTotal.appendChild(totalInput);
+
+                // Tombol Hapus
+                const cellAksi = newRow.insertCell(9);
+                const hapusBtn = document.createElement('button');
+                hapusBtn.textContent = 'Hapus';
+                hapusBtn.onclick = function() {
+                    tbody.removeChild(newRow);
+                };
+                cellAksi.appendChild(hapusBtn);
+            }
+        }
+    });
+}
+        function cariAtauTambahBarang(kodeInput) {
+            const barang = JSON.parse(localStorage.getItem('barang')) || [];
+            const barangDitemukan = barang.find(item => item.kode === kodeInput.value);
+
+            const row = kodeInput.closest('tr');
+            const namaInput = row.cells[2].querySelector('input');
+            const kategoriInput = row.cells[3].querySelector('select');
+            const kodeTokoInput = row.cells[4].querySelector('input');
+            const hargaBeliInput = row.cells[6].querySelector('input');
+            const hargaJualInput = row.cells[7].querySelector('input');
+
+            if (barangDitemukan) {
+                // Jika barang sudah ada
+                namaInput.value = barangDitemukan.nama;
+                kategoriInput.value = barangDitemukan.kategori;
+                kodeTokoInput.value = barangDitemukan.kodeToko;
+                hargaBeliInput.value = barangDitemukan.hargaBeli;
+                hargaJualInput.value = barangDitemukan.hargaJual;
+            } else {
+                // Jika barang tidak ditemukan, minta konfirmasi untuk menambahkan
+                Swal.fire({
+                    title: 'Barang Tidak Ditemukan',
+                    text: 'Apakah Anda ingin menambahkan barang baru?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Tambahkan',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed ) {
+                        // Generate PLU dari 4 digit terakhir kode barang
+                        const plu = kodeInput.value.slice(-4);
+
+                        // Biarkan pengguna mengisi detail
+                        Swal.fire({
+                            title: 'Tambah Barang Baru',
+                            html: `
+                                <input id="namaBarang" class="swal2-input" placeholder="Nama Barang">
+                                <input id="jumlah" type="number" class="swal2-input" placeholder="Jumlah" min="1">
+                                <input id="hargaBeli" type="number" class="swal2-input" placeholder="Harga Beli">
+                                <input id="hargaJual" type="number" class="swal2-input" placeholder="Harga Jual">
+                            `,
+                            focusConfirm: false,
+                            preConfirm: () => {
+                                const namaBarang = document.getElementById('namaBarang').value;
+                                const jumlah = parseInt(document.getElementById('jumlah').value);
+                                const hargaBeli = parseFloat(document.getElementById('hargaBeli').value);
+                                const hargaJual = parseFloat(document.getElementById('hargaJual').value);
+
+                                if (!namaBarang || isNaN(jumlah) || isNaN(hargaBeli) || isNaN(hargaJual)) {
+                                    Swal.showValidationMessage('Semua field harus diisi dengan benar');
+                                } else {
+                                    return { namaBarang, jumlah, hargaBeli, hargaJual, plu };
+                                }
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                const { namaBarang, jumlah, hargaBeli, hargaJual, plu } = result.value;
+
+                                // Tambahkan barang baru ke localStorage
+                                const newBarang = {
+                                    kode: kodeInput.value,
+                                    nama: namaBarang,
+                                    kategori: kategoriInput.value,
+                                    kodeToko: kodeTokoInput.value,
+                                    plu: plu,
+                                    stok: jumlah,
+                                    hargaBeli: hargaBeli,
+                                    hargaJual: hargaJual,
+                                    terjual: 0
+                                };
+
+                                let barang = JSON.parse(localStorage.getItem('barang')) || [];
+                                barang.push(newBarang);
+                                localStorage.setItem('barang', JSON.stringify(barang));
+
+                                // Update input di tabel
+                                namaInput.value = namaBarang;
+                                hargaBeliInput.value = hargaBeli;
+                                hargaJualInput.value = hargaJual;
+                                hitungTotal({ target: { closest: () => row, value: jumlah } });
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        function hitungTotal(event) {
+            const row = event.target.closest('tr');
+            const jumlahInput = row.cells[5].querySelector('input');
+            const hargaBeliInput = row.cells[6].querySelector('input');
+            const totalInput = row.cells[8].querySelector('input');
+
+            const jumlah = parseFloat(jumlahInput.value) || 0;
+            const hargaBeli = parseFloat(hargaBeliInput.value) || 0;
+
+            totalInput.value = jumlah * hargaBeli;
+        }
+
+        function simpanPenerimaan() {
+    const tbody = document.getElementById('bodyPenerimaan');
+    const rows = tbody.rows;
+    const penerimaanBarang = [];
+    
+    // Validasi input
+    let isValid = true;
+    const errorMessages = [];
+
+    for (let row of rows) {
+        const tanggal = row.cells[0].querySelector('input').value;
+        const kodeBarang = row.cells[1].querySelector('input').value;
+        const namaBarang = row.cells[2].querySelector('input').value;
+        const kategori = row.cells[3].querySelector('select').value;
+        const kodeToko = row.cells[4].querySelector('input').value;
+        const jumlah = parseFloat(row.cells[5].querySelector('input').value) || 0;
+        const hargaBeli = parseFloat(row.cells[6].querySelector('input').value) || 0;
+        const hargaJual = parseFloat(row.cells[7].querySelector('input').value) || 0;
+        const total = parseFloat(row.cells[8].querySelector('input').value) || 0;
+
+        // Validasi field wajib
+        if (!tanggal) {
+            isValid = false;
+            errorMessages.push("Tanggal harus diisi");
+        }
+        if (!kodeBarang) {
+            isValid = false;
+            errorMessages.push("Kode Barang harus diisi");
+        }
+        if (jumlah <= 0) {
+            isValid = false;
+            errorMessages.push("Jumlah barang harus lebih dari 0");
+        }
+        if (hargaBeli <= 0) {
+            isValid = false;
+            errorMessages.push("Harga beli harus lebih dari 0");
+        }
+    }
+
+    // Tampilkan pesan error jika validasi gagal
+    if (!isValid) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan Input',
+            html: errorMessages.map(msg => `<p>${msg}</p>`).join(''),
+            confirmButtonText: 'Perbaiki'
+        });
+        return;
+    }
+
+    // Proses penyimpanan
+    for (let row of rows) {
+        const tanggal = row.cells[0].querySelector('input').value;
+        const kodeBarang = row.cells[1].querySelector('input').value;
+        const namaBarang = row.cells[2].querySelector('input').value;
+        const kategori = row.cells[3].querySelector('select').value;
+        const kodeToko = row.cells[4].querySelector('input').value;
+        const jumlah = parseFloat(row.cells[5].querySelector('input').value) || 0;
+        const hargaBeli = parseFloat(row.cells[6].querySelector('input').value) || 0;
+        const hargaJual = parseFloat(row.cells[7].querySelector('input').value) || 0;
+        const total = parseFloat(row.cells[8].querySelector('input').value) || 0;
+
+        if (kodeBarang && jumlah > 0) {
+            // Proses update atau tambah barang di localStorage
+            let barang = JSON.parse(localStorage.getItem('barang')) || [];
+            const barangIndex = barang.findIndex(item => item.kode === kodeBarang);
+
+            if (barangIndex !== -1) {
+                // Update barang yang sudah ada
+                barang[barangIndex].stok += jumlah;
+                barang[barangIndex].kodeToko = kodeToko;
+                barang[barangIndex].hargaBeli = hargaBeli;
+                barang[barangIndex].hargaJual = hargaJual;
+            } else {
+                // Tambah barang baru
+                barang.push({
+                    kode: kodeBarang,
+                    nama: namaBarang,
+                    kategori: kategori,
+                    kodeToko: kodeToko,
+                    stok: jumlah,
+                    hargaBeli: hargaBeli,
+                    hargaJual: hargaJual,
+                    terjual: 0
+                });
+            }
+            localStorage.setItem('barang', JSON.stringify(barang));
+
+            // Simpan data penerimaan
+            penerimaanBarang.push({
+                tanggal, 
+                kodeBarang, 
+                namaBarang, 
+                kategori, 
+                kodeToko, 
+                jumlah, 
+                hargaBeli, 
+                hargaJual,
+                total
+            });
+        }
+    }
+
+    // Simpan riwayat penerimaan
+    const riwayatPenerimaan = JSON.parse(localStorage.getItem('penerimaanBarang')) || [];
+    riwayatPenerimaan.push(...penerimaanBarang);
+    localStorage.setItem('penerimaanBarang', JSON.stringify(riwayatPenerimaan));
+
+    // Hitung total
+    const totalBaris = penerimaanBarang.length;
+    const totalBarang = penerimaanBarang.reduce((sum, item) => sum + item.jumlah, 0);
+    const totalNominal = penerimaanBarang.reduce((sum, item) => sum + item.total, 0);
+
+    // Tampilkan konfirmasi dengan detail
+    Swal.fire({
+        icon: 'success',
+        title: 'Penerimaan Barang Berhasil',
+        html: `
+            <table class="swal2-table">
+                <tr>
+                    <th>Total Baris</th>
+                    <td>${totalBaris}</td>
+                </tr>
+                <tr>
+                    <th>Total Barang</th>
+                    <td>${totalBarang.toLocaleString()}</td>
+                </tr>
+                <tr>
+                    <th>Total Nominal</th>
+                    <td>Rp ${totalNominal.toLocaleString()}</td>
+                </tr>
+            </table>
+        `,
+        confirmButtonText: 'OK'
+    }).then(() => {
+        // Reset tabel setelah penyimpanan
+        tbody.innerHTML = '';
+        
+        // Tambahkan satu baris kosong
+        tambahBaris();
+    });
+}
+
+ function tampilkanRiwayatPenerimaan() {
+    const riwayat = JSON.parse(localStorage.getItem('penerimaanBarang')) || [];
+    
+    // Buat modal popup
+    Swal.fire({
+        title: 'Riwayat Penerimaan Barang',
+        html: `
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table id="riwayatTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Kode Barang</th>
+                            <th>Nama Barang</th>
+                            <th>Jumlah</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riwayatTableBody"></tbody>
+                </table>
+            </div>
+            <canvas id="riwayatChart" width="400" height="200"></canvas>
+        `,
+        width: '800px',
+        didRender: () => {
+            const tbody = document.getElementById('riwayatTableBody');
+            const ctx = document.getElementById('riwayatChart').getContext('2d');
+            
+            // Proses data untuk tabel
+            riwayat.forEach(item => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = item.tanggal;
+                row.insertCell(1).textContent = item.kodeBarang;
+                row.insertCell(2).textContent = item.namaBarang;
+                row.insertCell(3).textContent = item.jumlah;
+                row.insertCell(4).textContent = item.total;
+            });
+
+            // Buat grafik
+            const kategoriBulan = {};
+            riwayat.forEach(item => {
+                const bulan = new Date(item.tanggal).toLocaleString('default', { month: 'long' });
+                kategoriBulan[bulan] = (kategoriBulan[bulan] || 0) + item.total;
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(kategoriBulan),
+                    datasets: [{
+                        label: 'Total Penerimaan per Bulan',
+                        data: Object.values(kategoriBulan),
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                    }]
+                }
+            });
+        },
+        showConfirmButton: true,
+        confirmButtonText: 'Export Excel',
+        showCancelButton: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            exportToExcel(riwayat, 'Riwayat_Penerimaan_Barang');
+        }
+    });
+}
+
+function tampilkanStok() {
+    const barang = JSON.parse(localStorage.getItem('barang')) || [];
+    
+    Swal.fire({
+        title: 'Stok Barang',
+        html: `
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table id="stokTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Nama</th>
+                            <th>Kategori</th>
+                            <th>Stok</th>
+                            <th>Harga Beli</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stokTableBody"></tbody>
+                </table>
+            </div>
+            <canvas id="stokChart" width="400" height="200"></canvas>
+        `,
+        width: '800px',
+        didRender: () => {
+            const tbody = document.getElementById('stokTableBody');
+            const ctx = document.getElementById('stokChart').getContext('2d');
+            
+            // Proses data untuk tabel
+            barang.forEach(item => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = item.kode;
+                row.insertCell(1).textContent = item.nama;
+                row.insertCell(2).textContent = item.kategori;
+                row.insertCell(3).textContent = item.stok;
+                row.insertCell(4).textContent = item.hargaBeli;
+            });
+
+            // Buat grafik stok
+            const stokData = barang.filter(b => b.stok > 0);
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: stokData.map(b => b.nama),
+                    datasets: [{
+                        data: stokData.map(b => b.stok),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)'
+                        ]
+                    }]
+                }
+            });
+        },
+        showConfirmButton: true,
+        confirmButtonText: 'Export Excel',
+        showCancelButton: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            exportToExcel(barang, 'Stok_Barang');
+        }
+    });
+}
+
+// Fungsi export Excel
+function exportToExcel(data, filename) {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, filename);
+    
+    // Generate file
+    XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
+}       
+        document.addEventListener("DOMContentLoaded", function() {
+            tambahBaris();
+        });
+        
+       function hitungTotalKeseluruhan() {
+    const tbody = document.getElementById('bodyPenerimaan');
+    const rows = tbody.rows;
+    
+    let totalBaris = rows.length;
+    let totalBarang = 0;
+    let totalNominal = 0;
+
+    for (let row of rows) {
+        const jumlahInput = row.cells[5].querySelector('input');
+        const totalInput = row.cells[8].querySelector('input');
+
+        const jumlah = parseFloat(jumlahInput.value) || 0;
+        const total = parseFloat(totalInput.value) || 0;
+
+        totalBarang += jumlah;
+        totalNominal += total;
+    }
+
+    // Tampilkan ringkasan dengan SweetAlert
+    Swal.fire({
+        title: 'Ringkasan Penerimaan Barang',
+        html: `
+            <table class="swal2-table">
+                <tr>
+                    <th>Total Baris</th>
+                    <td>${totalBaris}</td>
+                </tr>
+                <tr>
+                    <th>Total Barang</th>
+                    <td>${totalBarang.toLocaleString()}</td>
+                </tr>
+                <tr>
+                    <th>Total Nominal</th>
+                    <td>Rp ${totalNominal.toLocaleString()}</td>
+                </tr>
+            </table>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Tutup'
+    });
+} 
+        
+   
+    </script>
+</body>
+</html>
+
+

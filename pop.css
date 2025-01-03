@@ -1,0 +1,633 @@
+
+
+
+
+      /* Popup CSS */
+.popup {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    backdrop-filter: blur(5px); /* Optional: Adds a blur effect */
+    padding-top: 60px;
+}
+
+.popup-content {
+    background-color: #ffffff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    width: 100%;
+    max-width: 450px; /* Maximum width */
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    position: relative; /* For close button positioning */
+    animation: fadeIn 0.3s; /* Fade-in animation */
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+.close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+/* CSS untuk form di popup */
+.popup-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.popup-form input {
+    margin-bottom: 15px; /* Tambahkan jarak bawah */
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ddd; /* Light border */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12); /* Inner shadow */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition */
+}
+
+.popup-form input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0,123,255,0.3); /* Focus shadow */
+    outline: none; /* Remove default outline */
+}
+
+.popup-form button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px; /* Rounded corners */
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.popup-form button:hover {
+    background-color: #0056b3;
+}
+
+/* Styling untuk input dan tombol di popup */
+#pinPopup .popup-content, #otpPopup .popup-content {
+    width: 90%;
+}
+
+#pinInput, #otpInput {
+    margin-bottom: 15px; /* Tambahkan jarak bawah */
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ddd; /* Light border */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12); /* Inner shadow */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition */
+}
+
+#pinInput:focus, #otpInput:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0,123,255,0.3); /* Focus shadow */
+    outline: none; /* Remove default outline */
+}
+
+/* Padding top untuk popup */
+#pinPopup, #otpPopup {
+    padding-top: 100px; /* Menambahkan jarak atas */
+}
+
+/* Button CSS */
+button {
+    padding: 10px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Table Button CSS */
+.table-button {
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.table-button:hover {
+    background-color: #218838;
+}
+
+/* CSS untuk popup PIN */
+#downloadPopup {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    backdrop-filter: blur(5px); /* Optional: Adds a blur effect */
+    padding-top: 60px;
+}
+
+#downloadPopup .popup-content {
+    background-color: #ffffff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    width: 80%;
+    max-width: 400px; /* Maximum width */
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    position: relative; /* For close button positioning */
+    animation: fadeIn 0.3s; /* Fade-in animation */
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+.close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+#downloadPopup h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#downloadPopup input {
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ddd; /* Light border */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12); /* Inner shadow */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition */
+    width: calc(100% - 22px); /* Full width minus padding */
+}
+
+#downloadPopup input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0,123,255,0.3); /* Focus shadow */
+    outline: none; /* Remove default outline */
+}
+
+#downloadPopup button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px; /* Rounded corners */
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Smooth transition */
+    width: 330px; /* Fixed width */
+    /* width: 50%; */ /* Alternative: 50% of the parent element */
+    /* Adjust the width as needed */
+}
+
+#downloadPopup button:hover {
+    background-color: #0056b3;
+}
+
+
+/* CSS untuk animasi loading */
+.loading-spinner {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #007bff; /* Blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-top: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+/* CSS untuk popup Upload */
+#uploadPopup {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    backdrop-filter: blur(5px); /* Optional: Adds a blur effect */
+    padding-top: 60px;
+}
+
+#uploadPopup .popup-content {
+    background-color: #ffffff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    width: 80%;
+    max-width: 400px; /* Maximum width */
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    position: relative; /* For close button positioning */
+    animation: fadeIn 0.3s; /* Fade-in animation */
+}
+
+#uploadPopup .popup-content .close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#uploadPopup .popup-content .close:hover,
+#uploadPopup .popup-content .close:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+#uploadPopup input[type="file"] {
+    margin-bottom: 10px;
+    width: 100%; /* Full width */
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ddd; /* Light border */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12); /* Inner shadow */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition */
+}
+
+#uploadPopup input[type="file"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0,123,255,0.3); /* Focus shadow */
+    outline: none; /* Remove default outline */
+}
+
+#uploadPopup button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px; /* Rounded corners */
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Smooth transition */
+    width: 100%; /* Full width */
+}
+
+#uploadPopup button:hover {
+    background-color: #0056b3;
+}
+
+#uploadMessage {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #28a745; /* Green for success messages */
+}
+
+.upload-status {
+    position: relative;
+    height: 20px;
+    margin-top: 10px;
+    background-color: #f3f3f3;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.upload-status::before {
+    content: '';
+    display: block;
+    height: 100%;
+    background-color: #007bff;
+    animation: none; /* Default state */
+    transition: width 0.3s ease-in-out; /* Smooth transition */
+}
+
+.upload-status.uploading::before {
+    animation: uploadAnimation 2s ease-in-out forwards; /* Add animation when uploading */
+}
+
+@keyframes uploadAnimation {
+    0% {
+        width: 0;
+        opacity: 0;
+    }
+    50% {
+        width: 50%;
+        opacity: 0.5;
+    }
+    100% {
+        width: 100%;
+        opacity: 1;
+    }
+}
+  
+  
+/* CSS untuk konfirmasi duplikasi username */
+#duplicatePopup {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.6); /* Black w/ opacity */
+    backdrop-filter: blur(5px); /* Optional: Adds a blur effect */
+    padding-top: 10%;
+}
+
+#duplicatePopup .popup-content {
+    background-color: #ffffff;
+    margin: auto;
+    padding: 20px;
+    border-radius: 8px; /* Rounded corners */
+    width: 90%;
+    max-width: 500px; /* Maximum width */
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    position: relative; /* For close button positioning */
+    animation: fadeIn 0.3s; /* Fade-in animation */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+#duplicatePopup .popup-content .close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#duplicatePopup .popup-content .close:hover,
+#duplicatePopup .popup-content .close:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+#duplicatePopup h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+#duplicatePopup p {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#duplicatePopup .button-container {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+}
+
+#duplicatePopup button {
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px; /* Rounded corners */
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+#duplicatePopup button:hover {
+    background-color: #0056b3;
+}
+
+#duplicatePopup button.cancel {
+    background-color: #6c757d;
+}
+
+#duplicatePopup button.cancel:hover {
+    background-color: #5a6268;
+}
+  
+  
+/* CSS untuk animasi loading */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 2;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #007bff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}  
+
+
+/* CSS untuk pop-up hapus akun */
+.popup1 {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup1-content {
+    background: #fff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+/* Tombol untuk menutup pop-up */
+.close {
+    color: #333;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.close:hover {
+    color: #000;
+}
+
+/* Input pencarian di dalam pop-up */
+#searchDeleteInput {
+    width: calc(100% - 24px);
+    padding: 14px;
+    margin-bottom: 20px;
+    border: 2px solid #007bff;
+    border-radius: 6px;
+    outline: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#searchDeleteInput:focus {
+    border-color: #0056b3;
+}
+
+/* Daftar username di dalam pop-up */
+#usernameList {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    background: #f9f9f9;
+    margin-bottom: 20px;
+}
+
+/* Item dalam daftar username */
+.username-item {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.username-item:hover {
+    background-color: #f1f1f1;
+}
+
+.username-item:last-child {
+    border-bottom: none;
+}
+
+.username-item input {
+    margin-right: 10px;
+}
+
+/* Daftar akun yang akan dihapus */
+#deleteList {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f9f9f9;
+}
+
+/* Item dalam daftar hapus */
+#deleteList li {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #e3f2fd;
+}
+
+#deleteList li:last-child {
+    border-bottom: none;
+}
+
+/* Tombol dalam pop-up */
+button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 8px 4px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:active {
+    background-color: #003d79;
+    transform: scale(0.98);
+}

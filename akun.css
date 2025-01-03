@@ -1,0 +1,320 @@
+/* akun.css */
+
+/* Reset dasar untuk margin dan padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+    a {
+            color: #000000;
+        }
+
+.header {
+  background-color: #fff;
+  box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, .1);
+  position: fixed;
+  width: auto; /* Perkecil ukuran navbar */
+  top: 18px; /* Menurunkan posisi header */
+  right: 10px; /* Posisikan navbar di pojok atas kanan */
+  border-radius: 15px; /* Tambahkan border radius */
+  z-index: 3;
+}
+
+        .header ul,
+        .header li {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            overflow: hidden;
+            background-color: #fff;
+            border-radius: 15px;
+        }
+
+        .header li a {
+            display: block;
+            padding: 15px;
+            border-right: 1px solid #f4f4f4;
+            text-decoration: none;
+        }
+
+        .header li a:hover,
+        .header .menu-btn:hover {
+            background-color: #f4f4f4;
+        }
+
+        .header .logo {
+            display: block;
+            float: left;
+            font-size: 1.5em;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+
+        .header .menu {
+            clear: both;
+            max-height: 0;
+            transition: max-height .2s ease-out;
+        }
+
+        .header .menu-icon {
+            cursor: pointer;
+            display: inline-block;
+            float: right;
+            padding: 20px;
+            position: relative;
+            user-select: none;
+        }
+
+        .header .menu-icon .navicon {
+            background: #333;
+            display: block;
+            height: 2px;
+            position: relative;
+            transition: background .2s ease-out;
+            width: 18px;
+        }
+
+        .header .menu-icon .navicon:before,
+        .header .menu-icon .navicon:after {
+            background: #333;
+            content: '';
+            display: block;
+            height: 100%;
+            position: absolute;
+            transition: all .2s ease-out;
+            width: 100%;
+        }
+
+        .header .menu-icon .navicon:before {
+            top: 5px;
+        }
+
+        .header .menu-icon .navicon:after {
+            top: -5px;
+        }
+
+        .header .menu-btn {
+            display: none;
+        }
+
+        .header .menu-btn:checked~.menu {
+            max-height: 240px;
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon {
+            background: transparent;
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon:before {
+            transform: rotate(-45deg);
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon:after {
+            transform: rotate(45deg);
+        }
+
+        .header .menu-btn:checked~.menu-icon:not(.steps) .navicon:before,
+        .header .menu-btn:checked~.menu-icon:not(.steps) .navicon:after {
+            top: 0;
+        }
+
+        @media (min-width: 48em) {
+            .header li {
+                float: left;
+            }
+
+            .header li a {
+                padding: 15px 20px;
+            }
+
+            .header .menu {
+                clear: none;
+                float: right;
+                max-height: none;
+            }
+
+            .header .menu-icon {
+                display: none;
+            }
+        }
+
+/* Gaya untuk keseluruhan body */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    padding: 20px;
+}
+
+/* Container utama */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Gaya untuk div dengan id createAccount */
+#createAccount {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    border: 1px solid #e1e5e9;
+}
+
+/* Gaya untuk judul dalam div createAccount */
+#createAccount h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+/* Gaya untuk input fields dalam div createAccount */
+#createAccount input {
+    width: calc(100% - 20px);
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+#createAccount button {
+    width: 100%;
+    padding: 12px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+#createAccount button:hover {
+    background-color: #2980b9;
+}
+
+/* Gaya untuk div dengan id accountList */
+#accountList {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px; /* Jarak bawah untuk pemisahan dari laporan */
+}
+
+/* Gaya untuk judul dalam div accountList */
+#accountList h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #2c3e50;
+    border-bottom: 2px solid #e67e22;
+    padding-bottom: 10px;
+}
+
+/* Gaya untuk tabel dalam div accountList */
+#accountTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+
+#accountTable th, #accountTable td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+#accountTable th {
+    background-color: #f9f9f9;
+    color: #333;
+    font-weight: bold;
+}
+
+#accountTable tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+
+#laporanListDisplay {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    font-family: 'Roboto', sans-serif; /* Ganti dengan font yang diinginkan */
+    font-size: 11px;
+}
+
+#laporanListDisplay li {
+    padding: 8px 12px;
+    border-bottom: 1px solid #ccc;
+    color: #555;
+    background-color: #f8f8f8;
+    transition: background-color 0.3s ease;
+}
+
+#laporanListDisplay li:last-child {
+    border-bottom: none;
+}
+
+#laporanListDisplay li:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#laporanListDisplay li:hover {
+    background-color: #e0e0e0;
+    cursor: pointer;
+}
+
+#laporanListDisplay li::before {
+    content: "• ";
+    color: #007bff; /* Warna ikon bullet */
+    font-weight: bold;
+}
+/* CSS untuk styling input pencarian */
+#searchInput {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 10px 0;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#searchInput::placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+#searchInput:focus {
+    border-color: #007BFF;
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Tambahan efek untuk ikon pencarian jika ada */
+#searchContainer {
+    position: relative;
+    width: 100%;
+}
+
+#searchIcon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+

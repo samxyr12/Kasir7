@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pengiriman Barang Kedaluwarsa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .table-exp {
+            margin-top: 20px;
+        }
+        .badge-danger {
+            background-color: #dc3545;
+        }
+        .badge-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .badge-success {
+            background-color: #28a745;
+        }
+        .table-group {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row mb-3">
+            <div class="col">
+                <button class="btn btn-secondary" onclick="window.location.href='barang.html'">
+                    Kembali
+                </button>
+            </div>
+        </div>
+
+        <h1 class="text-center mb-4">Pengiriman Barang Kedaluwarsa</h1>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="batasKirimExp" class="form-label">Batas Kirim Sebelum Expired (hari):</label>
+                <input type="number" id="batasKirimExp" class="form-control" value="30" min="1">
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-info mt-4" onclick="cekBarangMendekatiExp()">Cek Barang Mendekati Expired</button>
+            </div>
+        </div>
+
+        <div class="btn-group mb-3">
+            <button class="btn btn-primary" onclick="tambahBarangExp()">Tambah Barang Exp</button>
+            <button class="btn btn-success" onclick="simpanPengirimanExp()">Simpan Pengiriman</button>
+            <button class="btn btn-warning" onclick="tampilkanRiwayatPengirimanExp()">Riwayat Pengiriman</button>
+        </div>
+
+        <div id="ringkasanBarangExp" class="mb-3"></div>
+
+        <div class="table-responsive">
+            <table id="tabelBarangExp" class="table table-striped table-bordered table-exp">
+                <thead>
+                    <tr>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Tanggal Produksi</th>
+                        <th>Tanggal Kedaluwarsa</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyBarangExp">
+                    <!-- Baris akan ditambahkan secara dinamis -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+    let barangExpData = [];
+
+    function tambahBarangExp() {
+        const barang = JSON.parse(localStorage.getItem('barang')) || [];
+
+        if (barang.length === 0) {
+            Swal.fire('Peringatan', 'Tidak ada barang yang tersedia. Silakan tambah barang terlebih dahulu.', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Tambah Barang Kedaluwarsa',
+            html: `
+                <select id="pilihBarang" class="form-control mb-2">
+                    <option value="">Pilih Barang</option>
+                    ${barang.map(item => `<option value="${item.kode}">${item.kode} - ${item.nama}</option>`).join('')}
+                </select>
+                <input type="date" id="tanggalProduksi" class="form-control mb-2" placeholder="Tanggal Produksi">
+                <input type="date" id="tanggalExp" class="form-control mb-2" placeholder="Tanggal Kedaluwarsa">
+            `,
+            focusConfirm: false,
+            preConfirm: () => {
+                const kodeBarang = document.getElementById('pilihBarang').value;
+                const tanggalProduksi = document.getElementById('tanggalProduksi').value;
+                const tanggalExp = document.getElementById('tanggalExp').value;
+
+                if (!kodeBarang || !tanggalProduksi || !tanggalExp) {
+                    Swal.showValidationMessage('Semua field harus diisi');
+                    return false;
+                }
+
+                return { kodeBarang, tanggalProduksi, tanggalExp };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const { kodeBarang, tanggalProduksi, tanggalExp } = result.value;
+                const barangTerpilih = barang.find(item => item.kode === kodeBarang);
+
+                const statusExp = hitungStatusExp(tanggalExp);
+
+                const newBarangExp = {
+                    kodeBarang,
+                    namaBarang: barangTerpilih.nama,
+                    tanggalProduksi,
+                    tanggalExp,
+                    status: statusExp.text
+                };
+
+                barangExpData.push(newBarangExp);
+                updateTabelBarangExp();
+                updateRingkasanBarangExp();
+            }
+        });
+    }
+
+    function updateTabelBarangExp() {
+        const tbody = document.getElementById('bodyBarangExp');
+        tbody.innerHTML = '';
+
+        barangExpData.forEach((barang, index) => {
+            const statusExp = hitungStatusExp(barang.tanggalExp);
+            const newRow = tbody.insertRow();
+            newRow.innerHTML = `
+                <td>${barang.kodeBarang}</td>
+                <td>${barang.namaBarang}</td>
+                <td>${barang.tanggalProduksi}</td>
+                <td>${barang.tanggalExp}</td>
+                <td><span class="badge ${statusExp.class}">${statusExp.text}</span></td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="hapusBarisExp(${index})">Hapus</button>
+                </td>
+            `;
+        });
+    }
+
+    function updateRingkasanBarangExp() {
+        const ringkasan = document.getElementById('ringkasanBarangExp');
+        const ringkasanData = {};
+
+        barangExpData.forEach(barang => {
+            if (!ringkasanData[barang.kodeBarang]) {
+                ringkasanData[barang.kodeBarang] = {
+                    namaBarang: barang.namaBarang,
+                    total: 1
+                };
+            } else {
+                ringkasanData[barang.kodeBarang].total++;
+            }
+        });
+
+        let ringkasanHtml = '<h4>Ringkasan Barang Kedaluwarsa:</h4>';
+        ringkasanHtml += '<div class="row">';
+        
+        for (const [kode, data] of Object.entries(ringkasanData)) {
+            ringkasanHtml += `
+                <div class="col-md-4 mb-2">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${kode} - ${data.namaBarang}</h5>
+                            <p class="card-text">Total: ${data.total} item</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        ringkasanHtml += '</div>';
+        ringkasan.innerHTML = ringkasanHtml;
+    }
+
+    function cekBarangMendekatiExp() {
+        const batasKirimExp = parseInt(document.getElementById('batasKirimExp').value) || 30;
+        const today = new Date();
+        const barangMendekatiExp = barangExpData.filter(barang => {
+            const expDate = new Date(barang.tanggalExp);
+            const diffInDays = (expDate - today) / (1000 * 60 * 60 * 24);
+            return diffInDays <= batasKirimExp && diffInDays > 0;
+        });
+
+        if (barangMendekatiExp.length > 0) {
+            let pesan = `<div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Kode Barang</th>
+                            <th>Nama Barang</th>
+                            <th>Tanggal Kedaluwarsa</th>
+                            <th>Sisa Hari</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            barangMendekatiExp.forEach(barang => {
+                const today = new Date();
+                const expDate = new Date(barang.tanggalExp);
+                const sisaHari = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+
+                pesan += `
+                    <tr>
+                        <td>${barang.kodeBarang}</td>
+                        <td>${barang.namaBarang}</td>
+                        <td>${barang.tanggalExp}</td>
+                        <td>${sisaHari} hari</td>
+                    </tr>
+                `;
+            });
+
+            pesan += `</tbody>
+                </table>
+            </div>`;
+
+            Swal.fire({
+                title: 'Barang Mendekati Expired',
+                html: pesan,
+                icon: 'warning'
+            });
+        } else {
+            Swal.fire('Informasi', 'Tidak ada barang yang mendekati expired', 'info');
+        }
+    }
+
+    function hitungStatusExp(tanggalExp) {
+        const today = new Date();
+        const expDate = new Date(tanggalExp);
+        const diffInDays = (expDate - today) / (1000 * 60 * 60 * 24);
+
+        if (diffInDays < 0) {
+            return { text: 'Kedaluwarsa', class: 'badge-danger' };
+        } else if (diffInDays <= 30) {
+            return { text: 'Hampir Kedaluwarsa', class: 'badge-warning' };
+        } else {
+            return { text: 'Masih Layak', class: 'badge-success' };
+        }
+    }
+
+    function hapusBarisExp(index) {
+        barangExpData.splice(index, 1);
+        updateTabelBarangExp();
+        updateRingkasanBarangExp();
+    }
+
+    function simpanPengirimanExp() {
+        if (barangExpData.length === 0) {
+            Swal.fire('Error', 'Tidak ada data barang kedaluwarsa', 'warning');
+            return;
+        }
+
+        let riwayatPengirimanExp = JSON.parse(localStorage.getItem('riwayatPengirimanExp')) || [];
+        riwayatPengirimanExp.push({
+            tanggal: new Date().toLocaleDateString('id-ID'),
+            barangExp: barangExpData
+        });
+        localStorage.setItem('riwayatPengirimanExp', JSON.stringify(riwayatPengirimanExp));
+
+        Swal.fire('Sukses', 'Data barang kedaluwarsa telah disimpan', 'success');
+        barangExpData = [];
+        updateTabelBarangExp();
+        updateRingkasanBarangExp();
+    }
+
+    // Fungsi yang sudah ada sebelumnya seperti tampilkanRiwayatPengirimanExp() dan lihatDetailPengirimanExp() tetap sama
+    function tampilkanRiwayatPengirimanExp() {
+        const riwayatPengirimanExp = JSON.parse(localStorage.getItem('riwayatPengirimanExp')) || [];
+
+        if (riwayatPengirimanExp.length === 0) {
+            Swal.fire('Informasi', 'Tidak ada riwayat pengiriman barang kedaluwarsa', 'info');
+            return;
+        }
+
+        let riwayatHtml = `
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Jumlah Barang</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        riwayatPengirimanExp.forEach((riwayat, index) => {
+            riwayatHtml += `
+                <tr>
+                    <td>${riwayat.tanggal}</td>
+                    <td>${riwayat.barangExp.length}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" onclick="lihatDetailPengirimanExp(${index})">
+                            Lihat Detail
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        riwayatHtml += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        Swal.fire({
+            title: 'Riwayat Pengiriman Barang Kedaluwarsa',
+            html: riwayatHtml,
+            width: '800px'
+        });
+    }
+
+    function lihatDetailPengirimanExp(index) {
+        const riwayatPengirimanExp = JSON.parse(localStorage.getItem('riwayatPengirimanExp')) || [];
+        const riwayat = riwayatPengirimanExp[index];
+
+        let detailHtml = `
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Kode Barang</th>
+                            <th>Nama Barang</th>
+                            <th>Tanggal Produksi</th>
+                            <th>Tanggal Exp</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        riwayat.barangExp.forEach(barang => {
+            const statusExp = hitungStatusExp(barang.tanggalExp);
+            detailHtml += `
+                <tr>
+                    <td>${barang.kodeBarang}</td>
+                    <td>${barang.namaBarang}</td>
+                    <td>${barang.tanggalProduksi}</td>
+                    <td>${barang.tanggalExp}</td>
+                    <td><span class="badge ${statusExp.class}">${barang.status}</span></td>
+                </tr>
+            `;
+        });
+
+        detailHtml += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        Swal.fire({
+            title: 'Detail Pengiriman Barang Kedaluwarsa',
+            html: detailHtml,
+            width: '800px'
+        });
+    }
+
+    function getStatusClass(status) {
+        switch(status) {
+            case 'Kedaluwarsa': return 'badge-danger';
+            case 'Hampir Kedaluwarsa': return 'badge-warning';
+            case 'Masih Layak': return 'badge-success';
+        }
+    }
+    </script>
+</body>
+</html>

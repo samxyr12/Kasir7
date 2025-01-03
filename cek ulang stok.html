@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Cek Ulang Stok</title>
+    <style>
+        /* Global Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-color: #3498db;
+            --text-color: #2c3e50;
+            --background-color: #f0f4f8;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        /* Button Styles */
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Table Styles */
+        #tabelStok {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 30px;
+            background-color: white;
+            box-shadow: var(--box-shadow);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        #tabelStok th,
+        #tabelStok td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #tabelStok th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        #tabelStok tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        #tabelStok tr:hover {
+            background-color: #eaf2f8;
+        }
+
+        /* Responsive Table */
+        @media (max-width: 768px) {
+            #tabelStok th,
+            #tabelStok td {
+                padding: 8px;
+                font-size: 12px;
+            }
+        }
+
+        /* Form Styles */
+        form input,
+        form select,
+        form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        form input:focus,
+        form select:focus,
+        form textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
+        /* Header and Footer Styles */
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .card-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .card-body {
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 15px;
+            background-color: #f44336;
+            color: white;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+        }
+
+        .alert.success {
+            background-color: #4caf50;
+        }
+
+        .alert.info {
+            background-color: #2196f3;
+        }
+
+        .alert.warning {
+            background-color: #ff9800;
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        .p-20 {
+            padding: 20px;
+        }
+
+        /* Input Stok Fisik Styles */
+        input[type="number"] {
+            width: 100px; /* Atur lebar sesuai kebutuhan */
+            padding: 6px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db; /* Warna saat input difokuskan */
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); /* Efek bayangan saat fokus */
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0; /* Hilangkan tombol spin di browser berbasis WebKit */
+        }
+
+        input[type="number"][min="0"] {
+            color: #333; /* Warna teks untuk input dengan minimal 0 */
+        }
+
+        input[type="number"]:invalid {
+            border-color: #e74c3c; /* Warna border merah jika input tidak valid */
+            box-shadow: 0 0 5px rgba(231, 76, 60, 0.5); /* Bayangan merah jika tidak valid */
+        }
+
+        /* Tambahan style untuk tombol adjust */
+        #adjustButton {
+            background-color: #27ae60;
+            margin-left: 10px;
+            display: none;
+        }
+
+        /* Style untuk button group */
+        .button-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Style untuk selisih positif/negatif */
+        .positive {
+            color: #27ae60;
+        }
+
+        .negative {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <a href="barang.html" class="icon-kembali">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1>Cek Ulang Stok</h1>
+            <a href="adjust.html" class="btn-riwayat">
+                Lihat Riwayat Adjustment
+            </a>
+        </div>
+        
+  <table id="tabelStok">
+    <thead>
+        <tr>
+            <th>Kode Barang</th>
+            <th>Nama Barang</th>
+            <th>Stok Sistem</th>
+            <th>Stok Fisik</th>
+            <th>Selisih</th>
+            <th>Total Harga Selisih</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Data will be populated here by JavaScript -->
+    </tbody>
+</table>
+
+<button id="cekStokSelesai">Selesai Cek Stok</button>
+<div id="hasilSelisih" style="display:none;">
+    <p>Total Selisih Positif: <span id="totalPlus"></span></p>
+    <p>Total Selisih Negatif: <span id="totalMinus"></span></p>
+    <button id="adjustButton" style="display:none;">Adjust Stok</button>
+    <button id="downloadPdf" style="display:none;">Download PDF</button>
+</div>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">       
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    loadBarang(); // Load barang when the document is ready
+});
+
+function loadBarang() {
+    let barang = JSON.parse(localStorage.getItem('barang')) || [];
+    const tabelStok = document.getElementById('tabelStok').getElementsByTagName('tbody')[0];
+
+    tabelStok.innerHTML = '';
+
+    barang.forEach((item, index) => {
+        const row = tabelStok.insertRow();
+
+        row.insertCell(0).innerText = item.kode; // Item code
+        row.insertCell(1).innerText = item.nama; // Item name
+        row.insertCell(2).innerText = '#'; // Displaying system stock as '#'
+
+        const stokFisikInput = document.createElement('input');
+        stokFisikInput.type = 'number';
+        stokFisikInput.min = 0;
+        stokFisikInput.value = '';
+        stokFisikInput.dataset.index = index;
+        row.insertCell(3).appendChild(stokFisikInput); // Physical stock input
+
+        row.insertCell(4).innerText = '-'; // Placeholder for difference
+        row.insertCell(5).innerText = '-'; // Placeholder for total price difference
+    });
+}
+
+document.getElementById('cekStokSelesai').addEventListener('click', function() {
+    // Get all rows from the stock table
+    let barang = JSON.parse(localStorage.getItem('barang')) || [];
+    let totalPlus = 0;
+    let totalMinus = 0;
+    let hasSelisih = false;
+
+    const tbody = document.getElementById('tabelStok').getElementsByTagName('tbody')[0];
+    const rows = tbody.getElementsByTagName('tr');
+
+    // Loop through the rows to calculate differences and totals
+    for (let i = 0; i < rows.length; i++) {
+        const stokSistem = parseInt(barang[i].stok); // Get the system stock from the barang
+        const stokFisik = parseInt(rows[i].cells[3].getElementsByTagName('input')[0].value) || 0; // Get physical stock input
+        const hargaJual = barang[i].hargaJual;
+
+        const selisih = stokFisik - stokSistem; // Calculate difference
+        const totalSelisihHarga = Math.abs(selisih * hargaJual); // Calculate total price difference
+
+        rows[i].cells[2].innerText = stokSistem; // Display system stock
+        rows[i].cells[4].innerText = selisih; // Display difference
+        if (selisih !== 0) {
+            hasSelisih = true;
+            rows[i].cells[4].className = selisih > 0 ? 'positive' : 'negative'; // Assign class based on difference
+        }
+        
+        rows[i].cells[5].innerText = formatRupiah(totalSelisihHarga); // Display total price difference
+
+        // Update totals for positive and negative differences
+        if (selisih > 0) {
+            totalPlus += totalSelisihHarga;
+        } else if (selisih < 0) {
+            totalMinus += totalSelisihHarga;
+        }
+    }
+
+    // Display results
+    document.getElementById('hasilSelisih').style.display = 'block'; // Show results section
+    document.getElementById('totalPlus').innerText = formatRupiah(totalPlus);
+    document.getElementById('totalMinus').innerText = formatRupiah(totalMinus);
+    
+    // Show adjust button only if there are differences
+    document.getElementById('adjustButton').style.display = hasSelisih ? 'inline-block' : 'none';
+    document.getElementById('downloadPdf').style.display = 'inline-block';
+});
+
+document.getElementById('adjustButton').addEventListener('click', function() {
+    const confirmation = confirm('Apakah Anda yakin ingin melakukan adjustment stok?');
+    if (!confirmation) return;
+
+    const rows = document.getElementById('tabelStok').getElementsByTagName('tbody')[0].rows;
+    let barang = JSON.parse(localStorage.getItem('barang')) || [];
+    const adjustmentItems = [];
+    let totalPlus = 0;
+    let totalMinus = 0;
+    let totalItem = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+        const stokSistem = parseInt(rows[i].cells[2].innerText); // Get system stock
+        const stokFisik = parseInt(rows[i].cells[3].getElementsByTagName('input')[0].value) || 0; // Get physical stock input
+        const selisih = stokFisik - stokSistem; // Calculate difference
+        const nominal = Math.abs(selisih * barang[i].hargaJual); // Calculate nominal value
+
+        if (selisih !== 0) {
+            totalItem++;
+            if (selisih > 0) totalPlus += nominal;
+            else totalMinus += nominal;
+
+            barang[i].stok = stokFisik; // Update stock in barang
+
+            adjustmentItems.push({
+                kode: barang[i].kode,
+                nama: barang[i].nama,
+                stokAwal: stokSistem,
+                stokAkhir: stokFisik,
+                selisih: selisih,
+                nominal: nominal
+            });
+        }
+    }
+
+    // Save adjustment history
+    const now = new Date();
+    const adjustment = {
+        tanggal: now.toLocaleDateString(),
+        jam: now.toLocaleTimeString(),
+        totalItem: totalItem,
+        totalPlus: totalPlus,
+        totalMinus: totalMinus,
+        items: adjustmentItems
+    };
+
+    let adjustmentHistory = JSON.parse(localStorage.getItem('adjustmentHistory')) || [];
+    adjustmentHistory.push(adjustment);
+
+    localStorage.setItem('adjustmentHistory', JSON.stringify(adjustmentHistory));
+    localStorage.setItem('barang', JSON.stringify(barang));
+
+    alert('Adjustment stok berhasil dilakukan!');
+    location.reload(); // Reload the page
+});
+
+// Function to format numbers as currency
+function formatRupiah(angka) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+    }).format(angka);
+}
+
+
+document.getElementById('downloadPdf').addEventListener('click', function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Add title
+    doc.setFontSize(18);
+    doc.text('Laporan Cek Stok', 14, 16);
+
+    // Add date and time
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString();
+    doc.setFontSize(12);
+    doc.text(`Tanggal: ${formattedDate}`, 14, 24);
+    doc.text(`Waktu: ${formattedTime}`, 14, 30);
+
+    // Add total selisih
+    const totalPlus = document.getElementById('totalPlus').innerText;
+    const totalMinus = document.getElementById('totalMinus').innerText;
+    doc.text(`Total Selisih Positif: ${totalPlus}`, 14, 38);
+    doc.text(`Total Selisih Negatif: ${totalMinus}`, 14, 44);
+
+    // Prepare table data
+    const rows = [];
+    const tabelStok = document.getElementById('tabelStok').getElementsByTagName('tbody')[0].rows;
+    for (let i = 0; i < tabelStok.length; i++) {
+        const kodeBarang = tabelStok[i].cells[0].innerText;
+        const namaBarang = tabelStok[i].cells[1].innerText;
+        const stokSistem = tabelStok[i].cells[2].innerText;
+        const stokFisik = tabelStok[i].cells[3].getElementsByTagName('input')[0].value || '0';
+        const selisih = tabelStok[i].cells[4].innerText;
+        const totalHargaSelisih = tabelStok[i].cells[5].innerText;
+
+        rows.push([kodeBarang, namaBarang, stokSistem, stokFisik, selisih, totalHargaSelisih]);
+    }
+
+    // Add table to PDF
+    doc.autoTable({
+        head: [['Kode Barang', 'Nama Barang', 'Stok Sistem', 'Stok Fisik', 'Selisih', 'Total Harga Selisih']],
+        body: rows,
+        startY: 50, // Position after the initial text
+        theme: 'grid',
+    });
+
+    // Save PDF
+    doc.save(`Laporan_Cek_Stok_${formattedDate}.pdf`);
+});
+
+</script>
+</body>
+</html>
+        

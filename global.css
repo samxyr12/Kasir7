@@ -1,0 +1,233 @@
+        /* Advanced Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --accent-color: #e74c3c;
+    --background-color: #f0f4f8;
+    --text-color: #2c3e50;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, var(--background-color) 0%, #dfe6e9 100%);
+    color: var(--text-color);
+    line-height: 1.8;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 32px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Enhanced Button Styles */
+.action-btn, button {
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    margin: 8px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: var(--box-shadow);
+}
+
+.action-btn:hover, button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 30px;
+    animation: fadeInUp 0.5s ease-out 0.2s both;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Improved Input Styles */
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+/* Advanced Table Styles */
+#tabelBarang {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 30px;
+    background-color: white;
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    animation: fadeInUp 0.5s ease-out 0.4s both;
+}
+
+#tabelBarang th, #tabelBarang td {
+    border: none;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+#tabelBarang th {
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 12px;
+}
+
+#tabelBarang tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+#tabelBarang tr {
+    transition: all 0.3s ease;
+}
+
+#tabelBarang tr:hover {
+    background-color: #e8f4f8;
+    transform: scale(1.01);
+}
+
+/* Improved Icon Styles */
+.icon-kembali {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 24px;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: var(--box-shadow);
+}
+
+.icon-kembali:hover {
+    color: #2980b9;
+    transform: translateX(-5px);
+}
+
+/* Responsive Design Improvements */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 15px;
+        margin: 10px;
+    }
+    
+    input[type="text"],
+    input[type="number"] {
+        font-size: 14px;
+    }
+    
+    .action-btn, button {
+        font-size: 12px;
+        padding: 10px 15px;
+    }
+    
+    #tabelBarang th, #tabelBarang td {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+}
+
+/* Special Button Styles */
+.cek-stok-btn {
+    background: linear-gradient(135deg, var(--secondary-color), #27ae60);
+}
+
+.cek-stok-btn:hover {
+    background: linear-gradient(135deg, #27ae60, var(--secondary-color));
+}
+
+#scanButton {
+    background: linear-gradient(135deg, var(--accent-color), #c0392b);
+}
+
+#scanButton:hover {
+    background: linear-gradient(135deg, #c0392b, var(--accent-color));
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-warning:hover {
+    background-color: #ffb300;
+}
+```

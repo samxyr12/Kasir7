@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    
+    <title>Redeem Poin Member</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --background: #f9fafb;
+            --card-bg: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --discount-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            padding: 2rem;
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            font-size: 2.5rem;
+        }
+
+        .redeem-section {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        th:first-child {
+            border-top-left-radius: 0.5rem;
+        }
+
+        th:last-child {
+            border-top-right-radius: 0.5rem;
+        }
+
+        tr:hover {
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-redeem {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-redeem:hover {
+            background: #059669;
+        }
+
+        .price-display {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .discount-price {
+            color: var(--discount-color);
+            font-weight: 600;
+        }
+
+        .discount-badge {
+            background: var(--discount-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn-confirm {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-cancel {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #dc2626;
+        }
+
+        .price-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 0.5rem;
+        }
+
+        /* Custom Select Styles */
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .custom-select-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .custom-select-input:after {
+            content: '';
+            width: 0.8em;
+            height: 0.5em;
+            background-color: var(--text-secondary);
+            clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+        }
+
+        .custom-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-top: 0.25rem;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: var(--shadow-md);
+        }
+
+        .custom-select-dropdown.active {
+            display: block;
+        }
+
+        .custom-select-search {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            outline: none;
+            background: #f9fafb;
+        }
+
+        .custom-select-options {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .custom-select-option {
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .custom-select-option:last-child {
+            border-bottom: none;
+        }
+
+        .custom-select-option:hover {
+            background-color: var(--background);
+        }
+
+        .custom-select-option.selected {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .member-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .member-points {
+            color: var(--success-color);
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background: #ecfdf5;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .redeem-section {
+                padding: 1rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+        }
+        
+        
+        .detail-item {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: var(--background);
+    border-radius: 0.5rem;
+}
+
+.detail-item strong {
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.riwayat-section {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+
+.pin-input-container {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-scanner {
+    background-color: #17a2b8;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.btn-scanner:hover {
+    background-color: #138496;
+}
+
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Redeem Poin Member</h1>
+       
+        <div class="riwayat-section">
+    <button class="btn btn-redeem" onclick="showRiwayatModal()">Lihat Riwayat Penukaran</button>
+
+<button class="btn btn-redeem" onclick="window.location.href='member.html';">Pindah Halaman</button>
+
+</div>
+        <div class="redeem-section">
+            <div class="search-box">
+                <input type="text" id="searchBarang" placeholder="Cari barang..." oninput="cariBarang()">
+            </div>
+            
+            <table id="tabelBarang">
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Nama Barang</th>
+                        <th>Harga Normal</th>
+                        <th>Harga Poin</th>
+                        <th>Stok</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="daftarBarang">
+                    <!-- Daftar barang akan dimuat di sini -->
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+<!-- Modal Riwayat Redeem -->
+<div id="riwayatRedeemModal" class="modal">
+    <div class="modal-content">
+        <h2>Riwayat Penukaran Poin</h2>
+        
+        <div class="search-box">
+            <input type="text" id="searchRiwayat" placeholder="Cari riwayat..." oninput="cariRiwayat()">
+        </div>
+
+        <table id="tabelRiwayat">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Member</th>
+                    <th>Barang</th>
+                    <th>Poin Digunakan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="daftarRiwayat">
+                <!-- Riwayat redeem akan dimuat di sini -->
+            </tbody>
+        </table>
+
+        <div class="modal-buttons">
+            <button class="btn btn-cancel" onclick="hideRiwayatModal()">Tutup</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail Riwayat -->
+<div id="detailRiwayatModal" class="modal">
+    <div class="modal-content">
+        <h2>Detail Penukaran</h2>
+        <div id="detailRiwayatContent">
+            <!-- Detail riwayat akan dimuat di sini -->
+        </div>
+        <div class="modal-buttons">
+            <button class="btn btn-cancel" onclick="hideDetailRiwayatModal()">Tutup</button>
+        </div>
+    </div>
+</div>
+
+
+        <!-- Modal Redeem -->
+        <div id="redeemModal" class="modal">
+            <div class="modal-content">
+                <h2>Redeem Barang</h2>
+                <div id="barangInfo" class="price-info">
+                    <!-- Info barang akan ditampilkan di sini -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="memberSearchInput">Pilih Member</label>
+                    <div class="custom-select-container">
+                        <div class="custom-select-input" id="memberSelectDisplay">
+                            Pilih Member
+                        </div>
+                        <div class="custom-select-dropdown" id="memberSelectDropdown">
+                            <input type="text" 
+                                   class="custom-select-search" 
+                                   id="memberSearchInput" 
+                                   placeholder="Cari member...">
+                            <ul class="custom-select-options" id="memberOptions">
+                                <!-- Member options will be populated here -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+    <label for="pinInput">Masukkan PIN</label>
+    <div class="pin-input-container">
+        <input type="password" id="pinInput" placeholder="Masukkan PIN member">
+        <button class="btn btn-scanner" onclick="openQRScanner()">
+            <i class="fas fa-qrcode"></i> Scan QR
+        </button>
+    </div>
+</div>
+
+<!-- Modal QR Scanner -->
+<div id="qrScannerModal" class="modal">
+    <div class="modal-content">
+        <h2>Scan QR PIN Member</h2>
+        <div id="qr-reader" style="width:100%"></div>
+        <div class="modal-buttons">
+            <button class="btn btn-cancel" onclick="closeQRScanner()">Batal</button>
+        </div>
+    </div>
+</div>
+
+                <div class="form-group">
+                    <label>Poin Anda: <span id="poinDimiliki">0</span></label>
+                </div>
+
+                <div class="modal-buttons">
+                    <button class="btn btn-cancel" onclick="hideModal()">Batal</button>
+                    <button class="btn btn-confirm" onclick="konfirmasiRedeem()">Konfirmasi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+     
+     
+     
+ let html5QrcodeScanner;
+
+function openQRScanner() {
+    document.getElementById('qrScannerModal').style.display = 'flex';
+    
+    html5QrcodeScanner = new Html5Qrcode("qr-reader");
+    html5QrcodeScanner.start(
+        { facingMode: "environment" }, 
+        {
+            fps: 10,    // Frames per second
+            qrbox: 250  // Size of scanning box
+        },
+        onScanSuccess
+    );
+}
+
+function onScanSuccess(decodedText, decodedResult) {
+    try {
+        // Dekripsi PIN dari QR Code
+        const decryptedPin = decryptPIN(decodedText);
+        
+        // Set PIN di input
+        document.getElementById('pinInput').value = decryptedPin;
+        
+        // Tutup scanner
+        closeQRScanner();
+    } catch (error) {
+        console.error("Error decrypting PIN:", error);
+        alert("QR PIN tidak valid");
+    }
+}
+
+function closeQRScanner() {
+    document.getElementById('qrScannerModal').style.display = 'none';
+    
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.stop().then(() => {
+            html5QrcodeScanner = null;
+        }).catch(error => {
+            console.error("Error stopping scanner", error);
+        });
+    }
+}
+
+// Tambahkan event listener untuk menutup scanner jika modal ditutup
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeQRScanner();
+    }
+});    
+     
+   
+  function decryptPIN(encryptedPin) {
+    const secretKey = 'YourSecretKey123!@#'; // Gunakan kunci rahasia yang sama dengan saat enkripsi
+    try {
+        const bytes = CryptoJS.AES.decrypt(encryptedPin, secretKey);
+        const decryptedPin = bytes.toString(CryptoJS.enc.Utf8);
+        
+        // Validasi apakah dekripsi berhasil
+        if (decryptedPin) {
+            return decryptedPin;
+        } else {
+            throw new Error('Dekripsi gagal');
+        }
+    } catch (error) {
+        console.error('Error dekripsi:', error);
+        return null;
+    }
+} 
+     
+     
+        let selectedBarangKode = '';
+        let requiredPoin = 0;
+        let selectedMemberId = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBarang();
+            loadMembers();
+        });
+
+        function calculateDiscountedPrice(originalPrice) {
+            return Math.floor(originalPrice * 0.85); // 15% discount
+        }
+
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function loadBarang() {
+            const barang = JSON.parse(localStorage.getItem('barang')) || [];
+            const tbody = document.getElementById('daftarBarang');
+            tbody.innerHTML = '';
+
+            barang.forEach(item => {
+                if (item.stok > 0) {
+                    const originalPrice = item.hargaJual;
+                    const discountedPrice = calculateDiscountedPrice(originalPrice);
+                    const poinRequired = discountedPrice;
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.kode}</td>
+                        <td>${item.nama}</td>
+                        <td>${formatRupiah(originalPrice)}</td>
+                        <td>
+                            <div class="price-display">
+                                <span class="original-price">${formatRupiah(originalPrice)}</span>
+                                <span class="discount-price">${formatRupiah(discountedPrice)}</span>
+                                <span>(${poinRequired} poin)</span>
+                                <span class="discount-badge">Hemat 15%</span>
+                            </div>
+                        </td>
+                        <td>${item.stok}</td>
+                        <td>
+                            <button class="btn btn-redeem" onclick="showRedeemModal('${item.kode}', ${poinRequired}, '${item.nama}', ${discountedPrice}, ${originalPrice})">
+                                Tukar
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            });
+        }
+
+        function loadMembers() {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const optionsList = document.getElementById('memberOptions');
+            optionsList.innerHTML = '';
+
+            members.forEach(member => {
+                const option = document.createElement('li');
+                option.className = 'custom-select-option';
+                option.innerHTML = `
+                    <div class="member-info">
+                        <span>${member.nama}</span>
+                        <span class="member-points">${member.poin} poin</span>
+                    </div>
+                `;
+                option.dataset.memberId = member.id;
+                option.dataset.poin = member.poin;
+                option.onclick = () => selectMember(member);
+                optionsList.appendChild(option);
+            });
+
+            // Add click event for custom select input
+            document.getElementById('memberSelectDisplay').onclick = toggleDropdown;
+
+            // Add search functionality
+            document.getElementById('memberSearchInput').oninput = searchMembers;
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const container = document.querySelector('.custom-select-container');
+                if (!container.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+        }
+        
+        function toggleDropdown() {
+            const dropdown = document.getElementById('memberSelectDropdown');
+            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                document.getElementById('memberSearchInput').focus();
+            }
+        }
+
+        function closeDropdown() {
+            document.getElementById('memberSelectDropdown').classList.remove('active');
+        }
+
+        function selectMember(member) {
+            selectedMemberId = member.id;
+            document.getElementById('memberSelectDisplay').textContent = member.nama;
+            document.getElementById('poinDimiliki').textContent = member.poin;
+            closeDropdown();
+
+            // Clear search input when member is selected
+            document.getElementById('memberSearchInput').value = '';
+        }
+
+        function searchMembers(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const options = document.querySelectorAll('.custom-select-option');
+            
+            options.forEach(option => {
+                const memberName = option.querySelector('.member-info span').textContent.toLowerCase();
+                if (memberName.includes(searchTerm)) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+
+        function cariBarang() {
+            const searchTerm = document.getElementById('searchBarang').value.toLowerCase();
+            const rows = document.getElementById('daftarBarang').getElementsByTagName('tr');
+
+            Array.from(rows).forEach(row => {
+                const kode = row.cells[0].textContent.toLowerCase();
+                const nama = row.cells[1].textContent.toLowerCase();
+                row.style.display = kode.includes(searchTerm) || nama.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function showRedeemModal(kodeBarang, poinNeeded, namaBarang, discountedPrice, originalPrice) {
+            selectedBarangKode = kodeBarang;
+            requiredPoin = poinNeeded;
+            
+            const barangInfo = document.getElementById('barangInfo');
+            barangInfo.innerHTML = `
+                <h3>${namaBarang}</h3>
+                <p>Harga Normal: <span class="original-price">${formatRupiah(originalPrice)}</span></p>
+                <p>Harga Setelah Diskon: <span class="discount-price">${formatRupiah(discountedPrice)}</span></p>
+                <p>Poin yang Diperlukan: <strong>${poinNeeded} poin</strong></p>
+                <p class="discount-badge">Hemat 15%</p>
+            `;
+            
+            document.getElementById('redeemModal').style.display = 'flex';
+
+            // Reset member selection when opening modal
+            resetMemberSelection();
+        }
+
+        function resetMemberSelection() {
+            selectedMemberId = '';
+            document.getElementById('memberSelectDisplay').textContent = 'Pilih Member';
+            document.getElementById('poinDimiliki').textContent = '0';
+            document.getElementById('memberSearchInput').value = '';
+            document.getElementById('pinInput').value = '';
+            closeDropdown();
+        }
+
+        function hideModal() {
+            document.getElementById('redeemModal').style.display = 'none';
+            resetMemberSelection();
+        }
+
+        function konfirmasiRedeem() {
+            const pin = document.getElementById('pinInput').value;
+            
+            if (!selectedMemberId || !pin) {
+                alert('Silakan pilih member dan masukkan PIN');
+                return;
+            }
+
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const member = members.find(m => m.id === selectedMemberId);
+
+            if (!member) {
+                alert('Member tidak ditemukan');
+                return;
+            }
+
+            if (member.pin !== pin) {
+                alert('PIN tidak valid');
+                return;
+            }
+
+            if (member.poin < requiredPoin) {
+                alert('Poin tidak mencukupi');
+                return;
+            }
+
+            // Proses redeem
+            const barang = JSON.parse(localStorage.getItem('barang')) || [];
+            const barangIndex = barang.findIndex(b => b.kode === selectedBarangKode);
+
+            if (barangIndex === -1 || barang[barangIndex].stok <= 0) {
+                alert('Barang tidak tersedia');
+                return;
+            }
+
+            // Update stok barang
+            barang[barangIndex].stok--;
+            localStorage.setItem('barang', JSON.stringify(barang));
+
+            // Update poin member
+            member.poin -= requiredPoin;
+            localStorage.setItem('members', JSON.stringify(members));
+
+            // Tambahkan riwayat redeem
+            const riwayatRedeem = JSON.parse(localStorage.getItem('riwayatRedeem')) || [];
+            const riwayat = {
+                id: Date.now().toString(),
+                tanggal: new Date().toISOString(),
+                memberId: member.id,
+                memberNama: member.nama,
+                barangKode: selectedBarangKode,
+                barangNama: barang[barangIndex].nama,
+                poinDigunakan: requiredPoin
+            };
+            riwayatRedeem.push(riwayat);
+            localStorage.setItem('riwayatRedeem', JSON.stringify(riwayatRedeem));
+
+            alert('Penukaran berhasil!');
+            hideModal();
+            loadBarang();
+        }
+
+        // Handle Escape key to close modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideModal();
+            }
+        });
+
+        // Prevent form submission when Enter is pressed in the search input
+        document.getElementById('memberSearchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBarang();
+            loadMembers();
+        });
+        
+        function showRiwayatModal() {
+    const riwayatRedeem = JSON.parse(localStorage.getItem('riwayatRedeem')) || [];
+    const tbody = document.getElementById('daftarRiwayat');
+    tbody.innerHTML = '';
+
+    // Urutkan riwayat dari yang terbaru
+    riwayatRedeem.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+    riwayatRedeem.forEach(riwayat => {
+        const row = document.createElement('tr');
+        const tanggal = new Date(riwayat.tanggal).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        row.innerHTML = `
+            <td>${tanggal}</td>
+            <td>${riwayat.memberNama}</td>
+            <td>${riwayat.barangNama}</td>
+            <td>${riwayat.poinDigunakan} poin</td>
+            <td>
+                <button class="btn btn-redeem" onclick="showDetailRiwayat('${riwayat.id}')">Detail</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    document.getElementById('riwayatRedeemModal').style.display = 'flex';
+}
+
+function hideRiwayatModal() {
+    document.getElementById('riwayatRedeemModal').style.display = 'none';
+}
+
+function cariRiwayat() {
+    const searchTerm = document.getElementById('searchRiwayat').value.toLowerCase();
+    const rows = document.getElementById('daftarRiwayat').getElementsByTagName('tr');
+
+    Array.from(rows).forEach(row => {
+        const member = row.cells[1].textContent.toLowerCase();
+        const barang = row.cells[2].textContent.toLowerCase();
+        row.style.display = member.includes(searchTerm) || barang.includes(searchTerm) ? '' : 'none';
+    });
+}
+
+function showDetailRiwayat(riwayatId) {
+    const riwayatRedeem = JSON.parse(localStorage.getItem('riwayatRedeem')) || [];
+    const riwayat = riwayatRedeem.find(r => r.id === riwayatId);
+
+    if (riwayat) {
+        const tanggal = new Date(riwayat.tanggal).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const members = JSON.parse(localStorage.getItem('members')) || [];
+        const member = members.find(m => m.id === riwayat.memberId);
+
+        const barang = JSON.parse(localStorage.getItem('barang')) || [];
+        const barangDetail = barang.find(b => b.kode === riwayat.barangKode);
+
+        const detailContent = document.getElementById('detailRiwayatContent');
+        detailContent.innerHTML = `
+            <div class="detail-item">
+                <strong>Tanggal Penukaran:</strong>
+                <p>${tanggal}</p>
+            </div>
+            <div class="detail-item">
+                <strong>Nama Member:</strong>
+                <p>${riwayat.memberNama}</p>
+            </div>
+            <div class="detail-item">
+                <strong>Kode Member:</strong>
+                <p>${member.id}</p>
+            </div>
+            <div class="detail-item">
+                <strong>Barang Ditukar:</strong>
+                <p>${riwayat.barangNama}</p>
+            </div>
+            <div class="detail-item">
+                <strong>Kode Barang:</strong>
+                <p>${riwayat.barangKode}</p>
+            </div>
+            <div class="detail-item">
+                <strong>Poin Digunakan:</strong>
+                <p>${riwayat.poinDigunakan} poin</p>
+            </div>
+            <div class="detail-item">
+                <strong>Harga Barang:</strong>
+                <p>${formatRupiah(barangDetail.hargaJual)}</p>
+            </div>
+        `;
+
+        document.getElementById('detailRiwayatModal').style.display = 'flex';
+    }
+}
+
+function hideDetailRiwayatModal() {
+    document.getElementById('detailRiwayatModal').style.display = 'none';
+}
+        
+        
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</body>
+</html>
+        

@@ -1,0 +1,500 @@
+/* Reset dasar untuk menghindari perbedaan tampilan antar browser */
+body, h1, h2, h3, p, table {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+#app {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+/* Gaya untuk elemen heading */
+h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+/* Gaya untuk form input dan button */
+label {
+    font-weight: bold;
+    margin-right: 10px;
+    display: block;
+    margin-top: 5px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="month"] {
+    padding: 5px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    width: calc(100% - 12px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 5px; /* Tambahkan margin atas */
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --background-light: #f4f6f7;
+    --text-color: #2c3e50;
+    --border-color: #e0e4e6;
+}
+
+table {
+    width: 100%;
+    border-spacing: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+table thead {
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: white;
+    text-transform: uppercase;
+}
+
+table th, table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+table th {
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-size: 14px;
+}
+
+table tr:nth-child(even) {
+    background-color: var(--background-light);
+}
+
+table tr:hover {
+    background-color: rgba(46, 204, 113, 0.1);
+    transform: scale(1.01);
+}
+
+table td {
+    color: var(--text-color);
+    font-size: 14px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    table {
+        border-radius: 0;
+        box-shadow: none;
+    }
+    
+    table thead {
+        display: none;
+    }
+    
+    table tr {
+        display: block;
+        margin-bottom: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        padding: 12px 15px;
+    }
+    
+    table td:last-child {
+        border-bottom: none;
+    }
+    
+    table td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-right: 10px;
+    }
+}
+
+/* Scrollbar untuk tabel */
+table {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--background-light);
+}
+
+table::-webkit-scrollbar {
+    width: 8px;
+}
+
+table::-webkit-scrollbar-track {
+    background: var(--background-light);
+}
+
+table::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Animasi */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+table {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Gaya untuk total section */
+.total-section {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.total-item {
+    flex: 1;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #007bff;
+    border-radius: 8px;
+    margin: 0 5px;
+    text-align: center;
+}
+
+.total-item h3 {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.total-item span {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* Gaya untuk status setoran */
+.status-setoran {
+    margin-top: 10px;
+    padding: 5px;
+    background-color: #eafaf1;
+    border: 1px solid #d0e5e3;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #333;
+}
+
+/* Gaya untuk input setoran */
+#setoran input[type="number"] {
+    padding: 5px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Gaya untuk tombol hitung dan simpan setoran */
+#setoran button {
+    background-color: #28a745;
+}
+
+#setoran button:hover {
+    background-color: #218838;
+}
+/* CSS untuk ikon notifikasi */
+#notificationIcon {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, transform 0.3s;
+}
+#notificationIcon:hover {
+    background-color: #e0e0e0;
+    transform: scale(1.1);
+}
+
+/* CSS untuk ikon notifikasi */
+#notificationIcon {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, transform 0.3s;
+}
+#notificationIcon:hover {
+    background-color: #e0e0e0;
+    transform: scale(1.1);
+}
+
+/* CSS untuk badge notifikasi */
+#notificationBadge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    display: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* CSS untuk popup */
+#popup {
+    display: none;
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -30%);
+    width: 600px;
+    padding: 40px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    transition: transform 0.3s, opacity 0.3s;
+}
+#popup.show {
+    display: block;
+    opacity: 1;
+    transform: translate(-50%, -30%) scale(1);
+}
+#popup.hide {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(0.9);
+}
+
+/* CSS untuk konten dalam popup */
+#popupContent {
+    margin-bottom: 20px;
+    line-height: 1.5;
+    font-size: 16px;
+    color: #555;
+}
+
+/* CSS untuk tombol dalam popup */
+#popup button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+#popup button:hover {
+    background-color: #0056b3;
+}
+#popup button.close {
+    background-color: #dc3545;
+}
+#popup button.close:hover {
+    background-color: #c82333;
+}
+
+/* CSS untuk input nomor WA */
+#nomorWA {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+
+a {
+            color: #000000;
+        }
+
+.header {
+  background-color: #fff;
+  box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, .1);
+  position: fixed;
+  width: auto; /* Perkecil ukuran navbar */
+  top: 8px; /* Menurunkan posisi header */
+  right: 70px; /* Posisikan navbar di pojok atas kanan */
+  border-radius: 15px; /* Tambahkan border radius */
+  z-index: 3;
+}
+
+        .header ul,
+        .header li {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            overflow: hidden;
+            background-color: #fff;
+            border-radius: 15px;
+        }
+
+        .header li a {
+            display: block;
+            padding: 15px;
+            border-right: 1px solid #f4f4f4;
+            text-decoration: none;
+        }
+
+        .header li a:hover,
+        .header .menu-btn:hover {
+            background-color: #f4f4f4;
+        }
+
+        .header .logo {
+            display: block;
+            float: left;
+            font-size: 1.5em;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+
+        .header .menu {
+            clear: both;
+            max-height: 0;
+            transition: max-height .2s ease-out;
+        }
+
+        .header .menu-icon {
+            cursor: pointer;
+            display: inline-block;
+            float: right;
+            padding: 20px;
+            position: relative;
+            user-select: none;
+        }
+
+        .header .menu-icon .navicon {
+            background: #333;
+            display: block;
+            height: 2px;
+            position: relative;
+            transition: background .2s ease-out;
+            width: 18px;
+        }
+
+        .header .menu-icon .navicon:before,
+        .header .menu-icon .navicon:after {
+            background: #333;
+            content: '';
+            display: block;
+            height: 100%;
+            position: absolute;
+            transition: all .2s ease-out;
+            width: 100%;
+        }
+
+        .header .menu-icon .navicon:before {
+            top: 5px;
+        }
+
+        .header .menu-icon .navicon:after {
+            top: -5px;
+        }
+
+        .header .menu-btn {
+            display: none;
+        }
+
+        .header .menu-btn:checked~.menu {
+            max-height: 240px;
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon {
+            background: transparent;
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon:before {
+            transform: rotate(-45deg);
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon:after {
+            transform: rotate(45deg);
+        }
+
+        .header .menu-btn:checked~.menu-icon:not(.steps) .navicon:before,
+        .header .menu-btn:checked~.menu-icon:not(.steps) .navicon:after {
+            top: 0;
+        }
+
+        @media (min-width: 48em) {
+            .header li {
+                float: left;
+            }
+
+            .header li a {
+                padding: 15px 20px;
+            }
+
+            .header .menu {
+                clear: none;
+                float: right;
+                max-height: none;
+            }
+
+            .header .menu-icon {
+                display: none;
+            }
+        }

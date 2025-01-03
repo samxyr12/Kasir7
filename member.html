@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Manajemen Member Pro</title>
+    <style>
+        /* Reset dan variabel CSS modern */
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --background: #f9fafb;
+    --card-bg: #ffffff;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --border-color: #e5e7eb;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    background: var(--background);
+    padding: 2rem;
+    min-height: 100vh;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* Modern header styles dengan gradien */
+h1 {
+    text-align: center;
+    background: linear-gradient(135deg, var(--primary-color), #818cf8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 2rem;
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+
+h2 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Form section dengan efek glass morphism */
+.form-member {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-member input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--background);
+}
+
+.form-member input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Member list dengan animasi smooth */
+.member-list {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+#searchMember {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--background);
+}
+
+#searchMember:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Table dengan hover effects modern */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1.5rem;
+}
+
+thead {
+    background: linear-gradient(135deg, var(--primary-color), #818cf8);
+    color: white;
+}
+
+th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+th:first-child {
+    border-top-left-radius: 0.5rem;
+}
+
+th:last-child {
+    border-top-right-radius: 0.5rem;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+tbody tr {
+    transition: all 0.3s ease;
+}
+
+tbody tr:hover {
+    background-color: rgba(79, 70, 229, 0.05);
+    transform: translateY(-2px);
+}
+
+/* Button styles dengan micro-interactions */
+button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--primary-color);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button.tambah-poin {
+    background: var(--success-color);
+}
+
+button.tambah-poin:hover {
+    background: #059669;
+}
+
+/* Export/Import section dengan modern styling */
+.export-import-section {
+    max-width: 800px;
+    margin: 2rem auto;
+    text-align: center;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.export-import-section button,
+.export-import-section label {
+    flex: 1;
+    min-width: 200px;
+}
+
+.export-import-section label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    background: #8b5cf6;
+    color: white;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.export-import-section label:hover {
+    background: #7c3aed;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.export-import-section input[type="file"] {
+    display: none;
+}
+
+/* Animasi loading state */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Message styles dengan animasi */
+@keyframes slideIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.message {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    animation: slideIn 0.3s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.error-message {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: var(--danger-color);
+}
+
+.success-message {
+    background: #f0fdf4;
+    border: 1px solid #dcfce7;
+    color: var(--success-color);
+}
+
+/* Responsive design yang lebih sophisticated */
+@media screen and (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .form-member, 
+    .member-list,
+    .export-import-section {
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    td, th {
+        white-space: nowrap;
+        padding: 0.75rem;
+    }
+
+    button {
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+    }
+
+    .export-import-section {
+        flex-direction: column;
+    }
+
+    .export-import-section button,
+    .export-import-section label {
+        width: 100%;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: #1f2937;
+        --card-bg: #111827;
+        --text-primary: #f9fafb;
+        --text-secondary: #d1d5db;
+        --border-color: #374151;
+    }
+
+    .form-member input,
+    #searchMember {
+        background: #374151;
+        color: var(--text-primary);
+    }
+
+    tbody tr:hover {
+        background-color: rgba(79, 70, 229, 0.1);
+    }
+
+    .error-message {
+        background: #7f1d1d;
+        border-color: #991b1b;
+    }
+
+    .success-message {
+        background: #064e3b;
+        border-color: #065f46;
+    }
+}
+
+/* Scroll bar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
+
+/* Sweet Alert Custom Styling */
+.swal2-popup {
+    font-family: 'Arial', sans-serif;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.swal2-title {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* Tabel Styling */
+.custom-member-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 1rem;
+}
+
+.custom-member-table thead {
+    background-color: #f8f9fa;
+}
+
+.custom-member-table th,
+.custom-member-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.custom-member-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.custom-member-table tr:nth-child(even) {
+    background-color: #f2f4f6;
+}
+
+.custom-member-table tr:hover {
+    background-color: #e9ecef;
+    transition: background-color 0.3s ease;
+}
+
+/* Responsif Tabel */
+@media screen and (max-width: 600px) {
+    .custom-member-table,
+    .custom-member-table thead,
+    .custom-member-table tbody,
+    .custom-member-table th,
+    .custom-member-table td,
+    .custom-member-table tr {
+        display: block;
+    }
+
+    .custom-member-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    .custom-member-table tr {
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+    }
+
+    .custom-member-table td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+    }
+
+    .custom-member-table td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+    }
+}
+
+/* Statistik Highlight */
+.member-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    background-color: #f4f4f4;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.member-stat-item {
+    text-align: center;
+    flex: 1;
+}
+
+.member-stat-item h4 {
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 1rem;
+}
+
+.member-stat-item .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #3498db;
+}
+
+/* Animasi */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.swal2-popup {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Warna Aksen */
+.swal2-confirm {
+    background-color: #3498db !important;
+}
+
+.swal2-confirm:hover {
+    background-color: #2980b9 !important;
+}
+
+/* Ikon */
+.swal2-icon {
+    margin: 20px auto !important;
+}
+
+/* Tambahan Responsivitas */
+@media screen and (max-width: 480px) {
+    .swal2-popup {
+        width: 95% !important;
+        margin: 0 auto !important;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <h1>Manajemen Member Pro</h1>
+    <div class="form-member">
+        <h2>Tambah Member</h2>
+        <input type="text" id="namaMember" placeholder="Nama Member" required>
+        <input type="text" id="noTelpMember" placeholder="Nomor Telepon" required>
+        <input type="password" id="pinMember" placeholder="PIN Member" required>
+        <button onclick="tambahMember()">Tambah Member</button>
+    </div>
+
+    <div class="member-list">
+        <h2>Daftar Member</h2>
+        <input type="text" id="searchMember" placeholder="Cari member berdasarkan nama atau nomor telepon" oninput="cariMember()">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Nomor Telepon</th>
+                    <th>Poin</th>
+                    <th>Tanggal Terdaftar</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="memberList">
+                <!-- Daftar member akan ditampilkan di sini -->
+            </tbody>
+        </table>
+    </div>
+<div class="export-import-section">
+    <button onclick="eksporMember()">Ekspor Data Member</button>
+    <label for="importMember">Impor Data Member
+        <input type="file" id="importMember" accept=".xlsx, .xls" onchange="imporMember(event)">
+    </label>
+    <button onclick="tampilkanInfoMember()">Info Member</button>
+ <button class="button"  onclick="window.location.href='redem.html';">Redem</button>   
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <script>
+        
+        
+        function eksporMember() {
+    const members = JSON.parse(localStorage.getItem('members')) || [];
+    
+    // Konversi data ke worksheet
+    const worksheet = XLSX.utils.json_to_sheet(members);
+
+    // Atur format kolom yang diinginkan
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+        const colAddress = XLSX.utils.encode_col(C) + "1"; // Ambil header kolom
+        const header = worksheet[colAddress]?.v;
+        
+        if (header) {
+            if (header.toLowerCase().includes('nomor')) {
+                for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: R, c: C });
+                    if (worksheet[cellAddress]) {
+                        // Untuk kolom nomor telepon, set sebagai teks
+                        worksheet[cellAddress].z = '@'; // Format teks
+                    }
+                }
+            }
+        }
+    }
+
+    // Buat workbook dan tambahkan worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Member");
+
+    // Simpan file
+    XLSX.writeFile(workbook, "data_member_" + new Date().toISOString().split('T')[0] + ".xlsx");
+}
+        
+        function imporMember(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const members = XLSX.utils.sheet_to_json(worksheet);
+
+        const requiredFields = ['nama', 'noTelp', 'pin', 'poin', 'tanggalDaftar'];
+        const isValidData = members.every(member => 
+            requiredFields.every(field => member.hasOwnProperty(field))
+        );
+
+        if (!isValidData) {
+            alert('Format data tidak valid. Pastikan semua kolom ada.');
+            return;
+        }
+
+        const membersWithId = members.map(member => ({
+            ...member,
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+        }));
+
+        localStorage.setItem('members', JSON.stringify(membersWithId));
+        muatDaftarMember();
+        alert('Data member berhasil diimpor!');
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+        
+        
+  function tampilkanInfoMember() {
+    const members = JSON.parse(localStorage.getItem('members')) || [];
+    
+    const totalMember = members.length;
+    const totalPoin = members.reduce((sum, member) => sum + member.poin, 0);
+    const memberTertinggiPoin = members.reduce((max, member) => 
+        (max.poin || 0) > member.poin ? max : member, {});
+    
+    Swal.fire({
+        title: 'Informasi Member',
+        html: `
+            <table class="table table-striped" style="width:100%; text-align:left;">
+                <thead>
+                    <tr>
+                        <th colspan="2" style="text-align:center;">Statistik Member</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Total Member</strong></td>
+                        <td>${totalMember}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total Poin Keseluruhan</strong></td>
+                        <td>${totalPoin}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Member Poin Tertinggi</strong></td>
+                        <td>
+                            ${memberTertinggiPoin.nama ? 
+                                `${memberTertinggiPoin.nama} (${memberTertinggiPoin.poin} poin)` : 
+                                'Tidak ada data'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nomor Telepon</strong></td>
+                        <td>${memberTertinggiPoin.noTelp || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tanggal Pendaftaran Pertama</strong></td>
+                        <td>
+                            ${members.length > 0 ? 
+                                members[members.length - 1].tanggalDaftar : 
+                                'Tidak ada data'}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            ${members.length > 0 ? 
+                `<div class="mt-3">
+                    <h5>Daftar Semua Member</h5>
+                    <table class="table table-bordered" style="width:100%; text-align:left;">
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>No Telepon</th>
+                                <th>Poin</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${members.map(member => `
+                                <tr>
+                                    <td>${member.nama}</td>
+                                    <td>${member.noTelp}</td>
+                                    <td>${member.poin}</td>
+                                    <td>
+                                        <button onclick="cekMember('${member.id}')" class="btn btn-info">Cek</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>` : ''
+            }
+        `,
+        width: '600px',
+        showConfirmButton: true,
+        confirmButtonText: 'Tutup',
+        customClass: {
+            popup: 'custom-swal-popup',
+            title: 'custom-swal-title',
+            content: 'custom-swal-content'
+        }
+    });
+}
+
+// Optional: Tambahkan CSS kustom
+const style = document.createElement('style');
+style.textContent = `
+    .custom-swal-popup {
+        font-family: Arial, sans-serif;
+    }
+    .custom-swal-title {
+        color: #007bff;
+    }
+    .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #212529;
+    }
+    .table th, .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+    }
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid #dee2e6;
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0,0,0,.05);
+    }
+`;
+document.head.appendChild(style);
+
+
+
+
+function cekMember(memberId) {
+    const members = JSON.parse(localStorage.getItem('members')) || [];
+    const member = members.find(m => m.id === memberId);
+
+    if (member) {
+        Swal.fire({
+            title: `Detail Member: ${member.nama}`,
+            html: `
+                <p><strong>Nomor Telepon:</strong> ${member.noTelp}</p>
+                <p><strong>Poin:</strong> ${member.poin}</p>
+                <p><strong>Tanggal Terdaftar:</strong> ${member.tanggalDaftar}</p>
+                <p><strong>PIN:</strong> ${member.pin}</p>
+            `,
+            confirmButtonText: 'Tutup'
+        });
+    } else {
+        alert('Member tidak ditemukan!');
+    }
+}
+        function tambahMember() {
+            const nama = document.getElementById('namaMember').value.trim();
+            const noTelp = document.getElementById('noTelpMember').value.trim();
+            const pin = document.getElementById('pinMember').value.trim();
+
+            if (!nama || !noTelp || !pin) {
+                alert('Semua field harus diisi!');
+                return;
+            }
+
+            // Validasi nomor telepon
+            const teleponRegex = /^[0-9]{10,13}$/;
+            if (!teleponRegex.test(noTelp)) {
+                alert('Nomor telepon harus berisi 10-13 digit angka!');
+                return;
+            }
+
+            const members = JSON .parse(localStorage.getItem('members')) || [];
+            
+            // Cek apakah member sudah ada
+            const memberExist = members.some(member => 
+                member.nama.toLowerCase() === nama.toLowerCase() && 
+                member.noTelp === noTelp
+            );
+
+            if (memberExist) {
+                alert('Member dengan nama dan nomor telepon ini sudah terdaftar!');
+                return;
+            }
+
+            const newMember = {
+                id: Date.now().toString(),
+                nama: nama,
+                noTelp: noTelp,
+                pin: pin,
+                poin: 0,
+                tanggalDaftar: new Date().toLocaleDateString()
+            };
+
+            members.push(newMember);
+            localStorage.setItem('members', JSON.stringify(members));
+            document.getElementById('namaMember').value = '';
+            document.getElementById('noTelpMember').value = '';
+            document.getElementById('pinMember').value = '';
+            muatDaftarMember();
+        }
+
+        // Fungsi enkripsi PIN
+function encryptPIN(pin) {
+    const secretKey = 'YourSecretKey123!@#'; // Ganti dengan kunci rahasia Anda
+    return CryptoJS.AES.encrypt(pin, secretKey).toString();
+}
+
+// Fungsi dekripsi PIN
+function decryptPIN(encryptedPin) {
+    const secretKey = 'YourSecretKey123!@#'; // Gunakan kunci yang sama
+    const bytes = CryptoJS.AES.decrypt(encryptedPin, secretKey);
+    return bytes.toString(CryptoJS.enc.Utf8);
+}
+
+// Fungsi untuk menampilkan QR PIN
+function tampilkanQRPin(memberId) {
+    const members = JSON.parse(localStorage.getItem('members')) || [];
+    const member = members.find(m => m.id === memberId);
+
+    if (member) {
+        // Enkripsi PIN
+        const encryptedPin = encryptPIN(member.pin);
+
+        // Buat modal dengan QR Code
+        Swal.fire({
+            title: `QR PIN Member: ${member.nama}`,
+            html: `
+                <div id="qrcode" style="display: flex; justify-content: center; margin-bottom: 15px;"></div>
+                <button id="downloadQR" class="btn btn-primary">Download QR</button>
+            `,
+            didRender: () => {
+                // Buat QR Code
+                const qrCodeDiv = document.getElementById('qrcode');
+                const qrcode = new QRCode(qrCodeDiv, {
+                    text: encryptedPin,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                });
+
+                // Tambahkan event listener untuk download
+                document.getElementById('downloadQR').addEventListener('click', () => {
+                    const canvas = qrCodeDiv.querySelector('canvas');
+                    const link = document.createElement('a');
+                    link.download = `pin_qr_${member.nama}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                });
+            },
+            showConfirmButton: false,
+            showCloseButton: true
+        });
+    } else {
+        Swal.fire('Error', 'Member tidak ditemukan', 'error');
+    }
+}
+
+// Modifikasi fungsi muatDaftarMember untuk menambahkan tombol QR
+function muatDaftarMember() {
+    const members = JSON.parse(localStorage.getItem('members')) || [];
+    const memberList = document.getElementById('memberList');
+    memberList.innerHTML = '';
+
+    members.sort((a, b) => b.poin - a.poin).forEach(member => {
+        const memberElement = document.createElement('tr');
+        memberElement.innerHTML = `
+            <td>${member.nama}</td>
+            <td>${member.noTelp}</td>
+            <td>${member.poin}</td>
+            <td>${member.tanggalDaftar}</td>
+            <td>
+                <button class="tambah-poin" onclick="tambahPoin('${member.id}')">+ Poin</button>
+                <button onclick="hapusMember('${member.id}')">Hapus</button>
+                <button onclick="tampilkanQRPin('${member.id}')" style="background-color: #17a2b8;">QR PIN</button>
+            </td>
+        `;
+        memberList.appendChild(memberElement);
+    });
+}
+        function tambahPoin(memberId) {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const memberIndex = members.findIndex(member => member.id === memberId);
+            
+            if (memberIndex !== -1) {
+                const poinDitambahkan = prompt('Berapa poin yang ingin ditambahkan?', '10');
+                const poinAngka = parseInt(poinDitambahkan);
+
+                if (!isNaN(poinAngka) && poinAngka > 0) {
+                    members[memberIndex].poin += poinAngka;
+                    localStorage.setItem('members', JSON.stringify(members));
+                    muatDaftarMember();
+                } else {
+                    alert('Masukkan poin yang valid!');
+                }
+            }
+        }
+
+        function hapusMember(memberId) {
+            const konfirmasi = confirm('Yakin ingin menghapus member ini?');
+            if (konfirmasi) {
+                const members = JSON.parse(localStorage.getItem('members')) || [];
+                const updatedMembers = members.filter(member => member.id !== memberId);
+                localStorage.setItem('members', JSON.stringify(updatedMembers));
+                muatDaftarMember();
+            }
+        }
+
+        function cariMember() {
+    const searchTerm = document.getElementById('searchMember').value.toLowerCase().trim();
+    const members = JSON.parse(localStorage.getItem('members')) || [];
+    const memberList = document.getElementById('memberList');
+    memberList.innerHTML = '';
+
+    // Tambahkan pengecekan dan sanitasi data
+    const sanitizedMembers = members.filter(member => 
+        member && 
+        typeof member.nama === 'string' && 
+        typeof member.noTelp === 'string'
+    );
+
+    const filteredMembers = sanitizedMembers.filter(member => 
+        (member.nama || '').toLowerCase().includes(searchTerm) || 
+        (member.noTelp || '').includes(searchTerm)
+    );
+
+    // Sorting dengan penanganan error
+    const sortedMembers = filteredMembers.sort((a, b) => {
+        // Pastikan poin adalah angka, default ke 0 jika tidak valid
+        const poinA = Number(a.poin) || 0;
+        const poinB = Number(b.poin) || 0;
+        return poinB - poinA;
+    });
+
+    // Render dengan penanganan error tambahan
+    sortedMembers.forEach(member => {
+        // Hindari error dengan memberikan default value
+        const nama = member.nama || 'Nama Tidak Tersedia';
+        const noTelp = member.noTelp || 'Nomor Tidak Tersedia';
+        const poin = Number(member.poin) || 0;
+        const tanggalDaftar = member.tanggalDaftar || 'Tanggal Tidak Tersedia';
+        const memberId = member.id || '';
+
+        // Cegah XSS dengan encoding HTML
+        const safeNama = escapeHTML(nama);
+        const safeNoTelp = escapeHTML(noTelp);
+        const safeTanggalDaftar = escapeHTML(tanggalDaftar);
+
+        const memberElement = document.createElement('tr');
+        memberElement.innerHTML = `
+            <td>${safeNama}</td>
+            <td>${safeNoTelp}</td>
+            <td>${poin}</td>
+            <td>${safeTanggalDaftar}</td>
+            <td>
+                <button class="tambah-poin" onclick="tambahPoin('${memberId}')">+ Poin</button>
+                <button onclick="hapusMember('${memberId}')">Hapus</button>
+            </td>
+        `;
+        memberList.appendChild(memberElement);
+    });
+
+    // Tampilkan pesan jika tidak ada hasil
+    if (sortedMembers.length === 0) {
+        const noResultElement = document.createElement('tr');
+        noResultElement.innerHTML = `
+            <td colspan="5" style="text-align: center; color: #888;">
+                Tidak ada member yang ditemukan
+            </td>
+        `;
+        memberList.appendChild(noResultElement);
+    }
+}
+
+// Fungsi pembantu untuk mencegah XSS
+function escapeHTML(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[&<>'"]/g, 
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag));
+}
+        // Muat daftar member saat halaman dibuka
+        window.onload = muatDaftarMember;
+            
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+</body>
+</html>

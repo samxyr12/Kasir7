@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informasi Perusahaan</title>
+    <link rel="stylesheet" href="informasi.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background: linear-gradient(90deg, #4b6cb7, #182848);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 50px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header .icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        header .icon:hover {
+            transform: scale(1.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .intro {
+            margin-bottom: 30px;
+            animation: fadeIn 2s;
+        }
+
+        .intro h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .intro p {
+            font-size: 18px;
+            color: #666;
+        }
+
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .content .card {
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            flex: 1;
+            min-width: 300px;
+            max-width: 45%;
+            margin-bottom: 20px;
+            transition: transform 0.3s, max-height 0.5s;
+            cursor: pointer;
+        }
+
+        .content .card img,
+        .content .card video {
+            width: 100%;
+            height: auto;
+        }
+
+        .content .card .card-body {
+            padding: 15px;
+        }
+
+        .content .card .card-body h3 {
+            margin: 0;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .content .card .card-body p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .team {
+            display: flex;
+            overflow: hidden;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-top: 30px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .team .sliding-container {
+            display: flex;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+            scroll-behavior: smooth;
+        }
+
+        .team .sliding-container:active {
+            cursor: grabbing;
+        }
+
+        .team .member {
+            flex: 0 0 auto;
+            text-align: center;
+            margin: 10px;
+            scroll-snap-align: center;
+        }
+
+        .team .member img {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 2px solid #3498db;
+            transition: transform 0.3s;
+        }
+
+        .team .member img:hover {
+            transform: scale(1.1);
+        }
+
+        .team .member .position {
+            font-size: 14px;
+            color: #666;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .expanded {
+            max-height: 1000px !important;
+        }
+
+        .product-images {
+            display: none;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .product-images img {
+            max-width: 100px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+
+        .product-images img:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Informasi Perusahaan</h1>
+        <img src="icon.jpg" class="icon" alt="Icon" onclick="navigateToOtherPage()">
+    </header>
+    
+    <div class="container">
+        <div class="intro">
+            <h1>Selamat Datang di Perusahaan Kami</h1>
+            <p>Perusahaan kami bergerak di bidang teknologi informasi yang menyediakan solusi inovatif untuk kebutuhan bisnis Anda.</p>
+        </div>
+
+        <div class="content">
+            <div class="card" style="animation: slideInLeft 1s;" onclick="toggleExpand(this, 'visi')">
+                <img src="fxid.jpg" alt="Gambar Perusahaan">
+                <div class="card-body">
+                    <h3>Visi Kami</h3>
+                    <p id="visi">Mewujudkan dunia di mana teknologi mempermudah kehidupan setiap individu dan bisnis.</p>
+                </div>
+            </div>
+            <div class="card" style="animation: slideInRight 1s;" onclick="toggleExpand(this, 'misi')">
+                <video controls>
+                    <source src="vid.mp4" type="video/mp4">
+                    Browser Anda tidak mendukung tag video.
+                </video>
+                <div class="card-body">
+                    <h3>Misi Kami</h3>
+                    <p id="misi">Menyediakan solusi teknologi terbaik yang berfokus pada inovasi, kualitas, dan layanan pelanggan.</p>
+                </div>
+            </div>
+            <div class="card team-card" style="animation: slideInLeft 1.5s;">
+                <div class="card-body">
+                    <h3>Tim Kami</h3>
+                    <div class="team">
+                        <div class="sliding-container" id="team-container">
+                            <div class="member">
+                                <img src="k1.jpg" alt="Karyawan 1">
+                                <div class="position">CEO</div>
+                            </div>
+                            <div class="member">
+                                <img src="k2.jpg" alt="Karyawan 2">
+                                <div class="position">CTO</div>
+                            </div>
+                            <div class="member">
+                                <img src="k3.jpg" alt="Karyawan 3">
+                                <div class="position">CFO</div>
+                            </div>
+                            <!-- Tambahkan anggota tim lainnya di sini -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card" style="animation: slideInRight 1.5s;" onclick="toggleExpand(this, 'produk')">
+                <img src="gambar3.jpg" alt="Gambar Produk">
+                <div class="card-body">
+                    <h3>Produk Kami</h3>
+                    <p id="produk">Kami menawarkan berbagai produk teknologi yang dapat disesuaikan dengan kebutuhan bisnis Anda.</p>
+                    <div class="product-images">
+                        <img src="1.jpg" alt="Produk 1">
+                        <img src="2.jpg" alt="Produk 2">
+                        <img src="3.jpg" alt="Produk 3">
+                        <img src="4.jpg" alt="Produk 4">
+                        <img src="5.jpg" alt="Produk 5">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       function navigateToOtherPage() {
+    window.location.href = 'login.html';
+}
+
+function toggleExpand(card, section) {
+    const content = document.getElementById(section);
+    if (card.classList.contains('expanded')) {
+        card.classList.remove('expanded');
+        content.innerHTML = content.dataset.shortText;
+        if (section === 'produk') {
+            document.querySelector('.product-images').style.display = 'none';
+        }
+    } else {
+        card.classList.add('expanded');
+        content.dataset.shortText = content.innerHTML;
+        if (section === 'visi') {
+            content.innerHTML = 'Mewujudkan dunia di mana teknologi mempermudah kehidupan setiap individu dan bisnis. Kami percaya bahwa teknologi harus mudah diakses dan digunakan oleh semua orang, dan kami berkomitmen untuk menyediakan solusi yang dapat diandalkan dan efisien.';
+        } else if (section === 'misi') {
+            content.innerHTML = 'Menyediakan solusi teknologi terbaik yang berfokus pada inovasi, kualitas, dan layanan pelanggan. Kami terus berusaha untuk menjadi yang terdepan dalam industri teknologi dengan menyediakan produk dan layanan yang memenuhi kebutuhan pelanggan kami.';
+        } else if (section === 'produk') {
+            content.innerHTML = 'Kami menawarkan berbagai produk teknologi yang dapat disesuaikan dengan kebutuhan bisnis Anda. Dari perangkat lunak hingga perangkat keras, kami memiliki solusi yang dapat membantu bisnis Anda tumbuh dan berkembang. Produk unggulan kami termasuk perangkat lunak manajemen, sistem keamanan, dan solusi cloud computing.';
+            document.querySelector('.product-images').style.display = 'flex';
+        }
+    }
+}
+
+const slidingContainer = document.getElementById('team-container');
+let isDown = false;
+let startX;
+let scrollLeft;
+
+slidingContainer.addEventListener('mousedown', (e) => {
+    isDown = true;
+    slidingContainer.classList.add('active');
+    startX = e.pageX - slidingContainer.offsetLeft;
+    scrollLeft = slidingContainer.scrollLeft;
+});
+
+slidingContainer.addEventListener('mouseleave', () => {
+    isDown = false;
+    slidingContainer.classList.remove('active');
+});
+
+slidingContainer.addEventListener('mouseup', () => {
+    isDown = false;
+    slidingContainer.classList.remove('active');
+});
+
+slidingContainer.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - slidingContainer.offsetLeft;
+    const walk = (x - startX) * 1.5; // Adjusted scroll speed for smoothness
+    slidingContainer.scrollLeft = scrollLeft - walk;
+});
+
+slidingContainer.addEventListener('touchstart', (e) => {
+    isDown = true;
+    slidingContainer.classList.add('active');
+    startX = e.touches[0].pageX - slidingContainer.offsetLeft;
+    scrollLeft = slidingContainer.scrollLeft;
+});
+
+slidingContainer.addEventListener('touchend', () => {
+    isDown = false;
+    slidingContainer.classList.remove('active');
+});
+
+slidingContainer.addEventListener('touchmove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.touches[0].pageX - slidingContainer.offsetLeft;
+    const walk = (x - startX) * 1.5; // Adjusted scroll speed for smoothness
+    slidingContainer.scrollLeft = scrollLeft - walk;
+});
+    </script>
+</body>
+</html>

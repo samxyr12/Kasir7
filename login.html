@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Login</title>
+    <link rel="stylesheet" href="login.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+
+<body>
+    <div id="login">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="login()">Login</button>
+            <button onclick="window.location.href='akun.html'">Daftar</button>
+        </div>
+    </div>
+    
+    <div id="locked" style="display:none;">
+        <h2>Akun Terkunci</h2>
+        <button onclick="showPinPrompt()">Buka Akun</button>
+        <div id="unlockInput" style="display:none;">
+            <input type="password" id="unlockCode" placeholder="Masukkan Kode Unlock" required>
+            <button onclick="unlockAccount()">Unlock</button>
+        </div>
+    </div>
+
+    <script>
+        let loginAttempts = JSON.parse(localStorage.getItem('loginAttempts')) || {};
+
+        function generateCode() {
+            let code = '';
+            let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            for (let i = 0; i < 50; i++) {
+                code += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return code;
+        }
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            let user = accounts.find(account => account.username === username);
+
+            if (loginAttempts[username] && loginAttempts[username].locked) {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('locked').style.display = 'block';
+                return;
+            }
+
+            if (!user) {
+                alert('Akun tidak ditemukan.');
+                return;
+            }
+
+            // Dekripsi password
+            const decryptedPassword = CryptoJS.AES.decrypt(user.password, 'secret key 123').toString(CryptoJS.enc.Utf8);
+
+            if (decryptedPassword !== password) {
+                alert('Username atau password salah');
+                incrementLoginAttempts(username);
+                return;
+            }
+
+            resetLoginAttempts(username);
+            localStorage.setItem('loggedIn', 'true');
+            localStorage.setItem('username', username);
+            window.location.href = 'kasir.html'; // Arahkan ke halaman kasir
+        }
+
+        function incrementLoginAttempts(username) {
+            if (!loginAttempts[username]) {
+                loginAttempts[username] = { attempts: 0, locked: false, unlockCode: '' };
+            }
+
+            loginAttempts[username].attempts += 1;
+
+            if (loginAttempts[username].attempts >= 5) {
+                loginAttempts[username].locked = true;
+                loginAttempts[username].unlockCode = generateCode();
+                loginAttempts[username].unlockCodeExpiration = new Date(new Date().getTime() + 5 * 60000).toISOString(); // Set kode kadaluarsa 5 menit
+                alert(`Username terkunci. Klik "Buka Akun" untuk mendapatkan kode unlock.`);
+            }
+
+            localStorage.setItem('loginAttempts', JSON.stringify(loginAttempts));
+        }
+
+        function resetLoginAttempts(username) {
+            if (loginAttempts[username]) {
+                loginAttempts[username].attempts = 0;
+                loginAttempts[username].locked = false;
+                loginAttempts[username].unlockCode = '';
+                localStorage.setItem('loginAttempts', JSON.stringify(loginAttempts));
+            }
+        }
+
+        function showPinPrompt() {
+            const username = document.getElementById('username').value;
+            const pin = prompt('Masukkan PIN:');
+
+            if (pin === '451') {
+                let unlockCode = loginAttempts[username].unlockCode;
+                let unlockCodeExpiration = new Date(loginAttempts[username].unlockCodeExpiration);
+
+                if (new Date() < unlockCodeExpiration) {
+                    navigator.clipboard.writeText(unlockCode).then(function() {
+                        alert(`Kode unlock Anda adalah: ${unlockCode} (telah disalin ke clipboard)`);
+                        document.getElementById('unlockInput').style.display = 'block';
+                    }, function() {
+                        alert(`Kode unlock Anda adalah: ${unlockCode}`);
+                        document.getElementById('unlockInput').style.display = 'block';
+                    });
+                } else {
+                    alert('Kode unlock telah kedaluwarsa. Silakan coba lagi.');
+                }
+            } else {
+                alert('PIN salah.');
+            }
+        }
+
+        function unlockAccount() {
+            const username = document.getElementById('username').value;
+            const unlockCode = document.getElementById('unlockCode').value;
+
+            if (unlockCode === loginAttempts[username].unlockCode) {
+                loginAttempts[username].attempts = 0;
+                loginAttempts[username].locked = false;
+                loginAttempts[username].unlockCode = generateCode();  // Reset kode unlock setiap kali berhasil
+                alert('Akun berhasil dibuka.');
+                localStorage.setItem('loginAttempts', JSON.stringify(loginAttempts));
+                localStorage.setItem('loggedIn', 'true');
+                localStorage.setItem('username', username);
+                window.location.href = 'kasir.html'; // Arahkan ke halaman kasir
+                
+                // Simpan laporan
+                let laporan = JSON.parse(localStorage.getItem('laporan')) || [];
+                laporan.push({
+                    username: username,
+                    waktu: new Date().toLocaleString(),
+                    action: 'Unlock'
+                });
+                localStorage.setItem('laporan', JSON.stringify(laporan));
+            } else {
+                alert('Kode unlock salah.');
+            }
+        }
+    </script>
+</body>
+</html>

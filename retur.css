@@ -1,0 +1,339 @@
+   /* Reset dasar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Styling untuk seluruh halaman */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #e6e9ef, #f7f8f8);
+    color: #333;
+    line-height: 1.6;
+    overflow-x: hidden; /* Menyembunyikan scrollbar horizontal default */
+    background-attachment: fixed; /* Membuat latar belakang tetap saat scroll */
+    font-size: 16px; /* Ukuran font dasar yang konsisten */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Wrapper utama */
+#wrapper {
+    width: 110%;
+    max-width: 1300px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1; /* Menjaga wrapper di atas background */
+}
+
+/* Heading */
+h1 {
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+    color: #333;
+    text-align: center;
+    border-bottom: 3px solid #007bff;
+    padding-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Container pencarian */
+.search-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+/* Input dan button pencarian */
+.search-container input[type="text"],
+.search-container input[type="date"],
+.search-container input[type="month"],
+.search-container input[type="number"] {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    font-size: 1rem;
+    background: #f9f9f9;
+}
+
+.search-container input[type="text"]:focus,
+.search-container input[type="date"]:focus,
+.search-container input[type="month"]:focus,
+.search-container input[type="number"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.search-container button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    font-size: 1rem;
+}
+
+.search-container button:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Tombol download */
+#downloadButton {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: #28a745;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+#downloadButton i {
+    margin-right: 0.5rem;
+}
+
+#downloadButton:hover {
+    background: #218838;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Spinner */
+#spinner {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    font-size: 1.2rem;
+    color: #333;
+    backdrop-filter: blur(8px); /* Efek blur pada latar belakang */
+}
+
+#spinner i {
+    margin-right: 10px;
+}
+
+/* Blur efek */
+.blur {
+    filter: blur(5px);
+    transition: filter 0.3s;
+}
+
+/* Tabel */
+.table-container {
+    overflow-x: auto; /* Menyediakan scroll horizontal jika tabel terlalu besar */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+}
+
+thead {
+    background-color: #007bff;
+    color: #fff;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tbody tr:hover {
+    background-color: #eaeaea;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+    .search-container {
+        flex-direction: column;
+    }
+
+    .search-container input,
+    .search-container button {
+        width: 100%;
+    }
+}
+
+
+a {
+            color: #000000;
+        }
+
+.header {
+  background-color: #fff;
+  box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, .1);
+  position: fixed;
+  width: auto; /* Perkecil ukuran navbar */
+  top: 18px; /* Menurunkan posisi header */
+  right: 10px; /* Posisikan navbar di pojok atas kanan */
+  border-radius: 15px; /* Tambahkan border radius */
+  z-index: 3;
+}
+
+        .header ul,
+        .header li {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            overflow: hidden;
+            background-color: #fff;
+            border-radius: 15px;
+        }
+
+        .header li a {
+            display: block;
+            padding: 15px;
+            border-right: 1px solid #f4f4f4;
+            text-decoration: none;
+        }
+
+        .header li a:hover,
+        .header .menu-btn:hover {
+            background-color: #f4f4f4;
+        }
+
+        .header .logo {
+            display: block;
+            float: left;
+            font-size: 1.5em;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+
+        .header .menu {
+            clear: both;
+            max-height: 0;
+            transition: max-height .2s ease-out;
+        }
+
+        .header .menu-icon {
+            cursor: pointer;
+            display: inline-block;
+            float: right;
+            padding: 20px;
+            position: relative;
+            user-select: none;
+        }
+
+        .header .menu-icon .navicon {
+            background: #333;
+            display: block;
+            height: 2px;
+            position: relative;
+            transition: background .2s ease-out;
+            width: 18px;
+        }
+
+        .header .menu-icon .navicon:before,
+        .header .menu-icon .navicon:after {
+            background: #333;
+            content: '';
+            display: block;
+            height: 100%;
+            position: absolute;
+            transition: all .2s ease-out;
+            width: 100%;
+        }
+
+        .header .menu-icon .navicon:before {
+            top: 5px;
+        }
+
+        .header .menu-icon .navicon:after {
+            top: -5px;
+        }
+
+        .header .menu-btn {
+            display: none;
+        }
+
+        .header .menu-btn:checked~.menu {
+            max-height: 240px;
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon {
+            background: transparent;
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon:before {
+            transform: rotate(-45deg);
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon:after {
+            transform: rotate(45deg);
+        }
+
+        .header .menu-btn:checked~.menu-icon:not(.steps) .navicon:before,
+        .header .menu-btn:checked~.menu-icon:not(.steps) .navicon:after {
+            top: 0;
+        }
+
+        @media (min-width: 48em) {
+            .header li {
+                float: left;
+            }
+
+            .header li a {
+                padding: 15px 20px;
+            }
+
+            .header .menu {
+                clear: none;
+                float: right;
+                max-height: none;
+            }
+
+            .header .menu-icon {
+                display: none;
+            }
+        }
+

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <title>Laporan Void</title>
+    <link rel="stylesheet" href="void.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="global.css">  
+    <header class="header">
+        <input class="menu-btn" type="checkbox" id="menu-btn" />
+        <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
+        <ul class="menu">
+            <li><a href="kasir.html">KASIR</a></li>
+            <li><a href="laporan.html">LAPORAN</a></li>
+            <li><a href="void.html"> VOID</a></li>
+            <li><a href="setoran.html">SETORAN</a></li>
+            <li> <a href="akun.html">AKUN</a></li>
+            <li><a href="retur.html">RETUR</a></li>
+        </ul>
+    </header>
+
+    <style>
+        
+   
+        /* CSS untuk spinner */
+.spinner {
+    display: none;
+    border: 8px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 8px solid #3498db;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10001; /* Pastikan spinner berada di atas overlay */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* CSS untuk overlay dengan blur */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Warna latar belakang semi-transparan */
+    filter: blur(5px); /* Efek blur */
+    z-index: 10000; /* Pastikan overlay berada di bawah spinner */
+}
+
+/* CSS untuk konten yang diblur */
+.blurred-content {
+    transition: filter 0.3s ease;
+}
+
+/* Kelas tambahan untuk menambahkan blur pada konten */
+.blurred {
+    filter: blur(5px);
+}
+    </style>
+</head>
+<body>
+    <div id="spinner" class="spinner"></div>
+    <div id="overlay" class="overlay"></div>
+
+    <div id="laporanVoid">
+        <h2>Laporan Void</h2>
+        <button onclick="exportToExcel()">Unduh Excel</button>
+        <table id="tabelVoid">
+            <thead>
+                <tr>
+                    <th>Kode Void</th>
+                    <th>Nama Barang</th>
+                    <th>Jumlah</th>
+                    <th>Harga</th>
+                    <th>Total</th>
+                    <th>Tanggal</th>
+                </tr>
+            </thead>
+            <tbody id="tabelVoidBody">
+                <!-- Data akan diisi oleh JavaScript -->
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        function checkLogin() {
+            const loggedIn = localStorage.getItem('loggedIn');
+            const username = localStorage.getItem('username');
+
+            if (loggedIn !== 'true') {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Fungsi logout
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('username');
+            localStorage.setItem('loginAttempts', JSON.stringify({})); // Reset login attempts
+            window.location.href = 'login.html';
+        }
+
+        // Memastikan fungsi checkLogin dipanggil saat halaman dimuat
+        window.onload = checkLogin;
+
+        function loadVoidReports() {
+            const voids = JSON.parse(localStorage.getItem('voids')) || [];
+            const tabelVoidBody = document.getElementById('tabelVoidBody');
+            tabelVoidBody.innerHTML = '';
+
+            voids.forEach(report => {
+                const row = tabelVoidBody.insertRow();
+                row.insertCell(0).innerText = report.kodeVoid;
+                row.insertCell(1).innerText = report.namaBarang;
+                row.insertCell(2).innerText = report.jumlah;
+                row.insertCell(3).innerText = `Rp${report.harga}`;
+                row.insertCell(4).innerText = `Rp${report.total}`;
+                row.insertCell(5).innerText = report.tanggal;
+            });
+        }
+
+        function showSpinner() {
+            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function hideSpinner() {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function exportToExcel() {
+            showSpinner(); // Tampilkan spinner dan overlay saat proses dimulai
+            setTimeout(() => {
+                const tabel = document.getElementById('tabelVoid');
+                const wb = XLSX.utils.table_to_book(tabel, { sheet: "Laporan Void" });
+                XLSX.writeFile(wb, "Laporan_Void.xlsx");
+                hideSpinner(); // Sembunyikan spinner dan overlay setelah proses selesai
+            }, 5000); // Tambahkan delay agar spinner terlihat sebelum proses dimulai
+        }
+
+        document.addEventListener('DOMContentLoaded', loadVoidReports);
+    </script>
+</body>
+</html>

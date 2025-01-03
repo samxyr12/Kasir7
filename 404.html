@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            padding: 40px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
+        }
+
+        .content {
+            flex: 1;
+        }
+
+        .error-code {
+            font-size: 120px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 20px;
+            position: relative;
+            color: #1a1a1a;
+        }
+
+        .error-code::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 8px;
+            background: linear-gradient(90deg, #ff0055, #00ffff);
+            bottom: 15px;
+            right: 0;
+            border-radius: 4px;
+        }
+
+        .error-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #1a1a1a;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .illustration {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .shape {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape-circle {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .shape-1 {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #ff0055, #ff3377);
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .shape-2 {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(45deg, #00ffff, #00cccc);
+            bottom: 0;
+            right: 0;
+        }
+
+        .brand-text {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .fxid {
+            color: #ff0055;
+            top: 40%;
+            left: 20%;
+            animation: float 5s ease-in-out infinite;
+        }
+
+        .samxyr {
+            color: #00ffff;
+            bottom: 30%;
+            right: 20%;
+            animation: float 5s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column-reverse;
+                padding: 30px;
+                gap: 30px;
+            }
+
+            .illustration {
+                max-width: 100%;
+            }
+
+            .error-code {
+                font-size: 80px;
+            }
+
+            .error-title {
+                font-size: 24px;
+            }
+
+            .shape {
+                width: 200px;
+                height: 200px;
+            }
+
+            .shape-1 {
+                width: 150px;
+                height: 150px;
+            }
+
+            .shape-2 {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="error-code">404</div>
+            <h1 class="error-title">Ups! Halaman Tidak Ditemukan</h1>
+            <p class="error-message">
+                Halaman yang Anda cari mungkin telah dipindahkan, dihapus, 
+                atau tidak pernah ada. Silakan kembali ke halaman utama atau 
+                muat ulang halaman ini.
+            </p>
+            <div class="buttons">
+                <button onclick="window.location.href="kasir.html" class="btn btn-primary">
+                    Kembali ke Beranda
+                </button>
+                <button onclick="window.location.reload()" class="btn btn-secondary">
+                    Muat Ulang
+                </button>
+            </div>
+        </div>
+        <div class="illustration">
+            <div class="shape">
+                <div class="shape-circle shape-1"></div>
+                <div class="shape-circle shape-2"></div>
+                <div class="brand-text fxid">FXID</div>
+                <div class="brand-text samxyr">SAMXYR</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

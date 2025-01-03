@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <title>Halaman Akun</title>
+    <link rel="stylesheet" href="akun.css">
+    <link rel="stylesheet" href="pop.css">
+   <link rel="stylesheet" href="global.css">
+</head>
+ <header class="header">
+        <input class="menu-btn" type="checkbox" id="menu-btn" />
+        <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
+        <ul class="menu">
+            <li><a href="kasir.html">KASIR</a></li>
+            <li><a href="laporan.html">LAPORAN</a></li>
+            <li><a href="void.html">VOID</a></li>
+            <li><a href="setoran.html">SETORAN</a></li>
+            <li><a href="akun.html">AKUN</a></li>
+            <li><a href="retur.html">RETUR</a></li>
+        </ul>
+    </header> 
+<body>
+    <div id="createAccount">
+        <h2>Buat Akun Baru</h2>
+        <input type="text" id="newUsername" placeholder="Username">
+        <input type="password" id="newPassword" placeholder="Password">
+        <input type="password" id="confirmPassword" placeholder="Konfirmasi Password">
+        <input type="password" id="newPin" placeholder="Masukkan PIN (Opsional)">
+        <button onclick="createAccount()">Buat Akun</button>
+    </div>
+
+    <button onclick="openUploadPopup()">Unggah Akun</button>
+    <button onclick="openDownloadPopup()">Unduh Daftar Akun</button>
+    <input type="text" id="searchInput" placeholder="Cari Username" oninput="searchAccounts()">
+
+    <div id="accountList">
+        <h2>Daftar Akun</h2>
+        <table id="accountTable">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>Ganti Password</th>
+                </tr>
+            </thead>
+            <tbody id="accountListDisplay"></tbody>
+        </table>
+    </div>
+
+    <div id="laporanList">
+        <h2>Laporan</h2>
+        <ul id="laporanListDisplay"></ul>
+    </div>
+
+    <!-- Pop-up untuk Hapus Akun -->
+    <div id="deleteConfirmation" class="popup1">
+        <div class="popup1-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <h2>Hapus Akun</h2>
+            <input type="text" id="searchDeleteInput" placeholder="Cari username..." onkeyup="filterUsernames()" />
+            <div id="usernameList"></div>
+            <button onclick="addToDeleteList()">Tambahkan ke Daftar Hapus</button>
+            <h3>Daftar Username untuk Dihapus:</h3>
+            <ul id="deleteList"></ul>
+            <button onclick="confirmDelete()">Hapus Akun Terpilih</button>
+        </div>
+    </div>
+
+    <!-- Popup untuk Upload Akun -->
+    <div id="uploadPopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeUploadPopup()">&times;</span>
+            <h3>Unggah Daftar Akun</h3>
+            <input type="file" id="uploadFile" accept=".xlsx">
+            <button onclick="uploadAccounts()">Unggah</button>
+            <div id="uploadMessage"></div>
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup untuk Konfirmasi Duplikasi Username -->
+    <div id="duplicatePopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeDuplicatePopup()">&times;</span>
+            <p id="duplicateMessage"></p>
+            <div class="button-container">
+                <button onclick="handleDuplicate(true)">Ya, lanjutkan</button>
+                <button onclick="handleDuplicate(false)">Tidak, batalkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup untuk Download -->
+    <div id="downloadPopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeDownloadPopup()">&times;</span>
+            <h3>Masukkan PIN untuk Mengunduh</h3>
+            <input type="password" id="downloadPinInput" placeholder="PIN">
+            <button onclick="verifyDownloadPin()">Unduh</button>
+            <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div id="changePinPopup" class="popup">
+        <div class="popup-content">
+            <h2>Ganti PIN</h2>
+            <p id="changePinMessage">Masukkan PIN default untuk mengganti PIN Anda.</p>
+            <button onclick="changePin()">Ganti PIN</button>
+            <span class="close" onclick="closeChangePinPopup()">&times;</span>
+        </div>
+    </div>
+
+    <div id="pinPopup" class="popup">
+        <div class="popup-content">
+            <h2>Masukkan PIN</h2>
+            <input type="password" id="pinInput" placeholder="Masukkan PIN">
+            <button onclick="verifyPin()">Verifikasi PIN</button>
+            <span class="close" onclick="closePinPopup()">&times;</span>
+        </div>
+    </div>
+
+    <div id="otpPopup" class="popup">
+        <div class="popup-content">
+            <h2>OTP</h2>
+            <p id="otpMessage"></p>
+            <input type="text" id="otpInput" placeholder="Masukkan OTP">
+            <button onclick="verifyOtp()">Verifikasi OTP</button>
+            <span class="close" onclick="closeOtpPopup()">&times;</span>
+        </div>
+    </div>
+
+    <div id="notificationPopup" class="popup">
+        <div class="popup-content">
+            <p id="notificationMessage"></p>
+            <span class="close" onclick="closeNotificationPopup()">&times;</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="akun.js"></script>
+</body>
+</html>

@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    
+    <title>Retur Barang Lanjutan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    padding: 35px;
+    max-width: 1100px;
+    margin: 0 auto;
+    border: 1px solid #e9ecef;
+}
+
+h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 10px;
+}
+
+.form-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #495057;
+    font-weight: 600;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 15px;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    outline: none;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.4s ease;
+    padding: 12px 20px;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn-tambah {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.btn-tambah:hover {
+    background-color: #27ae60;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+table {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-top: 25px;
+}
+
+th {
+    background-color: #3498db;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 15px;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.3s ease;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+tr:hover {
+    background-color: #e9ecef;
+}
+
+.stock-info {
+    background: linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%);
+    border-left: 5px solid #3498db;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.stock-change {
+    color: #e74c3c;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+@media (max-width: 768px) {
+    .form-section {
+        grid-template-columns: 1fr;
+    }
+}
+    
+    
+    .btn-retur {
+    background-color: #ff6b6b; /* Warna merah lembut */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-retur:hover {
+    background-color: #ff5252; /* Warna merah sedikit lebih gelap */
+    transform: translateY(-2px); /* Efek terangkat sedikit */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-retur i {
+    margin-right: 8px; /* Jarak antara ikon dan teks */
+    font-size: 18px; /* Ukuran ikon */
+}
+
+.btn-kembali {
+    background-color: #6c757d; /* Warna abu-abu netral */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-kembali:hover {
+    background-color: #545b62; /* Warna abu-abu lebih gelap */
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-kembali i {
+    margin-right: 8px; 
+    font-size: 18px;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+ <button onclick="window.location.href='barang.html'" class="btn-kembali">
+    <i class="fas fa-arrow-left"></i> Kembali 
+</button>       
+        <h2>Retur Barang Lanjutan</h2>
+        
+        <div class="stock-info" id="stockInfo" style="display: none;">
+            <h4>Informasi Stok</h4>
+            <p>Stok Awal: <span id="stokAwal">0</span></p>
+            <p>Perubahan: <span id="perubahanStok" class="stock-change">0</span></p>
+            <p>Stok Akhir: <span id="stokAkhir">0</span></p>
+        </div>
+
+        <div class="form-section">
+            <div>
+                <div class="form-group">
+                    <label>Kode Barang:</label>
+                    <input type="text" id="kodeBarang" placeholder="Masukkan Kode Barang">
+                </div>
+                <div class="form-group">
+                    <label>Nama Barang:</label>
+                    <input type="text" id="namaBarang" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Stok Tersedia:</label>
+                    <input type="number" id="stokTersedia" readonly>
+                </div>
+            </div>
+            
+            <div>
+                <div class="form-group">
+                    <label>Alasan Retur:</label>
+                    <select id="alasanRetur">
+                        <option value="expired">Expired</option>
+                        <option value="rusak">Rusak</option>
+                        <option value="salah_kirim">Salah Kirim</option>
+                        <option value="kadaluwarsa">Kadaluwarsa</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Retur:</label>
+                    <input type="number" id="jumlahRetur" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Keterangan:</label>
+                    <textarea id="keteranganRetur" rows="3"></textarea>
+                </div>
+                <button class="btn btn-tambah" id="tambahKeListRetur">
+                    <i class="fas fa-plus"></i> Tambah ke List Retur
+                </button>
+            </div>
+        </div>
+
+        <h3>List Retur Barang</h3>
+        
+        <button onclick="window.location.href='riwayat retur.html'" class="btn-retur">
+    <i class="fas fa-exchange-alt"></i> Riwayat
+</button>
+        
+        <table id="tabelReturBarang">
+            <thead>
+                <tr>
+                    <th>Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Alasan</th>
+                    <th>Jumlah</th>
+                    <th>Stok Awal</th>
+                    <th>Stok Akhir</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="listReturBarang"></tbody>
+        </table>
+
+        <div class="form-group" style="margin-top: 20px;">
+            <button class="btn" id="prosesSemuaRetur">
+                <i class="fas fa-check"></i> Proses Semua Retur
+            </button>
+            
+            
+        </div>
+    </div>
+
+    <script>
+   document.addEventListener('DOMContentLoaded', function() {
+    const kodeBarangInput = document.getElementById('kodeBarang');
+    const namaBarangInput = document.getElementById('namaBarang');
+    const stokTersediaInput = document.getElementById('stokTersedia');
+    const jumlahReturInput = document.getElementById('jumlahRetur');
+    const alasanReturSelect = document.getElementById('alasanRetur');
+    const keteranganReturInput = document.getElementById('keteranganRetur');
+    const tambahKeListReturBtn = document.getElementById('tambahKeListRetur');
+    const listReturBarang = document.getElementById('listReturBarang');
+    const prosesSemuaReturBtn = document.getElementById('prosesSemuaRetur');
+    const stockInfo = document.getElementById('stockInfo');
+
+    let listRetur = [];
+
+    // Cari barang berdasarkan kode
+    kodeBarangInput.addEventListener('change', function() {
+        const barang = JSON.parse(localStorage.getItem('barang')) || [];
+        const selectedBarang = barang.find(item => item.kode === this.value);
+
+        if (selectedBarang) {
+            // Cek apakah barang sudah ada di list retur
+            const existingItem = listRetur.find(item => item.kodeBarang === this.value);
+            if (existingItem) {
+                Swal.fire({
+                    title: 'Barang Sudah Ada',
+                    text: 'Barang ini sudah ada dalam list retur. Hapus item yang ada terlebih dahulu jika ingin mengubah jumlah retur.',
+                    icon: 'warning',
+                    showCancelButton: false,
+                    confirmButtonText: 'OK'
+                });
+                resetInputBarang();
+                return;
+            }
+
+            namaBarangInput.value = selectedBarang.nama;
+            stokTersediaInput.value = selectedBarang.stok;
+            
+            // Tampilkan informasi stok
+            document.getElementById('stokAwal').textContent = selectedBarang.stok;
+            stockInfo.style.display = 'block';
+        } else {
+            Swal.fire('Error', 'Barang tidak ditemukan', 'error');
+            resetInputBarang();
+        }
+    });
+
+    // Update informasi stok saat jumlah retur diubah
+    jumlahReturInput.addEventListener('input', function() {
+        const stokAwal = parseInt(stokTersediaInput.value);
+        const jumlahRetur = parseInt(this.value) || 0;
+        const stokAkhir = stokAwal - jumlahRetur;
+        
+        document.getElementById('perubahanStok').textContent = `-${jumlahRetur}`;
+        document.getElementById('stokAkhir').textContent = stokAkhir;
+    });
+
+    // Tambah barang ke list retur
+    tambahKeListReturBtn.addEventListener('click', function() {
+        const kodeBarang = kodeBarangInput.value;
+        const namaBarang = namaBarangInput.value;
+        const jumlahRetur = parseInt(jumlahReturInput.value);
+        const alasanRetur = alasanReturSelect.value;
+        const keteranganRetur = keteranganReturInput.value;
+        const stokAwal = parseInt(stokTersediaInput.value);
+        const stokAkhir = stokAwal - jumlahRetur;
+
+        // Validasi input dasar
+        if (!kodeBarang || !namaBarang || !jumlahRetur || jumlahRetur <= 0) {
+            Swal.fire('Error', 'Semua field harus diisi dengan benar', 'error');
+            return;
+        }
+
+        // Cek apakah barang sudah ada di list retur
+        const existingItem = listRetur.find(item => item.kodeBarang === kodeBarang);
+        if (existingItem) {
+            Swal.fire({
+                title: 'Barang Sudah Ada',
+                text: 'Barang ini sudah ada dalam list retur. Hapus item yang ada terlebih dahulu jika ingin mengubah jumlah retur.',
+                icon: 'warning',
+                showCancelButton: false,
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        if (jumlahRetur > stokAwal) {
+            Swal.fire('Error', 'Jumlah retur melebihi stok yang tersedia', 'error');
+            return;
+        }
+
+        listRetur.push({
+            kodeBarang,
+            namaBarang,
+            alasan: alasanRetur,
+            jumlah: jumlahRetur,
+            keterangan: keteranganRetur,
+            stokAwal,
+            stokAkhir
+        });
+
+        updateListRetur();
+        resetInputBarang();
+        
+        // Tampilkan notifikasi sukses
+        Swal.fire({
+            title: 'Sukses',
+            text: 'Barang berhasil ditambahkan ke list retur',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    });
+
+    // Proses semua retur
+    prosesSemuaReturBtn.addEventListener('click', function() {
+        if (listRetur.length === 0) {
+            Swal.fire('Error', 'Tidak ada barang yang akan diretur', 'error');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Konfirmasi Retur',
+            html: generateReturConfirmationTable(),
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Proses Retur',
+            cancelButtonText: 'Batal',
+            width: '800px'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                prosesRetur();
+            }
+        });
+    });
+
+    function generateReturConfirmationTable() {
+        let tableHTML = `
+            <table class="swal2-table" style="width: 100%; margin-top: 1em;">
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Nama</th>
+                        <th>Jumlah</th>
+                        <th>Stok Awal</th>
+                        <th>Stok Akhir</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        listRetur.forEach(item => {
+            tableHTML += `
+                <tr>
+                    <td>${item.kodeBarang}</td>
+                    <td>${item.namaBarang}</td>
+                    <td>${item.jumlah}</td>
+                    <td>${item.stokAwal}</td>
+                    <td>${item.stokAkhir}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += '</tbody></table>';
+        return tableHTML;
+    }
+
+    function prosesRetur() {
+        // Ambil data dari localStorage
+        let barang = JSON.parse(localStorage.getItem('barang')) || [];
+        let riwayatRetur = JSON.parse(localStorage.getItem('riwayatRetur')) || [];
+        
+        // Gunakan format tanggal YYYY-MM-DD untuk konsistensi
+        const currentDate = new Date();
+        const tanggal = currentDate.toISOString().split('T')[0];
+        
+        // Format jam HH:MM
+        const jam = currentDate.toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Proses setiap item retur
+        const hasilProses = listRetur.map(item => {
+            const barangIndex = barang.findIndex(b => b.kode === item.kodeBarang);
+            
+            if (barangIndex === -1) {
+                console.warn(`Barang dengan kode ${item.kodeBarang} tidak ditemukan`);
+                return null;
+            }
+
+            // Update stok barang
+            barang[barangIndex].stok = item.stokAkhir;
+
+            // Buat objek retur
+            const returItem = {
+                id: generateReturId(riwayatRetur),
+                tanggal: tanggal,
+                jam: jam,
+                kodeBarang: item.kodeBarang,
+                namaBarang: item.namaBarang,
+                alasan: item.alasan,
+                jumlah: item.jumlah,
+                keterangan: item.keterangan || '',
+                stokAwal: item.stokAwal,
+                stokAkhir: item.stokAkhir,
+                status: 'Selesai'
+            };
+
+            return returItem;
+        }).filter(item => item !== null);
+
+        // Gabungkan dengan riwayat retur existing
+        riwayatRetur = [...riwayatRetur, ...hasilProses];
+
+        // Simpan perubahan ke localStorage
+        try {
+            localStorage.setItem('barang', JSON.stringify(barang));
+            localStorage.setItem('riwayatRetur', JSON.stringify(riwayatRetur));
+
+            // Tampilkan konfirmasi
+            Swal.fire({
+                title: 'Berhasil!',
+                text: `${hasilProses.length} retur berhasil diproses`,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reset list retur
+                listRetur = [];
+                updateListRetur();
+                
+                // Reset form
+                resetInputBarang();
+            });
+        } catch (error) {
+            Swal.fire({
+                title: 'Kesalahan',
+                text: 'Gagal menyimpan data retur',
+                icon: 'error'
+            });
+            console.error('Error saving data:', error);
+        }
+    }
+
+    function generateReturId(riwayatRetur) {
+    // Jika tidak ada riwayat retur, mulai dari 1
+    if (!riwayatRetur || riwayatRetur.length === 0) return 1;
+    
+    // Cari ID maksimum, jika tidak ditemukan, kembalikan 1
+    const maxId = riwayatRetur.reduce((max, item) => 
+        (item.id && item.id > max) ? item.id : max, 0);
+    
+    return maxId + 1;
+}
+
+    function updateListRetur() {
+        listReturBarang.innerHTML = '';
+        listRetur.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.kodeBarang}</td>
+                <td>${item.namaBarang}</td>
+                <td>${item.alasan}</td>
+                <td>${item.jumlah}</td>
+                <td>${item.stokAwal}</td>
+                <td>${item.stokAkhir}</td>
+                <td>
+                    <button class="btn btn-danger" onclick="removeFromList(${index})">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </td>
+            `;
+            listReturBarang.appendChild(row);
+        });
+    }
+
+    window.removeFromList = function(index) {
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: 'Apakah Anda yakin ingin menghapus item ini dari list retur?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                listRetur.splice(index, 1);
+                updateListRetur();
+                Swal.fire(
+                    'Terhapus!',
+                    'Item berhasil dihapus dari list retur.',
+                    'success'
+                );
+            }
+        });
+    };
+
+    function resetInputBarang() {
+        kodeBarangInput.value = '';
+        namaBarangInput.value = '';
+        stokTersediaInput.value = '';
+        jumlahReturInput.value = '';
+        alasanReturSelect.value = 'expired';
+        keteranganReturInput.value = '';
+        stockInfo.style.display = 'none';
+    }
+});
+
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Riwayat Adjustment Stok</title>
+    <style>
+        /* Global Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        :root {
+            --primary-color: #3498db;
+            --text-color: #2c3e50;
+            --background-color: #f0f4f8;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 30px;
+        }
+
+        .header-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .icon-kembali {
+            margin-right: 20px;
+            font-size: 24px;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        /* History Card Styles */
+        .history-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        /* Table Styles */
+        .adjustment-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+        }
+
+        .adjustment-table th,
+        .adjustment-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .adjustment-table th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .adjustment-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .positive {
+            color: #27ae60;
+        }
+
+        .negative {
+            color: #e74c3c;
+        }
+
+        /* No Data Message */
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        
+        .export-buttons { display: flex; gap: 10px; margin-bottom: 20px; } .export-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--border-radius); cursor: pointer; font-weight: 500; transition: background-color 0.3s; } .pdf-btn { background-color: #e74c3c; color: white; } .excel-btn { background-color: #27ae60; color: white; } .export-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+  
+    <div class="container">
+        <div class="header-section">
+            <a href="barang.html" class="icon-kembali">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1>Riwayat Adjustment Stok</h1>            
+        </div>
+<div class="export-buttons"> <button onclick="exportToPDF()" class="export-btn pdf-btn"> <i class="fas fa-file-pdf"></i> Download PDF </button> <button onclick="exportToExcel()" class="export-btn excel-btn"> <i class="fas fa-file-excel"></i> Download Excel </button>
+
+ </div>
+        <div id="adjustmentHistory">
+            <!-- Riwayat adjustment akan dimuat di sini -->
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
+    <script>
+        
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const adjustmentHistory = JSON.parse(localStorage.getItem('adjustmentHistory')) || [];
+
+    if (adjustmentHistory.length === 0) {
+        alert('Tidak ada data untuk di-export');
+        return;
+    }
+
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 15;
+
+    // Define colors
+    const primaryColor = [41, 128, 185]; // Soft blue
+    const accentColor = [230, 126, 34];  // Soft orange
+    const textColor = [52, 73, 94];      // Dark grayish blue
+    const lightGray = [236, 240, 241];   // Very light gray
+
+    // Define styles
+    doc.setFont('helvetica');
+    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+
+    // Helper function for drawing a line
+    function drawLine(x1, y1, x2, y2, color, width) {
+        doc.setDrawColor(color[0], color[1], color[2]);
+        doc.setLineWidth(width);
+        doc.line(x1, y1, x2, y2);
+    }
+
+    adjustmentHistory.reverse().forEach((adjustment, index) => {
+        if (index > 0) {
+            doc.addPage();
+        }
+
+        let yPos = margin;
+
+        // Sleek Header without logo
+        doc.setFillColor(255, 255, 255); // White background
+        doc.rect(0, 0, pageWidth, 50, 'F');
+
+        // Title
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Riwayat Adjustment Stok', margin, 30);  // Centered title
+
+        // Subtle line under the header
+        drawLine(margin, 50, pageWidth - margin, 50, lightGray, 0.5);
+
+        yPos = 70;
+
+        // Adjustment info
+        doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Adjustment #${adjustmentHistory.length - index}`, margin, yPos);
+        yPos += 8;
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Tanggal: ${adjustment.tanggal} ${adjustment.jam}`, margin, yPos);
+        yPos += 20;
+
+        // Summary box
+        doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+        doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 40, 2, 2, 'F');
+        
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Ringkasan:', margin + 5, yPos + 15);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Total Item: ${adjustment.totalItem}`, margin + 5, yPos + 25);
+        doc.text(`Total Selisih Plus: ${formatRupiah(adjustment.totalPlus)}`, margin + 5, yPos + 35);
+        doc.text(`Total Selisih Minus: ${formatRupiah(adjustment.totalMinus)}`, pageWidth / 2, yPos + 35);
+        yPos += 50;
+
+        // Table
+        doc.autoTable({
+            startY: yPos,
+            head: [['Kode', 'Nama', 'Stok Awal', 'Stok Akhir', 'Selisih', 'Nominal']],
+            body: adjustment.items.map(item => [
+                item.kode,
+                item.nama,
+                item.stokAwal,
+                item.stokAkhir,
+                { content: item.selisih, styles: { textColor: item.selisih > 0 ? [39, 174, 96] : [231, 76, 60] } },
+                formatRupiah(item.nominal)
+            ]),
+            theme: 'plain',
+            styles: {
+                fontSize: 9,
+                cellPadding: 4,
+                overflow: 'linebreak',
+                cellWidth: 'wrap'
+            },
+            headStyles: {
+                fillColor: primaryColor,
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+            },
+            columnStyles: {
+                0: { cellWidth: 25 },
+                1: { cellWidth: 'auto' },
+                2: { cellWidth: 25, halign: 'right' },
+                3: { cellWidth: 25, halign: 'right' },
+                4: { cellWidth: 25, halign: 'right' },
+                5: { cellWidth: 35, halign: 'right' },
+            },
+            alternateRowStyles: {
+                fillColor: [248, 249, 250],
+            },
+            margin: { left: margin, right: margin },
+            didDrawPage: function (data) {
+                // Footer
+                let footerYPos = pageHeight - 20;
+                drawLine(margin, footerYPos, pageWidth - margin, footerYPos, lightGray, 0.5);
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Dicetak pada: ${new Date().toLocaleString()}`, margin, pageHeight - 10);
+                doc.text(`Halaman ${doc.internal.getNumberOfPages()}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+            }
+        });
+    });
+
+    // Save the PDF
+    doc.save('riwayat-adjustment-stok.pdf');
+}
+    
+function exportToExcel() {
+    const adjustmentHistory = JSON.parse(localStorage.getItem('adjustmentHistory')) || [];
+
+    if (adjustmentHistory.length === 0) {
+        alert('Tidak ada data untuk di-export');
+        return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+
+    // Define styles
+    const headerStyle = {
+        font: { color: { rgb: "FFFFFF" }, bold: true, sz: 12 },
+        fill: { fgColor: { rgb: "3498DB" } },
+        alignment: { horizontal: "center", vertical: "center", wrapText: true },
+        border: { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } }
+    };
+    const subHeaderStyle = {
+        font: { bold: true, sz: 14 },
+        fill: { fgColor: { rgb: "F0F4F8" } },
+        alignment: { horizontal: "left", vertical: "center" }
+    };
+    const cellStyle = {
+        alignment: { vertical: "center" },
+        border: { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } }
+    };
+    const currencyStyle = { ...cellStyle, numFmt: '"Rp"#,##0.00', alignment: { horizontal: "right", vertical: "center" } };
+
+    adjustmentHistory.reverse().forEach((adjustment, index) => {
+        const wsData = [
+            [`Adjustment #${adjustmentHistory.length - index}`],
+            [`Tanggal: ${adjustment.tanggal} ${adjustment.jam}`],
+            [],
+            ['Total Item', 'Total Selisih Plus', 'Total Selisih Minus'],
+            [adjustment.totalItem, adjustment.totalPlus, adjustment.totalMinus],
+            [],
+            ['Kode', 'Nama', 'Stok Awal', 'Stok Akhir', 'Selisih', 'Nominal']
+        ];
+
+        adjustment.items.forEach(item => {
+            wsData.push([
+                item.kode,
+                item.nama,
+                item.stokAwal,
+                item.stokAkhir,
+                item.selisih,
+                item.nominal
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        // Apply styles
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell_address = { c: C, r: R };
+                const cell_ref = XLSX.utils.encode_cell(cell_address);
+                if (!ws[cell_ref]) continue;
+
+                ws[cell_ref].s = cellStyle;
+
+                if (R === 0 || R === 1) {
+                    ws[cell_ref].s = subHeaderStyle;
+                } else if (R === 3 || R === 6) {
+                    ws[cell_ref].s = headerStyle;
+                } else if (C === 5 || (R === 4 && (C === 1 || C === 2))) {
+                    ws[cell_ref].s = currencyStyle;
+                } else if (R > 6 && C === 4) {
+                    ws[cell_ref].s = { 
+                        ...cellStyle, 
+                        font: { color: { rgb: ws[cell_ref].v > 0 ? "27AE60" : "E74C3C" } },
+                        alignment: { horizontal: "right", vertical: "center" }
+                    };
+                }
+            }
+        }
+
+        // Auto-adjust column width
+        const autoFitCols = wsData[6].map((_, index) => {
+            const maxWidth = wsData.reduce((width, row) => {
+                const cellValue = row[index] ? row[index].toString() : "";
+                return Math.max(width, cellValue.length);
+            }, 10); // Minimum width of 10
+            return { wch: maxWidth + 5 }; // Add some padding
+        });
+
+        ws['!cols'] = autoFitCols;
+        ws['!rows'] = [{ hpt: 30 }, { hpt: 25 }]; // Set consistent row height for header and subheader
+
+        XLSX.utils.book_append_sheet(workbook, ws, `Adjustment ${adjustmentHistory.length - index}`);
+    });
+
+    // Save the Excel file
+    XLSX.writeFile(workbook, 'riwayat-adjustment-stok.xlsx');
+}
+
+// Load adjustment history when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', loadAdjustmentHistory);
+        
+        
+        document.addEventListener('DOMContentLoaded', loadAdjustmentHistory);
+
+        function loadAdjustmentHistory() {
+            const adjustmentHistory = JSON.parse(localStorage.getItem('adjustmentHistory')) || [];
+            const historyContainer = document.getElementById('adjustmentHistory');
+            
+            if (adjustmentHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="no-data">
+                        <h3>Belum ada data adjustment</h3>
+                        <p>Adjustment stok yang dilakukan akan muncul di sini</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Urutkan history dari yang terbaru
+            adjustmentHistory.reverse().forEach((adjustment, index) => {
+                const historyCard = document.createElement('div');
+                historyCard.className = 'history-card';
+                
+                historyCard.innerHTML = `
+                    <div class="history-header">
+                        <h3>Adjustment #${adjustmentHistory.length - index}</h3>
+                        <div>${adjustment.tanggal} ${adjustment.jam}</div>
+                    </div>
+                    
+                    <div class="history-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Total Item</span>
+                            <span class="detail-value">${adjustment.totalItem}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Selisih Plus</span>
+                            <span class="detail-value positive">${formatRupiah(adjustment.totalPlus)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Selisih Negatif</span>
+                            <span class="detail-value negative">${formatRupiah(adjustment.totalMinus)}</span>
+                        </div>
+                    </div>
+                    
+                    <table class="adjustment-table">
+                        <thead>
+                            <tr>
+                                <th>Kode Barang</th>
+                                <th>Nama Barang</th>
+                                <th>Stok Awal</th>
+                                <th>Stok Akhir</th>
+                                <th>Selisih</th>
+                                <th>Nominal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${adjustment.items.map(item => `
+                                <tr>
+                                    <td>${item.kode}</td>
+                                    <td>${item.nama}</td>
+                                    <td>${item.stokAwal}</td>
+                                    <td>${item.stokAkhir}</td>
+                                    <td class="${item.selisih > 0 ? 'positive' : 'negative'}">${item.selisih}</td>
+                                    <td>${formatRupiah(item.nominal)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                historyContainer.appendChild(historyCard);
+            });
+        }
+
+        // Function to format numbers as currency
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+            }).format(angka);
+        }
+    </script>
+</body>
+</html>

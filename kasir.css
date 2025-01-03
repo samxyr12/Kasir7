@@ -1,0 +1,509 @@
+/* kasir.css */
+
+/* Reset beberapa style default */
+body, h2, h3, table, input, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #343a40;
+    line-height: 1.6;
+}
+
+
+
+/* Styling untuk aplikasi utama */
+#app {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Styling untuk section heading */
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #007bff;
+}
+
+h3 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+}
+
+/* Styling untuk input fields */
+input[type="text"], input[type="number"] {
+    padding: 15px;
+    margin-bottom: 15px;
+    width: calc(100% - 32px);
+    border: 2px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield; /* Untuk menghilangkan spinner pada input number */
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Styling untuk tombol */
+button {
+    padding: 15px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Styling untuk tabel */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+table, th, td {
+    border: 1px solid #dee2e6;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+}
+
+thead {
+    background-color: #e9ecef;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* Styling untuk tombol aksi di tabel */
+.action-buttons button {
+    margin: 0 5px;
+    font-size: 1.2rem;
+}
+
+/* Styling untuk popup */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%; /* Ubah ukuran lebar popup */
+    max-width: 500px; /* Perbesar lebar maksimum popup */
+    max-height: 70vh; /* Tambahkan batas tinggi maksimum */
+    height: auto;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    overflow-y: auto; /* Tambahkan scroll jika konten melebihi tinggi maksimal */
+}
+
+.popup-content h2 {
+    margin-bottom: 20px;
+    font-size: 1.6rem;
+    color: #007bff;
+}
+
+.popup-content button {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.popup-content .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #343a40;
+    cursor: pointer;
+}
+
+.popup-content .close:hover {
+    color: #007bff;
+}
+
+.popup-content img {
+    display: block;
+    margin: 20px auto;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    width: 100%; /* Mengisi seluruh lebar elemen konten popup */
+    max-width: 400px; /* Atau tentukan lebar maksimum yang diinginkan */
+    height: auto; /* Menjaga rasio aspek gambar */
+}
+
+/* Styling untuk total dan kembalian */
+#totalKeranjang, #totalBayar, #totalBayarQRIS, #kembalian {
+    font-weight: bold;
+    font-size: 1.4rem;
+}
+
+/* Styling untuk tombol aksi dengan ikon */
+.action-btn {
+    margin: 0 5px; /* Jarak antar tombol aksi */
+    font-size: 10px{}; /* Ukuran ikon */
+    color: #007bff; /* Warna ikon */
+    cursor: pointer;
+    transition: color 0.3s ease;
+    border: none;
+    background: none;
+}
+
+.action-btn:hover {
+    color: #ff0a00; /* Warna ikon saat hover */
+}
+
+.action-btn i {
+    display: block;
+    font-size: 1.2rem; /* Ukuran font ikon */
+}
+
+a {
+            color: #000000;
+        }
+
+.header {
+  background-color: #fff;
+  box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, .1);
+  position: fixed;
+  width: auto; /* Perkecil ukuran navbar */
+  top: 18px; /* Menurunkan posisi header */
+  right: 10px; /* Posisikan navbar di pojok atas kanan */
+  border-radius: 15px; /* Tambahkan border radius */
+  z-index: 3;
+}
+
+        .header ul,
+        .header li {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            overflow: hidden;
+            background-color: #fff;
+            border-radius: 15px;
+        }
+
+        .header li a {
+            display: block;
+            padding: 15px;
+            border-right: 1px solid #f4f4f4;
+            text-decoration: none;
+        }
+
+        .header li a:hover,
+        .header .menu-btn:hover {
+            background-color: #f4f4f4;
+        }
+
+        .header .logo {
+            display: block;
+            float: left;
+            font-size: 1.5em;
+            padding: 10px 20px;
+            text-decoration: none;
+        }
+
+        .header .menu {
+            clear: both;
+            max-height: 0;
+            transition: max-height .2s ease-out;
+        }
+
+        .header .menu-icon {
+            cursor: pointer;
+            display: inline-block;
+            float: right;
+            padding: 20px;
+            position: relative;
+            user-select: none;
+        }
+
+        .header .menu-icon .navicon {
+            background: #333;
+            display: block;
+            height: 2px;
+            position: relative;
+            transition: background .2s ease-out;
+            width: 18px;
+        }
+
+        .header .menu-icon .navicon:before,
+        .header .menu-icon .navicon:after {
+            background: #333;
+            content: '';
+            display: block;
+            height: 100%;
+            position: absolute;
+            transition: all .2s ease-out;
+            width: 100%;
+        }
+
+        .header .menu-icon .navicon:before {
+            top: 5px;
+        }
+
+        .header .menu-icon .navicon:after {
+            top: -5px;
+        }
+
+        .header .menu-btn {
+            display: none;
+        }
+
+        .header .menu-btn:checked~.menu {
+            max-height: 240px;
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon {
+            background: transparent;
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon:before {
+            transform: rotate(-45deg);
+        }
+
+        .header .menu-btn:checked~.menu-icon .navicon:after {
+            transform: rotate(45deg);
+        }
+
+        .header .menu-btn:checked~.menu-icon:not(.steps) .navicon:before,
+        .header .menu-btn:checked~.menu-icon:not(.steps) .navicon:after {
+            top: 0;
+        }
+
+        @media (min-width: 48em) {
+            .header li {
+                float: left;
+            }
+
+            .header li a {
+                padding: 15px 20px;
+            }
+
+            .header .menu {
+                clear: none;
+                float: right;
+                max-height: none;
+            }
+
+            .header .menu-icon {
+                display: none;
+            }
+        }
+
+body.loading #content {
+    filter: blur(5px);
+    pointer-events: none;
+}
+
+#download-animation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+}
+
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 6px solid #3498db;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+.suggestion-box {
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 5px;
+    background-color: #fff;
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+
+.action-btn {
+    padding: 10px 15px;
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.action-btn:hover {
+    background-color: #e67e22;
+}
+
+/* Custom styling untuk SweetAlert2 popup */
+.custom-popup {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+}
+
+.custom-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Tambahan untuk styling popup */
+.swal2-popup {
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.swal2-title {
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.swal2-confirm {
+    background-color: #4CAF50 !important;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+/* Pop-up untuk scan */
+#popupScan {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.popup-scan-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+    animation: scaleUp 0.4s ease-out;
+}
+
+video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#result {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #333;
+}
+
+button.scan-ulang, button.selesai-scan {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 10px;
+}
+
+button.scan-ulang:hover, button.selesai-scan:hover {
+    background-color: #45a049;
+}
+
+/* Animasi untuk pop-up */
+@keyframes fadeIn {
+    from {
+        background-color: rgba(0, 0, 0, 0);
+    }
+    to {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+

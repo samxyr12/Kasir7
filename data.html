@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data dari Semua Tabel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            color: #333;
+        }
+
+        th {
+            background-color: #f4f4f9;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #fafafa;
+        }
+
+        .btn-download {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-download:hover {
+            background-color: #218838;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-header h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .table-header .btn-download {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Data dari Semua Tabel</h1>
+
+        <div class="card">
+            <div class="table-header">
+                <h2>Data Barang</h2>
+                <a href="#" class="btn-download" onclick="exportTableToExcel('barangTable', 'BarangData')">
+                    <i class="fas fa-download"></i> Download Excel
+                </a>
+            </div>
+            <table id="barangTable">
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Nama</th>
+                        <th>Harga Beli</th>
+                        <th>Harga Jual</th>
+                        <th>Stok</th>
+                        <th>Kode Toko</th>
+                        <th>Kategori</th>
+                        <th>Terjual</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="table-header">
+                <h2>Data Transaksi</h2>
+                <a href="#" class="btn-download" onclick="exportTableToExcel('transaksiTable', 'TransaksiData')">
+                    <i class="fas fa-download"></i> Download Excel
+                </a>
+            </div>
+            <table id="transaksiTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Jumlah</th>
+                        <th>Total</th>
+                        <th>Nominal</th>
+                        <th>Kembalian</th>
+                        <th>Metode</th>
+                        <th>Diskon</th>
+                        <th>Persen Diskon</th>
+                        <th>Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="table-header">
+                <h2>Laporan Setoran</h2>
+                <a href="#" class="btn-download" onclick="exportTableToExcel('laporanSetoranTable', 'LaporanSetoranData')">
+                    <i class="fas fa-download"></i> Download Excel
+                </a>
+            </div>
+            <table id="laporanSetoranTable">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Nominal Setoran</th>
+                        <th>Status</th>
+                        <th>Varian</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="table-header">
+                <h2>Adjustment History</h2>
+                <a href="#" class="btn-download" onclick="exportTableToExcel('adjustmentHistoryTable', 'AdjustmentHistoryData')">
+                    <i class="fas fa-download"></i> Download Excel
+                </a>
+            </div>
+            <table id="adjustmentHistoryTable">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Jam</th>
+                        <th>Total Item</th>
+                        <th>Total Plus</th>
+                        <th>Total Minus</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script>
+        // Fetch data from PHP file
+        fetch('ambilSemuaData.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+
+            // Populate barang table
+            const barangTableBody = document.getElementById('barangTable').getElementsByTagName('tbody')[0];
+            data.barang.forEach(item => {
+                const row = barangTableBody.insertRow();
+                row.insertCell(0).textContent = item.kode;
+                row.insertCell(1).textContent = item.nama;
+                row.insertCell(2).textContent = item.hargaBeli;
+                row.insertCell(3).textContent = item.hargaJual;
+                row.insertCell(4).textContent = item.stok;
+                row.insertCell(5).textContent = item.kodeToko;
+                row.insertCell(6).textContent = item.kategori;
+                row.insertCell(7).textContent = item.terjual;
+            });
+
+            // Populate transaksi table
+            const transaksiTableBody = document.getElementById('transaksiTable').getElementsByTagName('tbody')[0];
+            data.transaksi.forEach(item => {
+                const row = transaksiTableBody.insertRow();
+                row.insertCell(0).textContent = item.id;
+                row.insertCell(1).textContent = item.kodeBarang;
+                row.insertCell(2).textContent = item.namaBarang;
+                row.insertCell(3).textContent = item.jumlah;
+                row.insertCell(4).textContent = item.total;
+                row.insertCell(5).textContent = item.nominal;
+                row.insertCell(6).textContent = item.kembalian;
+                row.insertCell(7).textContent = item.metode;
+                row.insertCell(8).textContent = item.diskon;
+                row.insertCell(9).textContent = item.persenDiskon;
+                row.insertCell(10).textContent = item.tanggal;
+            });
+
+            // Populate laporan setoran table
+            const laporanSetoranTableBody = document.getElementById('laporanSetoranTable').getElementsByTagName('tbody')[0];
+            data.laporanSetoran.forEach(item => {
+                const row = laporanSetoranTableBody.insertRow();
+                row.insertCell(0).textContent = item.username;
+                row.insertCell(1).textContent = item.tanggal;
+                row.insertCell(2).textContent = item.waktu;
+                row.insertCell(3).textContent = item.nominalSetoran;
+                row.insertCell(4).textContent = item.status;
+                row.insertCell(5).textContent = item.varian;
+            });
+
+            // Populate adjustment history table
+            const adjustmentHistoryTableBody = document.getElementById('adjustmentHistoryTable').getElementsByTagName('tbody')[0];
+            data.adjustmentHistory.forEach(item => {
+                const row = adjustmentHistoryTableBody.insertRow();
+                row.insertCell(0).textContent = item.tanggal;
+                row.insertCell(1).textContent = item.jam;
+                row.insertCell(2).textContent = item.totalItem;
+                row.insertCell(3).textContent = item.totalPlus;
+                row.insertCell(4).textContent = item.totalMinus;
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+
+        // Function to export table data to Excel
+        function exportTableToExcel(tableID, filename = '') {
+            var downloadLink;
+            var dataType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            var tableSelect = document.getElementById(tableID);
+            var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+
+            // Specify file name
+            filename = filename ? filename + '.xlsx' : 'excel_data.xlsx';
+
+            // Create download link element
+            downloadLink = document.createElement("a");
+
+            document.body.appendChild(downloadLink);
+
+            var wb = XLSX.utils.table_to_book(tableSelect, { sheet: "Sheet1" });
+            var wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+
+            function s2ab(s) {
+                var buf = new ArrayBuffer(s.length);
+                var view = new Uint8Array(buf);
+                for (var i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+                return buf;
+            }
+
+            var blob = new Blob([s2ab(wbout)], { type: dataType });
+
+            // Create a link to the file
+            downloadLink.href = URL.createObjectURL(blob);
+
+            // Set file name
+            downloadLink.download = filename;
+
+            // Trigger download
+            downloadLink.click();
+        }
+    </script>
+</body>
+</html>

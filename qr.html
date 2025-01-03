@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir Pintar</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Kasir Pintar</h1>
+        <nav>
+            <a href="#">KASIR</a>
+            <a href="#">LAPORAN</a>
+            <a href="#">VOID</a>
+            <a href="#">SETORAN</a>
+            <a href="#">AKUN</a>
+        </nav>
+    </header>
+    
+    <section class="input-barang">
+        <h2>Input Barang</h2>
+        <form>
+            <input type="text" placeholder="Kode Barang">
+            <input type="text" placeholder="Nama Barang">
+            <input type="text" placeholder="Harga Beli">
+            <input type="text" placeholder="Harga Jual">
+            <input type="text" placeholder="Stok Barang">
+            <input type="text" placeholder="Kode Toko">
+            <button type="button">Tambah Barang</button>
+        </form>
+    </section>
+    
+    <section class="daftar-barang">
+        <h2>Daftar Barang</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Kode</th>
+                    <th>Nama</th>
+                    <th>Harga Jual</th>
+                    <th>Stok</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>12</td>
+                    <td>Asep</td>
+                    <td>Rp50</td>
+                    <td>165.4</td>
+                    <td>
+                        <button>Info</button>
+                        <button>Edit</button>
+                        <button>Hapus</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>51</td>
+                    <td>Ji</td>
+                    <td>Rp80000</td>
+                    <td>15.7</td>
+                    <td>
+                        <button>Info</button>
+                        <button>Edit</button>
+                        <button>Hapus</button>
+                    </td>
+                </tr>
+                <!-- Additional rows -->
+            </tbody>
+        </table>
+    </section>
+    
+    <section class="tambah-ke-keranjang">
+        <h2>Tambah ke Keranjang</h2>
+        <form>
+            <input type="text" placeholder="Kode/Nama Barang">
+            <input type="text" placeholder="Jumlah">
+            <button type="button">Tambah ke Keranjang</button>
+        </form>
+    </section>
+    
+    <section class="keranjang">
+        <h2>Keranjang</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Jumlah</th>
+                    <th>Harga</th>
+                    <th>Total</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="5">Total: Rp0</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="actions">
+            <button>Bayar</button>
+            <button>Lihat Laporan</button>
+            <button>Logout</button>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

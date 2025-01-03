@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    
+    <title>Riwayat Retur Barang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 35px;
+            max-width: 1400px;
+            margin: 0 auto;
+            border: 1px solid #e9ecef;
+        }
+
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .filter-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-selesai {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .status-proses {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-detail {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-export {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .btn-filter {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination button {
+            padding: 8px 15px;
+            border: 1px solid #3498db;
+            background-color: white;
+            color: #3498db;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .checkbox-column {
+            width: 40px;
+            text-align: center;
+        }
+
+        .bulk-actions {
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .detail-table th, .detail-table td {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+        }
+
+        .detail-table th {
+            background-color: #36a138;
+            width: 30%;
+            font-weight: 600;
+        }
+
+        .action-column {
+            display: flex;
+            gap: 5px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        
+        .btn-retur {
+    background-color: #ff6b6b; /* Warna merah lembut */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-retur:hover {
+    background-color: #ff5252; /* Warna merah sedikit lebih gelap */
+    transform: translateY(-2px); /* Efek terangkat sedikit */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-retur i {
+    margin-right: 8px; /* Jarak antara ikon dan teks */
+    font-size: 18px; /* Ukuran ikon */
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Riwayat Retur Barang</h2>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <button class="btn btn-filter" onclick="App.openFilterModal()">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <button class="btn btn-export" onclick="App.exportData()">
+                    <i class="fas fa-file-excel"></i> Export
+                </button>
+             <button onclick="window.location.href='retur barang.html'" class="btn-retur">
+    <i class="fas fa-undo-alt"></i> Retur Barang
+</button>
+                
+            </div>
+        </div>
+
+        <div class="bulk-actions" id="bulkActions">
+            <button class="btn btn-delete" onclick="App.deleteBulkItems()">
+                <i class="fas fa-trash"></i> Hapus Data Terpilih (<span id="selectedCount">0</span>)
+            </button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="checkbox-column">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="selectAll" onclick="App.toggleSelectAll()">
+                        </div>
+                    </th>
+                    <th>ID</th>
+                    <th>Tanggal</th>
+                    <th>Jam</th>
+                    <th>Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Alasan</th>
+                    <th>Jumlah</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="riwayatReturBody"></tbody>
+        </table>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <script>
+        const App = {
+            riwayatRetur: [],
+            filteredRetur: [],
+            itemsPerPage: 10,
+            currentPage: 1,
+            PIN: "451",
+            selectedItems: new Set(),
+
+            init() {
+                this.riwayatReturBody = document.getElementById('riwayatReturBody');
+                this.paginationContainer = document.getElementById('pagination');
+                this.bulkActions = document.getElementById('bulkActions');
+                this.selectedCountElement = document.getElementById('selectedCount');
+                this.loadRiwayatRetur();
+            },
+
+            validasiRetur(data) {
+                const requiredFields = ['tanggal', 'jam', 'kodeBarang', 'namaBarang', 'alasan', 'jumlah', 'status'];
+                for (let field of requiredFields) {
+                    if (!data[field]) {
+                        Swal.fire('Error', `${field} harus diisi`, 'error');
+                        return false;
+                    }
+                }
+                if (data.jumlah <= 0) {
+                    Swal.fire('Error', 'Jumlah retur harus lebih dari 0', 'error');
+                    return false;
+                }
+                return true;
+            },
+
+            tambahRetur(dataRetur) {
+                const storedRetur = JSON.parse(localStorage.getItem('riwayatRetur') || '[]');
+                if (!this.validasiRetur(dataRetur)) {
+                    return false;
+                }
+                dataRetur.id = storedRetur.length + 1;
+                storedRetur.push(dataRetur);
+                localStorage.setItem('riwayatRetur', JSON.stringify(storedRetur));
+                this.loadRiwayatRetur();
+                return true;
+            },
+
+            loadRiwayatRetur() {
+                try {
+                    const storedRetur = localStorage.getItem('riwayatRetur');
+                    this.riwayatRetur = storedRetur ? JSON.parse(storedRetur) : [];
+                    this.riwayatRetur.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                    this.filterRetur();
+                } catch (error) {
+                    console.error('Gagal memuat riwayat retur:', error);
+                    Swal.fire('Error', 'Gagal memuat riwayat retur', 'error');
+                }
+            },
+
+            filterRetur(statusFilter = '', startDate = '', endDate = '') {
+                this.filteredRetur = this.riwayatRetur.filter(item => {
+                    const matchStatus = !statusFilter || item.status === statusFilter;
+                    const matchDate = (!startDate && !endDate) || 
+                                    (new Date(item.tanggal) >= new Date(startDate) && 
+                                     new Date(item.tanggal) <= new Date(endDate));
+                    return matchStatus && matchDate;
+                });
+
+                this.currentPage = 1;
+                this.renderTable();
+            },
+
+            renderTable() {
+                const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+                const endIndex = startIndex + this.itemsPerPage;
+                const pageData = this.filteredRetur.slice(startIndex, endIndex);
+
+                if (this.filteredRetur.length === 0) {
+                    this.riwayatReturBody.innerHTML = `
+                        <tr>
+                            <td colspan="10" style="text-align:center;">
+                                Tidak ada data retur tersedia
+                            </td>
+                        </tr>
+                    `;
+                    this.paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                this.riwayatReturBody.innerHTML = pageData.map(item => `
+                    <tr>
+                        <td class="checkbox-column">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" class="item-checkbox" value="${item.id}"
+                                    ${this.selectedItems.has(item.id) ? 'checked' : ''}
+                                    onchange="App.toggleItemSelection(${item.id})">
+                            </div>
+                        </td>
+                        <td>${item.id}</td>
+                        <td>${item.tanggal}</td>
+                        <td>${item.jam}</td>
+                        <td>${item.kodeBarang}</td>
+                        <td>${item.namaBarang}</td>
+                        <td>${item.alasan}</td>
+                        <td>${item.jumlah}</td>
+                        <td>
+                            <span class="status-badge status-${(item.status || 'selesai').toLowerCase()}">
+                                ${item.status || 'Selesai'}
+                            </span>
+                        </td>
+                        <td class="action-column">
+                            <button class="btn btn-detail" onclick="App.viewDetail(${item.id})">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-delete" onclick="App.deleteItem(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                this.renderPagination();
+                this.updateBulkActionVisibility();
+            },
+
+            renderPagination() {
+                const pageCount = Math.ceil(this.filteredRetur.length / this.itemsPerPage);
+                this.paginationContainer.innerHTML = Array.from({length: pageCount}, (_, i) => `
+                    <button 
+                        class="${i + 1 === this.currentPage ? 'active' : ''}" 
+                        onclick="App.changePage(${i + 1})"
+                    >
+                        ${i + 1}
+                    </button>
+                `).join('');
+            },
+
+            async verifyPin() {
+                const { value: pin } = await Swal.fire({
+                    title: 'Masukkan PIN',
+                    input: 'password',
+                    inputPlaceholder: 'Masukkan PIN',
+                    showCancelButton: true,
+                    confirmButtonText: 'Verifikasi',
+                    cancelButtonText: 'Batal',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'PIN harus diisi!';
+                        }
+                    }
+                });
+
+                return pin === this.PIN;
+            },
+
+            async deleteItem(id) {
+                const isVerified = await this.verifyPin();
+                if (!isVerified) {
+                    Swal.fire('Error', 'PIN tidak valid!', 'error');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    text: "Anda yakin ingin menghapus data ini?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74c3c',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const index = this.riwayatRetur.findIndex(item => item.id === id);
+                        if (index !== -1) {
+                            this.riwayatRetur.splice(index, 1);
+                            localStorage.setItem('riwayatRetur', JSON.stringify(this.riwayatRetur));
+                            this.loadRiwayatRetur();
+                            Swal.fire('Terhapus!', 'Data telah dihapus.', 'success');
+                        }
+                    }
+                });
+            },
+
+            async deleteBulkItems() {
+                if (this.selectedItems.size === 0) {
+                    Swal.fire('Info', 'Pilih data yang akan dihapus terlebih dahulu!', 'info');
+                    return;
+                }
+
+                const isVerified = await this.verifyPin();
+                if (!isVerified) {
+                    Swal.fire('Error', 'PIN tidak valid!', 'error');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Konfirmasi Hapus Multiple',
+                    text: `Anda yakin ingin menghapus ${this.selectedItems.size} data terpilih?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74c3c',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus Semua!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.riwayatRetur = this.riwayatRetur.filter(item => !this.selectedItems.has(item.id));
+                        localStorage.setItem('riwayatRetur', JSON.stringify(this.riwayatRetur));
+                        this.selectedItems.clear();
+                        this.loadRiwayatRetur();
+                        this.updateBulkActionVisibility();
+                        document.getElementById('selectAll').checked = false;
+                        Swal.fire('Terhapus!', 'Data terpilih telah dihapus.', 'success');
+                    }
+                });
+            },
+
+            viewDetail(id) {
+                const item = this.riwayatRetur.find(retur => retur.id === id);
+                if (item) {
+                    Swal.fire({
+                        title: 'Detail Retur Barang',
+                        html: `
+                            <table class="detail-table">
+                                <tr>
+                                    <th>ID</th>
+                                    <td>${item.id}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <td>${item.tanggal}</td>
+                                </tr>
+                                <tr>
+                                    <th>Jam</th>
+                                    <td>${item.jam}</td>
+                                </tr>
+                                <tr>
+                                    <th>Kode Barang</th>
+                                    <td>${item.kodeBarang}</td>
+                                </tr>
+                                <tr>
+                                    <th>Nama Barang</th>
+                                    <td>${item.namaBarang}</td>
+                                </tr>
+                                <tr>
+                                    <th>Alasan</th>
+                                    <td>${item.alasan}</td>
+                                </tr>
+                                <tr>
+                                    <th>Jumlah</th>
+                                    <td>${item.jumlah}</td>
+                                </tr>
+                                <tr>
+                                    <th>Status</th>
+                                    <td>
+                                        <span class="status-badge status-${(item.status || 'selesai').toLowerCase()}">
+                                            ${item.status || 'Selesai'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        `,
+                        width: '600px',
+                        confirmButtonText: 'Tutup'
+                    });
+                }
+            },
+
+            toggleSelectAll() {
+                const selectAllCheckbox = document.getElementById('selectAll');
+                const checkboxes = document.querySelectorAll('.item-checkbox');
+                
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllCheckbox.checked;
+                    const id = parseInt(checkbox.value);
+                    if (selectAllCheckbox.checked) {
+                        this.selectedItems.add(id);
+                    } else {
+                        this.selectedItems.delete(id);
+                    }
+                });
+
+                this.updateBulkActionVisibility();
+            },
+
+            toggleItemSelection(id) {
+                if (this.selectedItems.has(id)) {
+                    this.selectedItems.delete(id);
+                } else {
+                    this.selectedItems.add(id);
+                }
+
+                // Update select all checkbox
+                const selectAllCheckbox = document.getElementById('selectAll');
+                const checkboxes = document.querySelectorAll('.item-checkbox');
+                const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+                selectAllCheckbox.checked = allChecked;
+
+                this.updateBulkActionVisibility();
+            },
+
+            updateBulkActionVisibility() {
+                this.bulkActions.style.display = this.selectedItems.size > 0 ? 'block' : 'none';
+                this.selectedCountElement.textContent = this.selectedItems.size;
+            },
+
+            changePage(page) {
+                this.currentPage = page;
+                this.renderTable();
+            },
+
+            openFilterModal() {
+                Swal.fire({
+                    title: 'Filter Data',
+                    html: `
+                        <div style="text-align: left;">
+                            <label>Kode Barang:</label>
+                            <input type="text" id="searchInput" class="swal2-input" placeholder="Cari Kode Barang">
+                            
+                            <label>Status:</label>
+                            <select id="statusFilter" class="swal2-input">
+                                <option value="">Semua Status</option>
+                                <option value="Selesai">Selesai</option>
+                                <option value="Proses">Proses</option>
+                            </select>
+                            
+                            <label>Periode:</label>
+                            <input type="date" id="startDate" class="swal2-input" placeholder="Tanggal Mulai">
+                            <input type="date" id="endDate" class="swal2-input" placeholder="Tanggal Selesai">
+                        </div>
+                    `,
+                    focusConfirm: false,
+                    showCancelButton: true,
+                    confirmButtonText: 'Terapkan Filter',
+                    cancelButtonText: 'Batal',
+                    preConfirm: () => {
+                        const searchValue = document.getElementById('searchInput').value;
+                        const statusValue = document.getElementById('statusFilter').value;
+                        const startDate = document.getElementById('startDate').value;
+                        const endDate = document.getElementById('endDate').value;
+
+                        this.filterRetur(statusValue, startDate, endDate);
+                        
+                        if (searchValue) {
+                            this.filteredRetur = this.filteredRetur.filter(item => 
+                                item.kodeBarang && item.kodeBarang.toLowerCase().includes(searchValue.toLowerCase())
+                            );
+                        }
+                        this.renderTable();
+                    }
+                });
+            },
+
+            exportData() {
+                const headers = ['ID', 'Tanggal', 'Jam', 'Kode Barang', 'Nama Barang', 'Alasan', 'Jumlah', 'Status'];
+                const csvContent = [
+                    headers.join(','),
+                    ...this.filteredRetur.map(item => [
+                        item.id,
+                        item.tanggal,
+                        item.jam,
+                        item.kodeBarang,
+                        item.namaBarang,
+                        item.alasan,
+                        item.jumlah,
+                        item.status
+                    ].join(','))
+                ].join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `riwayat_retur_${new Date().toISOString().slice(0,10)}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        };
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+    </script>
+</body>
+</html>

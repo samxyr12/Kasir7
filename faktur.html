@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+    <title>Proses Pengiriman dan Faktur</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <style>
+  body {
+    padding: 20px;
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+h1 {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.btn-group .btn {
+    margin-right: 10px;
+}
+
+.table {
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 12px;
+    text-align: center;
+}
+
+.table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f2f2f2;
+}
+
+.table-striped tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+.signature-section {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.signature-box {
+    width: 45%;
+    text-align: center;
+}
+
+.signature-line {
+    border-top: 1px solid #333;
+    margin-top: 20px;
+}
+
+.print-btn, .download-btn {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.print-btn:hover, .download-btn:hover {
+    background-color: #218838;
+}
+
+.download-btn {
+    background-color: #007bff;
+}
+
+.download-btn:hover {
+    background-color: #0056b3;
+}
+
+@media print {
+    .print-btn, .download-btn { display: none; }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="btn btn-secondary mb-3" onclick="window.location.href='barang.html'">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        
+        <h1 class="text-center mb-4">Proses Pengiriman dan Faktur</h1>
+
+        <div class="btn-group mb-3">
+            <button class="btn btn-primary" onclick="tambahPengiriman()">Tambah Pengiriman</button>
+            <button class="btn btn-success" onclick="simpanPengiriman()">Simpan Pengiriman</button>
+            <button class="btn btn-info" onclick="generateFaktur()">Buat Faktur</button>
+            <button class="btn btn-warning" onclick="tampilkanRiwayatFaktur()">Riwayat Faktur</button>
+
+        </div>      
+
+
+        <div class="table-responsive">
+            <table id="tabelPengiriman" class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Tanggal Pengiriman</th>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Jumlah Dikirim</th>
+                        <th>Harga Jual</th>
+                        <th>Total</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyPengiriman">
+                    <!-- Baris akan ditambahkan secara dinamis -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+    function tambahPengiriman() {
+    // Ambil daftar barang dari localStorage
+    const barang = JSON.parse(localStorage.getItem('barang')) || [];
+
+    if (barang.length === 0) {
+        Swal.fire('Peringatan', 'Tidak ada barang yang tersedia. Silakan tambah barang terlebih dahulu.', 'warning');
+        return;
+    }
+
+    // Buat HTML untuk popup daftar barang
+    let barangHtml = `
+        <div class="mb-3">
+            <input type="text" id="searchBarang" class="form-control" placeholder="Cari barang berdasarkan kode atau nama..." 
+                   oninput="filterBarang(this.value)">
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped" id="tabelBarang">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="checkAllBarang" onchange="toggleAllCheckboxes(this)">
+                            Pilih Semua
+                        </th>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Harga Jual</th>
+                        <th>Jumlah</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    barang.forEach((item, index) => {
+        barangHtml += `
+            <tr class="barang-row" 
+                data-kode="${item.kode}" 
+                data-nama="${item.nama.toLowerCase()}">
+                <td>
+                    <input type="checkbox" class="barang-checkbox" 
+                           data-kode="${item.kode}" 
+                           data-nama="${item.nama}" 
+                           data-harga="${item.hargaJual}"
+                           onchange="updateSelectedBarang(this)">
+                </td>
+                <td>${item.kode}</td>
+                <td>${item.nama}</td>
+                <td>Rp ${item.hargaJual.toLocaleString('id-ID')}</td>
+                <td>
+                    <input type="number" class="form-control jumlah-barang" 
+                           min="1" value="1" 
+                           data-kode="${item.kode}"
+                           onchange="updateJumlahBarang(this)">
+                </td>
+            </tr>
+        `;
+    });
+
+    barangHtml += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    Swal.fire({
+        title: 'Pilih Barang untuk Pengiriman',
+        html: barangHtml,
+        width: '800px',
+        showCancelButton: true,
+        confirmButtonText: 'Tambahkan ke Pengiriman',
+        cancelButtonText: 'Batal',
+        didRender: () => {
+            // Inisialisasi objek untuk menyimpan barang yang dipilih
+            window.selectedBarang = {};
+        },
+        preConfirm: () => {
+            // Tambahkan barang yang dipilih ke tabel pengiriman
+            const tbody = document.getElementById('bodyPengiriman');
+            
+            Object.values(window.selectedBarang).forEach(barang => {
+                const newRow = tbody.insertRow();
+                newRow.innerHTML = `
+                    <td><input type="date" class="form-control" value="${new Date().toISOString().split('T')[0]}"></td>
+                    <td><input type="text" class="form-control" value="${barang.kode}" readonly></td>
+                    <td><input type="text" class="form-control" value="${barang.nama}" readonly></td>
+                    <td><input type="number" class="form-control" value="${barang.jumlah}" min="1" onchange="hitungTotalPengiriman(event)"></td>
+                    <td><input type="number" class="form-control" value="${barang.hargaJual}" onchange="hitungTotalPengiriman(event)"></td>
+                    <td><input type="number" class="form-control" value="${barang.jumlah * barang.hargaJual}" readonly></td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">
+                            Hapus
+                        </button>
+                    </td>
+                `;
+            });
+
+            // Reset selected barang
+            window.selectedBarang = {};
+        }
+    });
+}
+
+// Fungsi untuk filter barang berdasarkan pencarian
+function filterBarang(searchTerm) {
+    searchTerm = searchTerm.toLowerCase();
+    const rows = document.querySelectorAll('.barang-row');
+
+    rows.forEach(row => {
+        const kode = row.dataset.kode.toLowerCase();
+        const nama = row.dataset.nama;
+
+        // Tampilkan baris jika cocok dengan pencarian
+        if (kode.includes(searchTerm) || nama.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Reset checkbox "Pilih Semua" saat melakukan pencarian
+    const checkAllBarang = document.getElementById('checkAllBarang');
+    if (checkAllBarang) {
+        checkAllBarang.checked = false;
+    }
+}
+
+// Fungsi untuk toggle semua checkbox
+function toggleAllCheckboxes(masterCheckbox) {
+    const checkboxes = document.querySelectorAll('.barang-row:not([style*="display: none"]) .barang-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = masterCheckbox.checked;
+        updateSelectedBarang(checkbox);
+    });
+}
+
+// Fungsi untuk update barang yang dipilih
+function updateSelectedBarang(checkbox) {
+    const kode = checkbox.dataset.kode;
+    const nama = checkbox.dataset.nama;
+    const hargaJual = parseFloat(checkbox.dataset.harga);
+    const jumlahInput = checkbox.closest('tr').querySelector('.jumlah-barang');
+    const jumlah = parseInt(jumlahInput.value) || 1;
+
+    if (checkbox.checked) {
+        window.selectedBarang[kode] = { 
+            kode, 
+            nama, 
+            hargaJual, 
+            jumlah 
+        };
+    } else {
+        delete window.selectedBarang[kode];
+    }
+}
+
+// Fungsi untuk update jumlah barang
+function updateJumlahBarang(input) {
+    const kode = input.dataset.kode;
+    const jumlah = parseInt(input.value) || 1;
+    
+    if (window.selectedBarang[kode]) {
+        window.selectedBarang[kode].jumlah = jumlah;
+    }
+}
+
+// Fungsi untuk update jumlah barang
+function updateJumlahBarang(input) {
+    const kode = input.dataset.kode;
+    const jumlah = parseInt(input.value) || 1;
+    
+    if (window.selectedBarang[kode]) {
+        window.selectedBarang[kode].jumlah = jumlah;
+    }
+}
+        function tambahBarisKosong(tbody) {
+            const newRow = tbody.insertRow();
+            newRow.innerHTML = `
+                <td><input type="date" class="form-control" value="${new Date().toISOString().split('T')[0]}"></td>
+                <td>
+                    <input type="number" class="form-control" placeholder="Kode Barang" 
+                           onchange="cariBarangPengiriman(this)">
+                </td>
+                <td><input type="text" class="form-control" readonly></td>
+                <td><input type="number" class="form-control" min="1" 
+                           onchange="hitungTotalPengiriman(event)"></td>
+                <td><input type="number" class="form-control" 
+                           onchange="hitungTotalPengiriman(event)"></td>
+                <td><input type="number" class="form-control" readonly></td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">
+                        Hapus
+                    </button>
+                </td>
+            `;
+        }
+
+        function cariBarangPengiriman(kodeInput) {
+            const barang = JSON.parse(localStorage.getItem('barang')) || [];
+            const row = kodeInput.closest('tr');
+            const namaInput = row.cells[2].querySelector('input');
+            const hargaJualInput = row.cells[4].querySelector('input');
+
+            const barangDitemukan = barang.find(item => item.kode === kodeInput.value);
+
+            if (barangDitemukan) {
+                namaInput.value = barangDitemukan.nama;
+                hargaJualInput.value = barangDitemukan.hargaJual;
+                hitungTotalPengiriman({ target: kodeInput });
+            } else {
+                Swal.fire({
+                    title: 'Barang Tidak Ditemukan',
+                    text: 'Apakah Anda ingin menambahkan barang baru?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Tambahkan',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        tambahBarangBaru(kodeInput, namaInput, hargaJualInput);
+                    }
+                });
+            }
+        }
+
+        function tambahBarangBaru(kodeInput, namaInput, hargaJualInput) {
+            Swal.fire({
+                title: 'Tambah Barang Baru',
+                html: `
+                    <input id="namaBarang" class="swal2-input" placeholder="Nama Barang">
+                    <input id="hargaJual" type="number" class="swal2-input" placeholder="Harga Jual">
+                `,
+                focusConfirm: false,
+                preConfirm: () => {
+                    const namaBarang = document.getElementById('namaBarang').value;
+                    const hargaJual = parseFloat(document.getElementById('hargaJual').value);
+
+                    return { namaBarang, hargaJual };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { namaBarang, hargaJual } = result.value;
+
+                    if (!namaBarang || isNaN(hargaJual)) {
+                        Swal.fire('Error', 'Semua field harus diisi dengan benar', 'error');
+                        return;
+                    }
+
+                    const newBarang = {
+                        kode: kodeInput.value,
+                        nama: namaBarang,
+                        hargaJual: hargaJual,
+                    };
+
+                    let barang = JSON.parse(localStorage.getItem('barang')) || [];
+                    barang.push(newBarang);
+                    localStorage.setItem('barang', JSON.stringify(barang));
+
+                    namaInput.value = namaBarang;
+                    hargaJualInput.value = hargaJual;
+                    hitungTotalPengiriman({ target: kodeInput });
+                }
+            });
+        }
+
+        function hitungTotalPengiriman(event) {
+            const row = event.target.closest('tr');
+            const jumlahInput = row.cells[3].querySelector('input');
+            const hargaJualInput = row.cells[4].querySelector('input');
+            const totalInput = row.cells[5].querySelector('input');
+
+            const jumlah = parseFloat(jumlahInput.value) || 0;
+            const hargaJual = parseFloat(hargaJualInput.value) || 0;
+
+            totalInput.value = (jumlah * hargaJual).toFixed(2);
+        }
+
+        function simpanPengiriman() {
+            const tbody = document.getElementById('bodyPengiriman');
+            const rows = tbody.rows;
+            const pengirimanBarang = [];
+
+            for (let row of rows) {
+                const tanggal = row.cells[0].querySelector('input').value;
+                const kodeBarang = row.cells[1].querySelector('input').value;
+                const namaBarang = row.cells[2].querySelector('input').value;
+                const jumlah = parseFloat(row.cells[3].querySelector('input').value) || 0;
+                const hargaJual = parseFloat(row.cells[4].querySelector('input').value) || 0;
+                const total = parseFloat(row.cells[5].querySelector('input').value) || 0;
+
+                if (kodeBarang && namaBarang && jumlah > 0) {
+                    pengirimanBarang.push({ tanggal, kodeBarang, namaBarang, jumlah, hargaJual, total });
+                }
+            }
+
+            if (pengirimanBarang.length === 0) {
+                Swal.fire('Error', 'Tidak ada data pengiriman yang valid', 'warning');
+                return;
+            }
+
+            localStorage.setItem('pengirimanBarang', JSON.stringify(pengirimanBarang));
+            Swal.fire('Sukses', 'Pengiriman barang telah disimpan.', 'success');
+        }
+
+      function tampilkanRiwayatFaktur() {
+    // Ambil riwayat faktur dari localStorage
+    const riwayatFaktur = JSON.parse(localStorage.getItem('riwayatFaktur')) || [];
+
+    if (riwayatFaktur.length === 0) {
+        Swal.fire('Informasi', 'Tidak ada riwayat faktur.', 'info');
+        return;
+    }
+
+    // Buat HTML untuk tabel riwayat faktur
+    let riwayatHtml = `
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nomor Faktur</th>
+                        <th>Tanggal Dibuat</th>
+                        <th>Total Faktur</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    riwayatFaktur.forEach((faktur, index) => {
+        const totalFaktur = faktur.items.reduce((total, item) => total + item.total, 0);
+        riwayatHtml += `
+            <tr>
+                <td>${faktur.nomorFaktur}</td>
+                <td>${faktur.tanggal}</td>
+                <td>Rp ${totalFaktur.toLocaleString('id-ID')}</td>
+                <td>
+                    <button class="btn btn-info btn-sm" onclick="lihatDetailFaktur('${faktur.nomorFaktur}')">
+                        Lihat Detail
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="downloadFaktur('${faktur.nomorFaktur}')">
+                        Download
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    riwayatHtml += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    Swal.fire({
+        title: 'Riwayat Faktur',
+        html: riwayatHtml,
+        width: '800px',
+        showCloseButton: true
+    });
+}
+
+function lihatDetailFaktur(nomorFaktur) {
+    const riwayatFaktur = JSON.parse(localStorage.getItem('riwayatFaktur')) || [];
+    const faktur = riwayatFaktur.find(f => f.nomorFaktur === nomorFaktur);
+
+    if (!faktur) {
+        Swal.fire('Error', 'Faktur tidak ditemukan', 'error');
+        return;
+    }
+
+    let detailHtml = `
+        <div class="table-responsive">
+            <h4>Detail Faktur: ${nomorFaktur}</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Jumlah</th>
+                        <th>Harga Jual</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    faktur.items.forEach(item => {
+        detailHtml += `
+            <tr>
+                <td>${item.tanggal}</td>
+                <td>${item.kodeBarang}</td>
+                <td>${item.namaBarang}</td>
+                <td>${item.jumlah}</td>
+                <td>Rp ${item.hargaJual.toLocaleString('id-ID')}</td>
+                <td>Rp ${item.total.toLocaleString('id-ID')}</td>
+            </tr>
+        `;
+    });
+
+    detailHtml += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    Swal.fire({
+        title: 'Detail Faktur',
+        html: detailHtml,
+        width: '800px'
+    });
+}
+
+function downloadFaktur(nomorFaktur) {
+    const riwayatFaktur = JSON.parse(localStorage.getItem('riwayatFaktur')) || [];
+    const faktur = riwayatFaktur.find(f => f.nomorFaktur === nomorFaktur);
+
+    if (!faktur) {
+        Swal.fire('Error', 'Faktur tidak ditemukan', 'error');
+        return;
+    }
+
+    // Buat workbook Excel
+    const wb = XLSX.utils.book_new();
+    const wsData = [
+        ['Nomor Faktur', nomorFaktur],
+        ['Tanggal', faktur.tanggal],
+        [], // Baris kosong
+        ['Tanggal', 'Kode Barang', 'Nama Barang', 'Jumlah', 'Harga Jual', 'Total']
+    ];
+
+    // Tambahkan data item faktur
+    faktur.items.forEach(item => {
+        wsData.push([
+            item.tanggal,
+            item.kodeBarang,
+            item.namaBarang,
+            item.jumlah,
+            item.hargaJual,
+            item.total
+        ]);
+    });
+
+    // Tambahkan total keseluruhan
+    const totalFaktur = faktur.items.reduce((total, item) => total + item.total, 0);
+    wsData.push([], ['Total Keseluruhan', '', '', '', '', totalFaktur]);
+
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, 'Faktur');
+
+    // Buat ZIP
+    const zip = new JSZip();
+    const excelBuffer = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+    zip.file(`Faktur_${nomorFaktur}.xlsx`, excelBuffer);
+
+    // Download ZIP
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = `Faktur_${nomorFaktur}.zip`;
+        link.click();
+    });
+}
+
+function generateFaktur() {
+    // Ambil data pengiriman dari localStorage
+    const pengiriman = JSON.parse(localStorage.getItem('pengirimanBarang')) || [];
+
+    // Validasi apakah ada data pengiriman
+    if (pengiriman.length === 0) {
+        Swal.fire('Peringatan', 'Tidak ada barang yang diproses. Silakan tambahkan pengiriman terlebih dahulu.', 'warning');
+        return;
+    }
+
+    // Cek apakah faktur sudah pernah dibuat sebelumnya
+    const riwayatFaktur = JSON.parse(localStorage.getItem('riwayatFaktur')) || [];
+    const fakturTerakhir = riwayatFaktur[riwayatFaktur.length - 1];
+    
+    if (fakturTerakhir) {
+        const pengirimanTerakhir = fakturTerakhir.items;
+        
+        // Bandingkan apakah pengiriman saat ini sama persis dengan pengiriman terakhir
+        const apakahSamaDenganFakturTerakhir = pengiriman.every((item, index) => 
+            item.kodeBarang === pengirimanTerakhir[index]?.kodeBarang &&
+            item.namaBarang === pengirimanTerakhir[index]?.namaBarang &&
+            item.jumlah === pengirimanTerakhir[index]?.jumlah &&
+            item.hargaJual === pengirimanTerakhir[index]?.hargaJual
+        );
+
+        if (apakahSamaDenganFakturTerakhir) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Faktur Sudah Dibuat',
+                text: 'Faktur untuk pengiriman ini sudah pernah dibuat sebelumnya.',
+                confirmButtonText: 'Lihat Riwayat Faktur',
+                cancelButtonText: 'Batal',
+                showCancelButton: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    tampilkanRiwayatFaktur();
+                }
+            });
+            return;
+        }
+    }
+
+    // Hitung total barang
+    const totalBarang = pengiriman.reduce((sum, item) => sum + item.jumlah, 0);
+
+    // Jika total barang 0, tampilkan peringatan
+    if (totalBarang === 0) {
+        Swal.fire('Peringatan', 'Jumlah barang yang diproses tidak valid (0).', 'warning');
+        return;
+    }
+
+    // Buat tanggal dan waktu
+    const now = new Date();
+    const tanggal = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }).replace(/\//g, '');
+    const waktu = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '');
+    
+    // Buat kode unik 4 angka
+    const kodeUnik = Math.floor(1000 + Math.random() * 9000);
+
+    // Format nomor faktur
+    const invoiceNumber = `FX-${tanggal}.${waktu}.${totalBarang}/${kodeUnik}`;
+
+    // Buat tanggal untuk tampilan
+    const currentDate = now.toLocaleDateString('id-ID', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+    });
+
+    // Simpan riwayat faktur
+    riwayatFaktur.push({
+        nomorFaktur: invoiceNumber,
+        tanggal: currentDate,
+        items: pengiriman
+    });
+    localStorage.setItem('riwayatFaktur', JSON.stringify(riwayatFaktur));
+
+    // Buat HTML untuk faktur
+    let fakturHtml = `
+        <html>
+        <head>
+            <title>Faktur Pengiriman - FXID</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body { font-family: Arial, sans-serif; }
+                .invoice-container { 
+                    max-width: 900px; 
+                    margin: auto; 
+                    padding: 20px; 
+                }
+                .invoice-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 20px;
+                }
+                .table { margin-top: 20px; }
+                @media print {
+                    .no-print { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="invoice-container">
+                <div class="invoice-header">
+                    <div>
+                        <h3>FXID</h3>
+                        <p>Alamat Perusahaan</p>
+                    </div>
+                    <div>
+                        <strong>Nomor Invoice:</strong> ${invoiceNumber}<br>
+                        <strong>Tanggal:</strong> ${currentDate}
+                    </div>
+                </div>
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Kode Barang</th>
+                            <th>Nama Barang</th>
+                            <th>Jumlah</th>
+                            <th>Harga Jual</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    `;
+
+    // Variabel untuk menyimpan total keseluruhan
+    let totalFaktur = 0;
+
+    // Tambahkan item-item pengiriman ke tabel
+    pengiriman.forEach(item => {
+        fakturHtml += `
+            <tr>
+                <td>${item.tanggal}</td>
+                <td>${item.kodeBarang}</td>
+                <td>${item.namaBarang}</td>
+                <td>${item.jumlah}</td>
+                <td>Rp ${item.hargaJual.toLocaleString('id-ID')}</td>
+                <td>Rp ${item.total.toLocaleString('id-ID')}</td>
+            </tr>
+        `;
+        totalFaktur += item.total;
+    });
+
+    // Tambahkan baris total
+    fakturHtml += `
+                    <tr>
+                        <td colspan="5" class="text-end"><strong>Total Keseluruhan</strong></td>
+                        <td><strong>Rp ${totalFaktur.toLocaleString('id-ID')}</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="signature-section mt-4 d-flex justify-content-between">
+                    <div class="text-center">
+                        <p>Hormat Kami,</p>
+                        <div style="border-top: 1px solid black; width: 200px; margin: 50px auto 0;"></div>
+                        <p>Pengirim</p>
+                    </div>
+                    <div class="text-center">
+                        <p>Penerima,</p>
+                        <div style="border-top: 1px solid black; width: 200px; margin: 50px auto 0;"></div>
+                        <p>Tanda Tangan</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4 no-print">
+                    <button onclick="window.print()" class="btn btn btn-primary">Cetak Faktur</button>
+                </div>
+            </div>
+        </body>
+        </html>
+    `;
+
+    // Buka jendela baru untuk menampilkan faktur
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(fakturHtml);
+    newWindow.document.close();
+    newWindow.focus();
+}
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+
+</body>
+</html>
