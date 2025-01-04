@@ -1504,13 +1504,18 @@ button:disabled {
             <i class="fas fa-percent"></i> Tambah Diskon
         </button>
         
-        <button onclick="tambahTargetPenjualan()" class="btn-target">
+    
+ <button onclick="window.location.href='faktur.html'">Go to Faktur</button>
+ 
+     <button onclick="tambahTargetPenjualan()" class="btn-target">
             <i class="fas fa-bullseye"></i> Tambah Target Penjualan
         </button>
- <button onclick="window.location.href='faktur.html'">Go to Faktur</button>
+ 
         <button onclick="tampilkanDaftarTarget()" class="btn-lihat-target">
             <i class="fas fa-eye"></i> Lihat Daftar Target
         </button>
+        
+         <button onclick="window.location.href='retur barang.html'">retur barang</button>
         
         <button onclick="lihatStokGrafis()" class="cek-stok-btn">
     <i class="fas fa-chart-bar"></i> Lihat Grafis Stok
@@ -1521,7 +1526,7 @@ button:disabled {
         id="riwayatDiskonKedaluwarsaBtn" 
         class="btn btn-outline-secondary btn-sm" 
         onclick="lihatDiskonKedaluwarsa()"
-    >
+>
         <i class="fas fa-history me-2"></i>Riwayat Diskon Kedaluwarsa
         <span 
             id="diskonKedaluwarsaCounter" 
