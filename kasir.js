@@ -773,10 +773,10 @@ function updateKembalian() {
     const nominalInput = document.getElementById('nominalCash');
     const totalElement = document.getElementById('totalBayar');
     const kembalianElement = document.getElementById('kembalian');
-    
+
     const nominal = parseFloat(nominalInput.value) || 0;
-    const total = parseFloat(totalElement.textContent.replace(/\D/g, ''));
-    
+    const total = parseFloat(totalElement.textContent.replace(/\D/g, '')) || 0;
+
     const kembalian = nominal - total;
     kembalianElement.textContent = kembalian >= 0 ? formatRupiah(kembalian, '', false) : '0';
 }
@@ -928,7 +928,7 @@ function prosesPembayaran(metode) {
         const nominalElement = document.getElementById('nominalCash');
         const nominal = parseFloat(nominalElement.value);
         const kembalianElement = document.getElementById('kembalian');
-        const kembalian = parseFloat(kembalianElement.textContent.replace(/\./g, '')) || 0;
+        const kembalian = parseFloat(kembalianElement.textContent.replace(/\D/g, '')) || 0;
 
         if (isNaN(nominal) || nominal <= 0) {
             alert('Nominal tidak valid');
@@ -939,7 +939,7 @@ function prosesPembayaran(metode) {
             alert('Nominal kurang');
             return;
         }
-        
+
         // Proses poin untuk member
         prosesPoinMember(memberTransaksi, total, metode, idTransaksi, keranjang, kembalian, nominal);
 
