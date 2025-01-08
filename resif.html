@@ -1,161 +1,992 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-   
+<head>          
     <title>Penerimaan Barang</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
   <style>
+ /* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+/* Header Styles */
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 2px;
+}
+
+/* Button Styles */
+.btn {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+    justify-content: center;
+}
+
+button {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    background: linear-gradient(135deg, #2980b9, #2c3e50);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Back Button Specific Styles */
+.btn-kembali {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    margin-bottom: 1rem;
+}
+
+.btn-kembali:hover {
+    background: linear-gradient(135deg, #c0392b, #962d22);
+}
+
+/* Table Styles */
+#tabelPenerimaan {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    margin: 2rem 0;
+}
+
+#tabelPenerimaan thead {
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    color: white;
+}
+
+#tabelPenerimaan th {
+    padding: 1rem;
+    font-weight: 600;
+    text-align: left;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#tabelPenerimaan td {
+    padding: 0.8rem;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+#tabelPenerimaan tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Input Styles */
+input, select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
+}
+
+/* Modal and SweetAlert2 Custom Styles */
+.swal2-popup {
+    border-radius: 16px !important;
+    padding: 2rem !important;
+}
+
+.swal2-title {
+    color: #2c3e50 !important;
+    font-size: 1.8rem !important;
+}
+
+.swal2-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+.swal2-table th, .swal2-table td {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+/* Chart Container Styles */
+canvas {
+    margin-top: 2rem;
+    border-radius: 8px;
+    background: white;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1200px) {
+    #tabelPenerimaan {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+@media screen and (max-width: 768px) {
     body {
-        font-family: 'Arial', sans-serif;
-        line-height: 1.6;
-        margin: 0;
-        padding: 20px;
-        max-width: 1200px;
-        background-color: #f4f4f4;
-        color: #333;
+        padding: 1rem;
     }
 
     h1 {
-        text-align: center;
-        color: #4CAF50;
-        margin-bottom: 30px;
-        font-size: 2.5em;
+        font-size: 2rem;
     }
 
     .btn {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 20px;
+        flex-direction: column;
     }
 
     button {
-        background-color: #4CAF50;
-        border: none;
-        color: white;
-        padding: 10px 20px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        cursor: pointer;
-        border-radius: 5px;
-        transition: background-color 0.3s, transform 0.2s;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    button:hover {
-        background-color: #45a049;
-        transform: translateY(-2px);
-    }
-
-    .btn-kembali {
-        background-color: #2196F3;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .btn-kembali:hover {
-        background-color: #1976D2;
-        transform: translateY(-2px);
-    }
-
-    table {
         width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-        background-color: white;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        overflow: hidden; /* To ensure rounded corners */
+    }
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply Animations */
+#bodyPenerimaan tr {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Loading States */
+.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Print Styles */
+@media print {
+    .btn, button {
+        display: none;
     }
 
-    table, th, td {
+    body {
+        padding: 0;
+        background: white;
+    }
+
+    #tabelPenerimaan {
+        box-shadow: none;
         border: 1px solid #ddd;
     }
+}
 
-    th, td {
-        text-align: left;
-        padding: 12px;
-        transition: background-color 0.3s;
+/* SweetAlert2 Custom Styles */
+.swal2-popup {
+    padding: 2rem !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1) !important;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa) !important;
+}
+
+.swal2-title {
+    color: #2c3e50 !important;
+    font-size: 1.8rem !important;
+    font-weight: 600 !important;
+    padding: 1rem 0 !important;
+    position: relative;
+}
+
+.swal2-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 2px;
+}
+
+.swal2-html-container {
+    margin: 1.5rem 0 !important;
+    color: #34495e !important;
+}
+
+.swal2-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.swal2-table th,
+.swal2-table td {
+    padding: 0.8rem 1.2rem;
+    text-align: left;
+    border: 1px solid #e9ecef;
+}
+
+.swal2-table th {
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.swal2-table td {
+    background: white;
+}
+
+.swal2-table tr:hover td {
+    background-color: #f8f9fa;
+}
+
+.swal2-input,
+.swal2-textarea {
+    border: 2px solid #e9ecef !important;
+    border-radius: 8px !important;
+    padding: 0.8rem 1rem !important;
+    margin: 0.5rem 0 !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.swal2-input:focus,
+.swal2-textarea:focus {
+    border-color: #3498db !important;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2) !important;
+}
+
+.swal2-confirm {
+    background: linear-gradient(135deg, #3498db, #2980b9) !important;
+    padding: 0.8rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s ease !important;
+}
+
+.swal2-confirm:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.swal2-cancel {
+    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+    padding: 0.8rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s ease !important;
+}
+
+.swal2-cancel:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Custom scrollbar for SweetAlert content */
+.swal2-html-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.swal2-html-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.swal2-html-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.swal2-html-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .swal2-popup {
+        padding: 1.5rem !important;
+        margin: 1rem;
     }
-
-    th {
-        background-color: #f2f2f2;
-        font-weight: bold;
-        color: #333;
+    
+    .swal2-title {
+        font-size: 1.5rem !important;
     }
-
-    input, select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-sizing: border-box;
-        transition: border-color 0.3s;
-    }
-
-    input[type="number"] {
-        text-align: right;
-    }
-
-    input[readonly] {
-        background-color: #f9f9f9;
-    }
-
-    #tabelPenerimaan tbody tr:nth-child(even) {
-        background-color: #f8f8f8;
-    }
-
-    #tabelPenerimaan tbody tr:hover {
-        background-color: #e0f7fa; /* Light blue on hover */
-    }
-
-    tr td:last-child button {
-        background-color: #f44336;
-        width: 100%;
-        transition: background-color 0.3s, transform 0.2s;
-    }
-
-    tr td:last-child button:hover {
-        background-color: #d32f2f;
-        transform: translateY(-2px);
-    }
-
-    @media screen and (max-width: 768px) {
-        table {
-            font-size: 14px;
-        }
-
-        .btn {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        button {
-            width: 100%;
-        }
-    }
-
-    /* Additional styling for modal tables */
+    
     .swal2-table {
-        width: 100%;
-        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    
+    .swal2-table th,
+    .swal2-table td {
+        padding: 0.6rem 0.8rem;
+    }
+}
+  /* Enhanced SweetAlert2 Stock Visualization Styles */
+
+/* Main Container Styles */
+.swal2-popup.swal2-modal {
+    width: 80vw !important;
+    max-width: 1200px !important;
+    padding: 2rem !important;
+    background: linear-gradient(to bottom right, #ffffff, #f8f9fa) !important;
+}
+
+/* Grid Layout for Chart and Table */
+.swal2-html-container {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+    padding: 1rem !important;
+    max-height: 80vh !important;
+}
+
+/* Stock Table Container */
+.stock-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Enhanced Table Styles */
+#stokTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+}
+
+#stokTable thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#stokTable th {
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    color: white;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+#stokTable td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 0.95rem;
+}
+
+#stokTable tbody tr:hover {
+    background-color: #f8fafc;
+    transition: background-color 0.2s ease;
+}
+
+/* Numeric Column Alignment */
+#stokTable td:nth-child(4),
+#stokTable td:nth-child(5) {
+    text-align: right;
+}
+
+/* Chart Container Styles */
+.chart-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-top: 2rem;
+}
+
+#stokChart {
+    max-height: 400px !important;
+    width: 100% !important;
+}
+
+/* Chart Legend Styles */
+.chart-js-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-top: 1px solid #edf2f7;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #4a5568;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+/* Stock Level Indicators */
+.stock-level {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.stock-level-high {
+    background-color: #c6f6d5;
+    color: #2f855a;
+}
+
+.stock-level-medium {
+    background-color: #fefcbf;
+    color: #975a16;
+}
+
+.stock-level-low {
+    background-color: #fed7d7;
+    color: #c53030;
+}
+
+/* Enhanced Button Styles */
+.swal2-actions {
+    gap: 1rem !important;
+    margin-top: 2rem !important;
+}
+
+.swal2-confirm {
+    background: linear-gradient(135deg, #3498db, #2980b9) !important;
+    padding: 0.8rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.3s ease !important;
+}
+
+.swal2-cancel {
+    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+    padding: 0.8rem 1.5rem !important;
+    border-radius: 8px !important;
+}
+
+/* Custom Scrollbar */
+.stock-table-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.stock-table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.stock-table-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+}
+
+.stock-table-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Loading State */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1024px) {
+    .swal2-popup.swal2-modal {
+        width: 90vw !important;
+        padding: 1.5rem !important;
     }
 
-    .swal2-table th, .swal2-table td {
-        padding: 10px;
+    .chart-container {
+        padding: 1rem;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .swal2-html-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    #stokTable {
+        font-size: 0.9rem;
+    }
+
+    #stokTable th,
+    #stokTable td {
+        padding: 0.6rem;
+    }
+
+    .stock-table-container {
+        max-height: 300px;
+    }
+
+    #stokChart {
+        max-height: 300px !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .swal2-popup {
+        box-shadow: none !important;
+    }
+
+    .swal2-actions,
+    .swal2-timer-progress-bar-container {
+        display: none !important;
+    }
+
+    #stokTable {
         border: 1px solid #ddd;
-        text-align: left;
     }
 
-    .swal2-table th {
-        background-color: #f2f2f2;
+    #stokTable th {
+        background: #f8f9fa !important;
+        color: #000 !important;
     }
+} 
+
+
+/* Receipt History Visualization Styles */
+
+/* Main Container */
+.receipt-history-container {
+    background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+/* Title Styles */
+.history-title {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.history-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    border-radius: 2px;
+}
+
+/* Table Container */
+.history-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+/* Table Styles */
+#riwayatTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+}
+
+#riwayatTable thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+}
+
+#riwayatTable th {
+    color: white;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    text-align: left;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+#riwayatTable tbody tr {
+    transition: all 0.3s ease;
+}
+
+#riwayatTable tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+#riwayatTable tbody tr:hover {
+    background-color: #edf2f7;
+    transform: translateX(4px);
+}
+
+#riwayatTable td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.95rem;
+    color: #2d3748;
+}
+
+/* Numeric Column Alignment */
+#riwayatTable td:nth-child(4),
+#riwayatTable td:nth-child(5) {
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+}
+
+/* Date Column Styling */
+#riwayatTable td:first-child {
+    font-weight: 500;
+    color: #4a5568;
+}
+
+/* Chart Container */
+.chart-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-top: 2rem;
+}
+
+#riwayatChart {
+    max-height: 300px !important;
+    width: 100% !important;
+}
+
+/* Summary Cards */
+.summary-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+}
+
+.summary-label {
+    font-size: 0.9rem;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.summary-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.summary-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.trend-up {
+    color: #48bb78;
+}
+
+.trend-down {
+    color: #e53e3e;
+}
+
+/* Custom Scrollbar */
+.history-table-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.history-table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.history-table-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+}
+
+.history-table-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Filters Section */
+.filters-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-size: 0.9rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.filter-select {
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: white;
+    color: #2d3748;
+    font-size: 0.9rem;
+    min-width: 150px;
+}
+
+/* Export Button */
+.export-button {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.export-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.export-button i {
+    font-size: 1.2rem;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 1024px) {
+    .receipt-history-container {
+        padding: 1.5rem;
+    }
+
+    .summary-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .history-title {
+        font-size: 1.5rem;
+    }
+
+    .summary-container {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-container {
+        flex-direction: column;
+    }
+
+    .filter-item {
+        width: 100%;
+    }
+
+    .filter-select {
+        width: 100%;
+    }
+
+    #riwayatTable {
+        font-size: 0.9rem;
+    }
+
+    #riwayatTable th,
+    #riwayatTable td {
+        padding: 0.75rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .receipt-history-container {
+        box-shadow: none;
+    }
+
+    .filters-container,
+    .export-button {
+        display: none;
+    }
+
+    #riwayatTable {
+        border: 1px solid #ddd;
+    }
+
+    #riwayatTable th {
+        background: #f8f9fa !important;
+        color: #000 !important;
+    }
+}
 </style>
 </head>
 <body>
@@ -550,63 +1381,104 @@
  function tampilkanRiwayatPenerimaan() {
     const riwayat = JSON.parse(localStorage.getItem('penerimaanBarang')) || [];
     
-    // Buat modal popup
+    // Hapus chart instance global jika sudah ada
+    if (window.riwayatChartInstance) {
+        window.riwayatChartInstance.destroy();
+        window.riwayatChartInstance = null;
+    }
+
     Swal.fire({
         title: 'Riwayat Penerimaan Barang',
         html: `
-            <div style="max-height: 400px; overflow-y: auto;">
-                <table id="riwayatTable" class="table">
-                    <thead>
-                        <tr>
-                            <th>Tanggal</th>
-                            <th>Kode Barang</th>
-                            <th>Nama Barang</th>
-                            <th>Jumlah</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="riwayatTableBody"></tbody>
-                </table>
+            <div class="receipt-history-container">
+                <div class="summary-container">
+                    <div class="summary-card">
+                        <div class="summary-label">Total Penerimaan</div>
+                        <div class="summary-value">Rp ${riwayat.reduce((sum, item) => sum + item.total, 0).toLocaleString()}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Total Barang</div>
+                        <div class="summary-value">${riwayat.reduce((sum, item) => sum + item.jumlah, 0).toLocaleString()}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Unique Items</div>
+                        <div class="summary-value">${new Set(riwayat.map(item => item.kodeBarang)).size}</div>
+                    </div>
+                </div>
+
+                <div class="filters-container">
+                    <div class="filter-item">
+                        <span class="filter-label">Filter by Date:</span>
+                        <select class="filter-select" id="dateFilter">
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <span class="filter-label">Sort By:</span>
+                        <select class="filter-select" id="sortFilter">
+                            <option value="date-desc">Date (Newest)</option>
+                            <option value="date-asc">Date (Oldest)</option>
+                            <option value="amount-desc">Amount (Highest)</option>
+                            <option value="amount-asc">Amount (Lowest)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="history-table-container">
+                    <table id="riwayatTable">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Kode Barang</th>
+                                <th>Nama Barang</th>
+                                <th>Jumlah</th>
+                                <th>Total (Rp)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riwayatTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="riwayatChart"></canvas>
+                </div>
             </div>
-            <canvas id="riwayatChart" width="400" height="200"></canvas>
         `,
-        width: '800px',
+        width: '90%',
+        padding: '0',
+        showConfirmButton: true,
+        confirmButtonText: '<i class="fas fa-file-excel"></i> Export Excel',
+        showCancelButton: true,
+        cancelButtonText: 'Tutup',
         didRender: () => {
             const tbody = document.getElementById('riwayatTableBody');
-            const ctx = document.getElementById('riwayatChart').getContext('2d');
             
-            // Proses data untuk tabel
+            // Populate table
             riwayat.forEach(item => {
                 const row = tbody.insertRow();
-                row.insertCell(0).textContent = item.tanggal;
+                const date = new Date(item.tanggal);
+                
+                row.insertCell(0).textContent = date.toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
                 row.insertCell(1).textContent = item.kodeBarang;
                 row.insertCell(2).textContent = item.namaBarang;
-                row.insertCell(3).textContent = item.jumlah;
-                row.insertCell(4).textContent = item.total;
+                row.insertCell(3).textContent = item.jumlah.toLocaleString();
+                row.insertCell(4).textContent = item.total.toLocaleString();
             });
 
-            // Buat grafik
-            const kategoriBulan = {};
-            riwayat.forEach(item => {
-                const bulan = new Date(item.tanggal).toLocaleString('default', { month: 'long' });
-                kategoriBulan[bulan] = (kategoriBulan[bulan] || 0) + item.total;
-            });
+            // Create chart
+            window.riwayatChartInstance = createRiwayatChart(riwayat);
 
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(kategoriBulan),
-                    datasets: [{
-                        label: 'Total Penerimaan per Bulan',
-                        data: Object.values(kategoriBulan),
-                        backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                    }]
-                }
-            });
-        },
-        showConfirmButton: true,
-        confirmButtonText: 'Export Excel',
-        showCancelButton: true
+            // Add filter functionality
+            document.getElementById('dateFilter').addEventListener('change', () => filterData(riwayat));
+            document.getElementById('sortFilter').addEventListener('change', () => filterData(riwayat));
+        }
     }).then((result) => {
         if (result.isConfirmed) {
             exportToExcel(riwayat, 'Riwayat_Penerimaan_Barang');
@@ -614,14 +1486,152 @@
     });
 }
 
+function createRiwayatChart(data) {
+    const ctx = document.getElementById('riwayatChart').getContext('2d');
+
+    // Create monthly data
+    const monthlyData = data.reduce((acc, item) => {
+        const month = new Date(item.tanggal).toLocaleString('default', { month: 'long' });
+        acc[month] = (acc[month] || 0) + item.total;
+        return acc;
+    }, {});
+
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(monthlyData),
+            datasets: [{
+                label: 'Total Penerimaan per Bulan',
+                data: Object.values(monthlyData),
+                backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                borderColor: 'rgba(41, 128, 185, 1)',
+                borderWidth: 1,
+                borderRadius: 8,
+                hoverBackgroundColor: 'rgba(41, 128, 185, 0.9)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rp ' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function filterData(originalData) {
+    const dateFilter = document.getElementById('dateFilter').value;
+    const sortFilter = document.getElementById('sortFilter').value;
+    const tbody = document.getElementById('riwayatTableBody');
+
+    // Apply date filter
+    let filteredData = originalData.filter(item => {
+        const itemDate = new Date(item.tanggal);
+        const today = new Date();
+        
+        switch(dateFilter) {
+            case 'today':
+                return itemDate.toDateString() === today.toDateString();
+            case 'week':
+                const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+                const endOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 6);
+                return itemDate >= startOfWeek && itemDate <= endOfWeek;
+            case 'month':
+                return itemDate.getMonth() === today.getMonth() && 
+                       itemDate.getFullYear() === today.getFullYear();
+            default:
+                return true;
+        }
+    });
+
+    // Apply sorting
+    switch(sortFilter) {
+        case 'date-desc':
+            filteredData.sort((a, b) => new Date( b.tanggal) - new Date(a.tanggal));
+            break;
+        case 'date-asc':
+            filteredData.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+            break;
+        case 'amount-desc':
+            filteredData.sort((a, b) => b.total - a.total);
+            break;
+        case 'amount-asc':
+            filteredData.sort((a, b) => a.total - b.total);
+            break;
+    }
+
+    // Clear existing table rows
+    tbody.innerHTML = '';
+
+    // Populate table with filtered and sorted data
+    filteredData.forEach(item => {
+        const row = tbody.insertRow();
+        const date = new Date(item.tanggal);
+        
+        row.insertCell(0).textContent = date.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        row.insertCell(1).textContent = item.kodeBarang;
+        row.insertCell(2).textContent = item.namaBarang;
+        row.insertCell(3).textContent = item.jumlah.toLocaleString();
+        row.insertCell(4).textContent = item.total.toLocaleString();
+    });
+
+    // Update summary statistics
+    const totalPenerimaan = filteredData.reduce((sum, item) => sum + item.total, 0);
+    const totalBarang = filteredData.reduce((sum, item) => sum + item.jumlah, 0);
+    const uniqueBarang = new Set(filteredData.map(item => item.kodeBarang)).size;
+
+    document.querySelector('.summary-card:nth-child(1) .summary-value').textContent = 
+        `Rp ${totalPenerimaan.toLocaleString()}`;
+    document.querySelector('.summary-card:nth-child(2) .summary-value').textContent = 
+        totalBarang.toLocaleString();
+    document.querySelector('.summary-card:nth-child(3) .summary-value').textContent = 
+        uniqueBarang;
+
+    // Destroy existing chart and create new one
+    if (window.riwayatChartInstance) {
+        window.riwayatChartInstance.destroy();
+    }
+    window.riwayatChartInstance = createRiwayatChart(filteredData);
+}
+
+function exportToExcel(data, filename) {
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Riwayat Penerimaan');
+    XLSX.writeFile(workbook, `${filename}.xlsx`);
+}
 function tampilkanStok() {
     const barang = JSON.parse(localStorage.getItem('barang')) || [];
     
     Swal.fire({
         title: 'Stok Barang',
         html: `
-            <div style="max-height: 400px; overflow-y: auto;">
-                <table id="stokTable" class="table">
+            <div class="stock-table-container">
+                <table id="stokTable">
                     <thead>
                         <tr>
                             <th>Kode</th>
@@ -629,14 +1639,17 @@ function tampilkanStok() {
                             <th>Kategori</th>
                             <th>Stok</th>
                             <th>Harga Beli</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="stokTableBody"></tbody>
                 </table>
             </div>
-            <canvas id="stokChart" width="400" height="200"></canvas>
+            <div class="chart-container">
+                <canvas id="stokChart"></canvas>
+                <div class="chart-js-legend" id="chartLegend"></div>
+            </div>
         `,
-        width: '800px',
         didRender: () => {
             const tbody = document.getElementById('stokTableBody');
             const ctx = document.getElementById('stokChart').getContext('2d');
@@ -647,31 +1660,79 @@ function tampilkanStok() {
                 row.insertCell(0).textContent = item.kode;
                 row.insertCell(1).textContent = item.nama;
                 row.insertCell(2).textContent = item.kategori;
-                row.insertCell(3).textContent = item.stok;
-                row.insertCell(4).textContent = item.hargaBeli;
+                
+                const stokCell = row.insertCell(3);
+                stokCell.textContent = item.stok.toLocaleString();
+                stokCell.style.textAlign = 'right';
+                
+                const hargaCell = row.insertCell(4);
+                hargaCell.textContent = `Rp ${item.hargaBeli.toLocaleString()}`;
+                hargaCell.style.textAlign = 'right';
+                
+                // Add stock level indicator
+                const statusCell = row.insertCell(5);
+                const stockLevel = item.stok <= 10 ? 'low' : item.stok <= 50 ? 'medium' : 'high';
+                const statusText = stockLevel === 'low' ? 'Rendah' : stockLevel === 'medium' ? 'Sedang' : 'Tinggi';
+                statusCell.innerHTML = `<span class="stock-level stock-level-${stockLevel}">${statusText}</span>`;
             });
 
-            // Buat grafik stok
+            // Create enhanced chart
             const stokData = barang.filter(b => b.stok > 0);
-            new Chart(ctx, {
-                type: 'pie',
+            const backgroundColors = [
+                '#3498db', '#2ecc71', '#f1c40f', '#e74c3c', '#9b59b6',
+                '#1abc9c', '#d35400', '#34495e', '#16a085', '#c0392b'
+            ];
+
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
                 data: {
                     labels: stokData.map(b => b.nama),
                     datasets: [{
                         data: stokData.map(b => b.stok),
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',
-                            'rgba(54, 162, 235, 0.6)',
-                            'rgba(255, 206, 86, 0.6)',
-                            'rgba(75, 192, 192, 0.6)'
-                        ]
+                        backgroundColor: backgroundColors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
                 }
             });
+
+            // Create custom legend
+            const legendContainer = document.getElementById('chartLegend');
+            stokData.forEach((item, index) => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                legendItem.innerHTML = `
+                    <span class="legend-color" style="background: ${backgroundColors[index]}"></span>
+                    <span>${item.nama} (${item.stok})</span>
+                `;
+                legendContainer.appendChild(legendItem);
+            });
         },
+        width: '80%',
         showConfirmButton: true,
         confirmButtonText: 'Export Excel',
-        showCancelButton: true
+        showCancelButton: true,
+        cancelButtonText: 'Tutup'
     }).then((result) => {
         if (result.isConfirmed) {
             exportToExcel(barang, 'Stok_Barang');
