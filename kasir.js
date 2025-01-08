@@ -934,7 +934,6 @@ function prosesPembayaran(metode) {
 
     if (metode === 'cash') {
         const nominalElement = document.getElementById('nominalCash');
-        // Parse nominal dari string format rupiah ke number
         const nominal = parseRupiahToNumber(nominalElement.value);
         const kembalianElement = document.getElementById('kembalian');
         const kembalian = parseRupiahToNumber(kembalianElement.textContent);
@@ -966,12 +965,6 @@ function prosesPembayaran(metode) {
         nominalElement.value = '';
         kembalianElement.textContent = '0';
         
-        // Bersihkan teks nominal jika ada
-        const teksNominalDiv = document.getElementById('teksNominal');
-        if (teksNominalDiv) {
-            teksNominalDiv.innerHTML = '';
-        }
-
         // Tutup popup pembayaran
         const popup = document.getElementById('popup');
         if (popup) {
@@ -979,7 +972,9 @@ function prosesPembayaran(metode) {
         }
 
         resetKeranjang();
-        cetakStruk(idTransaksi);
+        
+        // Panggil fungsi cetakStruk untuk menampilkan struk
+        cetakStruk(idTransaksi); // Pastikan struk ditampilkan
         
         // Tampilkan notifikasi sukses
         Swal.fire({
@@ -987,6 +982,8 @@ function prosesPembayaran(metode) {
             title: 'Pembayaran Berhasil',
             text: `Kembalian: ${formatRupiah(kembalian)}`,
             confirmButtonColor: '#4caf50',
+        }).then(() => {
+            cetakStruk(idTransaksi); // Tampilkan struk setelah notifikasi
         });
     } else if (metode === 'qris') {
         // Validasi checkbox persetujuan QRIS
@@ -1011,7 +1008,9 @@ function prosesPembayaran(metode) {
         }
 
         resetKeranjang();
-        cetakStruk(idTransaksi);
+        
+        // Panggil fungsi cetakStruk untuk menampilkan struk
+        cetakStruk(idTransaksi); // Pastikan struk ditampilkan
         
         // Tampilkan notifikasi sukses
         Swal.fire({
@@ -1019,10 +1018,11 @@ function prosesPembayaran(metode) {
             title: 'Pembayaran QRIS Berhasil',
             text: `Total Pembayaran: ${formatRupiah(total)}`,
             confirmButtonColor: '#4caf50',
+        }).then(() => {
+            cetakStruk(idTransaksi); // Tampilkan struk setelah notifikasi
         });
     }
 }
-
 // Pastikan fungsi formatRupiah mendukung kembalian dengan atau tanpa prefix
 function formatRupiah(angka, prefix = 'Rp. ', showPrefix = true) {
     const numberString = angka.toString().replace(/[^,\d]/g, '');
@@ -2812,34 +2812,7 @@ function scanUlang() {
     startScan();
 }
 
-function sinkronTransaksi() {
-    const transaksiData = JSON.parse(localStorage.getItem('transaksi'));
 
-    if (!transaksiData || transaksiData.length === 0) {
-        Swal.fire('Info', 'Tidak ada transaksi untuk disinkronkan', 'info');
-        return;
-    }
-
-    fetch('sync_transaksi.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(transaksiData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire('Sukses', 'Transaksi berhasil disinkronkan', 'success');
-        } else {
-            Swal.fire('Error', data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire('Error', 'Terjadi kesalahan saat menghubungi server', 'error');
-    });
-}
 
 
 // Function jika scan selesai
