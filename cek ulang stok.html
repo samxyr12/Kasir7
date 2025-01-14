@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Cek Ulang Stok</title>
+    <style>
+/* Modern CSS Reset */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Properties */
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --danger-color: #dc2626;
+    --background-color: #f8fafc;
+    --surface-color: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+}
+
+/* Modern Font Setup */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 1.25rem;
+}
+
+/* Enhanced Container */
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: var(--surface-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Modern Header Section */
+.header-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 0;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border-color);
+    position: relative;
+}
+
+.header-section::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(to right, var(--primary-color), transparent);
+}
+
+.header-section h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    background: linear-gradient(120deg, var(--primary-color), #4f46e5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.025em;
+}
+
+/* Enhanced Back Button */
+.icon-kembali {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.icon-kembali::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.icon-kembali:hover::before {
+    width: 200%;
+    height: 200%;
+}
+
+/* Modern History Button */
+.btn-riwayat {
+    text-decoration: none;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn-riwayat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+    z-index: -1;
+}
+
+.btn-riwayat:hover::before {
+    left: 100%;
+}
+
+/* Enhanced Table Styles */
+#tabelStok {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.5rem 0;
+    background: var(--surface-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+#tabelStok thead {
+    background: linear-gradient(to right, #1e293b, #334155);
+    color: white;
+}
+
+#tabelStok th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+#tabelStok td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+#tabelStok tbody tr {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#tabelStok tbody tr:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(to right, #f8fafc, transparent);
+}
+
+/* Modern Input Styling */
+#tabelStok input[type="number"] {
+    width: 120px;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+#tabelStok input[type="number"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    background: white;
+}
+
+/* Enhanced Button Styles */
+button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+#cekStokSelesai {
+    background: linear-gradient(to right, var(--success-color), #059669);
+    color: white;
+    margin: 1.5rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+#cekStokSelesai:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+#adjustButton {
+    background: linear-gradient(to right, var(--warning-color), #b45309);
+    color: white;
+    margin-right: 0.75rem;
+}
+
+#downloadPdf {
+    background: linear-gradient(to right, var(--danger-color), #991b1b);
+    color: white;
+}
+
+/* Modern Results Section */
+#hasilSelisih {
+    background: linear-gradient(to right, #f8fafc, #f1f5f9);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    margin-top: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+
+#hasilSelisih p {
+    margin: 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Enhanced Difference Highlighting */
+.positive {
+    color: var(--success-color);
+    font-weight: 600;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.positive::before {
+    content: '↑';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: bounce 1s infinite;
+}
+
+.negative {
+    color: var(--danger-color);
+    font-weight: 600;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.negative::before {
+    content: '↓';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: bounce 1s infinite;
+}
+
+/* Advanced Animations */
+@keyframes bounce {
+    0%, 100% { transform: translateY(-50%); }
+    50% { transform: translateY(-30%); }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modern Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    background: rgba(17, 24, 39, 0.95);
+    color: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Loading State Enhancement */
+.loading {
+    position: relative;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Responsive Enhancement */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .header-section {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    #tabelStok {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #tabelStok th,
+    #tabelStok td {
+        white-space: nowrap;
+        padding: 0.75rem;
+    }
+
+    button {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    #hasilSelisih {
+        padding: 1rem;
+    }
+    
+    .toast {
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+        text-align: center;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #0f172a;
+        --surface-color: #1e293b;
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --border-color: #334155;
+    }
+
+    #tabelStok input[type="number"] {
+        background: #334155;
+        color: var(--text-primary);
+    }
+
+    #tabelStok tbody tr:hover {
+        background: linear-gradient(to right, #334155, transparent);
+    }
+
+    .header-section::after {
+        background: linear-gradient(to right, var(--primary-color), #334155);
+    }
+}
+
+/* Print Optimization */
+@media print {
+    .container {
+        box-shadow: none;
+        padding: 0;
+    }
+
+    #tabelStok {
+        box-shadow: none;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <a href="barang.html" class="icon-kembali">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1>Cek Ulang Stok</h1>
+            <a href="adjust.html" class="btn-riwayat">
+                Lihat Riwayat Adjustment
+            </a>
+        </div>
+        
+  <table id="tabelStok">
+    <thead>
+        <tr>
+            <th>Kode Barang</th>
+            <th>Nama Barang</th>
+            <th>Stok Sistem</th>
+            <th>Stok Fisik</th>
+            <th>Selisih</th>
+            <th>Total Harga Selisih</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Data will be populated here by JavaScript -->
+    </tbody>
+</table>
+
+<button id="cekStokSelesai">Selesai Cek Stok</button>
+<div id="hasilSelisih" style="display:none;">
+    <p>Total Selisih Positif: <span id="totalPlus"></span></p>
+    <p>Total Selisih Negatif: <span id="totalMinus"></span></p>
+    <button id="adjustButton" style="display:none;">Adjust Stok</button>
+    <button id="downloadPdf" style="display:none;">Download PDF</button>
+</div>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">       
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    loadBarang(); // Load barang when the document is ready
+});
+
+function loadBarang() {
+    let barang = JSON.parse(localStorage.getItem('barang')) || [];
+    const tabelStok = document.getElementById('tabelStok').getElementsByTagName('tbody')[0];
+
+    tabelStok.innerHTML = '';
+
+    barang.forEach((item, index) => {
+        const row = tabelStok.insertRow();
+
+        row.insertCell(0).innerText = item.kode; // Item code
+        row.insertCell(1).innerText = item.nama; // Item name
+        row.insertCell(2).innerText = '#'; // Displaying system stock as '#'
+
+        const stokFisikInput = document.createElement('input');
+        stokFisikInput.type = 'number';
+        stokFisikInput.min = 0;
+        stokFisikInput.value = '';
+        stokFisikInput.dataset.index = index;
+        row.insertCell(3).appendChild(stokFisikInput); // Physical stock input
+
+        row.insertCell(4).innerText = '-'; // Placeholder for difference
+        row.insertCell(5).innerText = '-'; // Placeholder for total price difference
+    });
+}
+
+document.getElementById('cekStokSelesai').addEventListener('click', function() {
+    // Get all rows from the stock table
+    let barang = JSON.parse(localStorage.getItem('barang')) || [];
+    let totalPlus = 0;
+    let totalMinus = 0;
+    let hasSelisih = false;
+
+    const tbody = document.getElementById('tabelStok').getElementsByTagName('tbody')[0];
+    const rows = tbody.getElementsByTagName('tr');
+
+    // Loop through the rows to calculate differences and totals
+    for (let i = 0; i < rows.length; i++) {
+        const stokSistem = parseInt(barang[i].stok); // Get the system stock from the barang
+        const stokFisik = parseInt(rows[i].cells[3].getElementsByTagName('input')[0].value) || 0; // Get physical stock input
+        const hargaJual = barang[i].hargaJual;
+
+        const selisih = stokFisik - stokSistem; // Calculate difference
+        const totalSelisihHarga = Math.abs(selisih * hargaJual); // Calculate total price difference
+
+        rows[i].cells[2].innerText = stokSistem; // Display system stock
+        rows[i].cells[4].innerText = selisih; // Display difference
+        if (selisih !== 0) {
+            hasSelisih = true;
+            rows[i].cells[4].className = selisih > 0 ? 'positive' : 'negative'; // Assign class based on difference
+        }
+        
+        rows[i].cells[5].innerText = formatRupiah(totalSelisihHarga); // Display total price difference
+
+        // Update totals for positive and negative differences
+        if (selisih > 0) {
+            totalPlus += totalSelisihHarga;
+        } else if (selisih < 0) {
+            totalMinus += totalSelisihHarga;
+        }
+    }
+
+    // Display results
+    document.getElementById('hasilSelisih').style.display = 'block'; // Show results section
+    document.getElementById('totalPlus').innerText = formatRupiah(totalPlus);
+    document.getElementById('totalMinus').innerText = formatRupiah(totalMinus);
+    
+    // Show adjust button only if there are differences
+    document.getElementById('adjustButton').style.display = hasSelisih ? 'inline-block' : 'none';
+    document.getElementById('downloadPdf').style.display = 'inline-block';
+});
+
+document.getElementById('adjustButton').addEventListener('click', function() {
+    const confirmation = confirm('Apakah Anda yakin ingin melakukan adjustment stok?');
+    if (!confirmation) return;
+
+    const rows = document.getElementById('tabelStok').getElementsByTagName('tbody')[0].rows;
+    let barang = JSON.parse(localStorage.getItem('barang')) || [];
+    const adjustmentItems = [];
+    let totalPlus = 0;
+    let totalMinus = 0;
+    let totalItem = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+        const stokSistem = parseInt(rows[i].cells[2].innerText); // Get system stock
+        const stokFisik = parseInt(rows[i].cells[3].getElementsByTagName('input')[0].value) || 0; // Get physical stock input
+        const selisih = stokFisik - stokSistem; // Calculate difference
+        const nominal = Math.abs(selisih * barang[i].hargaJual); // Calculate nominal value
+
+        if (selisih !== 0) {
+            totalItem++;
+            if (selisih > 0) totalPlus += nominal;
+            else totalMinus += nominal;
+
+            barang[i].stok = stokFisik; // Update stock in barang
+
+            adjustmentItems.push({
+                kode: barang[i].kode,
+                nama: barang[i].nama,
+                stokAwal: stokSistem,
+                stokAkhir: stokFisik,
+                selisih: selisih,
+                nominal: nominal
+            });
+        }
+    }
+
+    // Save adjustment history
+    const now = new Date();
+    const adjustment = {
+        tanggal: now.toLocaleDateString(),
+        jam: now.toLocaleTimeString(),
+        totalItem: totalItem,
+        totalPlus: totalPlus,
+        totalMinus: totalMinus,
+        items: adjustmentItems
+    };
+
+    let adjustmentHistory = JSON.parse(localStorage.getItem('adjustmentHistory')) || [];
+    adjustmentHistory.push(adjustment);
+
+    localStorage.setItem('adjustmentHistory', JSON.stringify(adjustmentHistory));
+    localStorage.setItem('barang', JSON.stringify(barang));
+
+    alert('Adjustment stok berhasil dilakukan!');
+    location.reload(); // Reload the page
+});
+
+// Function to format numbers as currency
+function formatRupiah(angka) {
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+    }).format(angka);
+}
+
+
+document.getElementById('downloadPdf').addEventListener('click', function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Add title
+    doc.setFontSize(18);
+    doc.text('Laporan Cek Stok', 14, 16);
+
+    // Add date and time
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString();
+    doc.setFontSize(12);
+    doc.text(`Tanggal: ${formattedDate}`, 14, 24);
+    doc.text(`Waktu: ${formattedTime}`, 14, 30);
+
+    // Add total selisih
+    const totalPlus = document.getElementById('totalPlus').innerText;
+    const totalMinus = document.getElementById('totalMinus').innerText;
+    doc.text(`Total Selisih Positif: ${totalPlus}`, 14, 38);
+    doc.text(`Total Selisih Negatif: ${totalMinus}`, 14, 44);
+
+    // Prepare table data
+    const rows = [];
+    const tabelStok = document.getElementById('tabelStok').getElementsByTagName('tbody')[0].rows;
+    for (let i = 0; i < tabelStok.length; i++) {
+        const kodeBarang = tabelStok[i].cells[0].innerText;
+        const namaBarang = tabelStok[i].cells[1].innerText;
+        const stokSistem = tabelStok[i].cells[2].innerText;
+        const stokFisik = tabelStok[i].cells[3].getElementsByTagName('input')[0].value || '0';
+        const selisih = tabelStok[i].cells[4].innerText;
+        const totalHargaSelisih = tabelStok[i].cells[5].innerText;
+
+        rows.push([kodeBarang, namaBarang, stokSistem, stokFisik, selisih, totalHargaSelisih]);
+    }
+
+    // Add table to PDF
+    doc.autoTable({
+        head: [['Kode Barang', 'Nama Barang', 'Stok Sistem', 'Stok Fisik', 'Selisih', 'Total Harga Selisih']],
+        body: rows,
+        startY: 50, // Position after the initial text
+        theme: 'grid',
+    });
+
+    // Save PDF
+    doc.save(`Laporan_Cek_Stok_${formattedDate}.pdf`);
+});
+
+</script>
+</body>
+</html>
+        
