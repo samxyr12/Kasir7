@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Riwayat Adjustment Stok</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --text-color: #2c3e50;
+            --background-color: #f0f4f8;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-section {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-kembali {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .icon-kembali:hover {
+            color: var(--primary-color);
+        }
+
+        .controls-section {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 100px;
+            max-width: 200px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            padding-left: 40px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .pdf-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .excel-btn {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .export-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+        }
+
+        .history-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s;
+        }
+
+        .history-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .history-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+
+        .adjustment-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+        }
+
+        .adjustment-table th,
+        .adjustment-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .adjustment-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .adjustment-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .positive {
+            color: var(--success-color);
+            font-weight: 500;
+        }
+
+        .negative {
+            color: var(--danger-color);
+            font-weight: 500;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        @media (max-width: 768px) {
+            .controls-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .export-buttons {
+                justify-content: stretch;
+            }
+
+            .export-btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <div class="header-left">
+                <a href="barang.html" class="icon-kembali">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Kembali</span>
+                </a>
+                <h1>Riwayat Adjustment Stok</h1>
+            </div>
+            <div class="current-time" id="currentTime"></div>
+        </div>
+
+        <div class="controls-section">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Cari berdasarkan kode atau nama barang...">
+            </div>
+         <div class="filter-section">
+    <select class="filter-select" id="dateFilter">
+        <option value="all">Semua Tanggal</option>
+        <option value="today">Hari Ini</option>
+        <option value="week">Minggu Ini</option>
+        <option value="month">Bulan Ini</option>
+        <option value="range">Rentang Tanggal</option>
+    </select>
+    <input type="date" id="startDate" class="filter-select" placeholder="Tanggal Mulai" style="display:none;">
+    <input type="date" id="endDate" class="filter-select" placeholder="Tanggal Akhir" style="display:none;">
+    <select class="filter-select" id="typeFilter">
+        <option value="all">Semua Tipe</option>
+        <option value="positive">Selisih Plus</option>
+        <option value="negative">Selisih Minus</option>
+    </select>
+</div>
+            <div class="export-buttons">
+                <button onclick="exportToPDF()" class="export-btn pdf-btn">
+                    <i class="fas fa-file-pdf"></i>
+                    Download PDF
+                </button>
+                <button onclick="exportToExcel()" class="export-btn excel-btn">
+                    <i class="fas fa-file-excel"></i>
+                    Download Excel
+                </button>
+            </div>
+        </div>
+
+        <div id="adjustmentHistory"></div>
+        
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        
+       document.getElementById('dateFilter').addEventListener('change', function() {
+    const selectedValue = this.value;
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    if (selectedValue === 'range') {
+        startDateInput.style.display = 'block';
+        endDateInput.style.display = 'block';
+    } else {
+        startDateInput.style.display = 'none';
+        endDateInput.style.display = 'none';
+    }
+}); 
+        
+        
+        // Update current time
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        setInterval(updateCurrentTime, 1000);
+        updateCurrentTime();
+
+        // Global variables for pagination
+        const ITEMS_PER_PAGE = 5;
+        let currentPage = 1;
+        let filteredHistory = [];
+
+ function loadAdjustmentHistory() {
+    try {
+        // Get filters
+        const searchTerm = document.getElementById('searchInput')?.value.toLowerCase().trim() || '';
+        const dateFilter = document.getElementById('dateFilter')?.value || 'all';
+        const typeFilter = document.getElementById('typeFilter')?.value || 'all';
+
+        // Get history from localStorage with error handling
+        let adjustmentHistory = [];
+        try {
+            const storedHistory = localStorage.getItem('adjustmentHistory');
+            adjustmentHistory = storedHistory ? JSON.parse(storedHistory) : [];
+            
+            if (!Array.isArray(adjustmentHistory)) {
+                console.error('Invalid history data structure');
+                adjustmentHistory = [];
+            }
+        } catch (error) {
+            console.error('Error loading history from localStorage:', error);
+            adjustmentHistory = [];
+        }
+
+        // Date range calculations
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const weekAgo = new Date(today);
+        weekAgo.setDate(today.getDate() - 7);
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        // Get start and end dates for range filter
+        const startDate = new Date(document.getElementById('startDate')?.value);
+        const endDate = new Date(document.getElementById('endDate')?.value);
+
+        // Filter history
+        filteredHistory = adjustmentHistory.filter(adjustment => {
+            try {
+                if (!adjustment || !adjustment.items) return false;
+
+                // Search filter
+                let matchesSearch = true;
+                if (searchTerm) {
+                    matchesSearch = adjustment.items.some(item => {
+                        const kode = String(item.kode || '').toLowerCase();
+                        const nama = String(item.nama || '').toLowerCase();
+                        return kode.includes(searchTerm) || nama.includes(searchTerm);
+                    });
+                }
+
+                // Date filter
+                let matchesDate = true;
+                if (dateFilter !== 'all' && adjustment.tanggal) {
+                    const [day, month, year] = adjustment.tanggal.split('/');
+                    const adjustmentDate = new Date(year, month - 1, day); // month is 0-based in JavaScript
+                    
+                    switch (dateFilter) {
+                        case 'today':
+                            matchesDate = adjustmentDate.getDate() === today.getDate() &&
+                                          adjustmentDate.getMonth() === today.getMonth() &&
+                                          adjustmentDate.getFullYear() === today.getFullYear();
+                            break;
+                        case 'week':
+                            matchesDate = adjustmentDate >= weekAgo && adjustmentDate <= today;
+                            break;
+                        case 'month':
+                            matchesDate = adjustmentDate.getMonth() === today.getMonth() &&
+                                          adjustmentDate.getFullYear() === today.getFullYear();
+                            break;
+                        case 'range':
+                            if (!isNaN(startDate) && !isNaN(endDate)) {
+                                matchesDate = adjustmentDate >= startDate && adjustmentDate <= endDate;
+                            }
+                            break;
+                    }
+                }
+
+                // Type filter
+                let matchesType = true;
+                if (typeFilter !== 'all') {
+                    const hasPositive = adjustment.items.some(item => item.selisih > 0);
+                    const hasNegative = adjustment.items.some(item => item.selisih < 0);
+                    
+                    switch (typeFilter) {
+                        case 'positive':
+                            matchesType = hasPositive;
+                            break;
+                        case 'negative':
+                            matchesType = hasNegative;
+                            break;
+                    }
+                }
+
+                return matchesSearch && matchesDate && matchesType;
+            } catch (error) {
+                console.error('Error processing adjustment:', error);
+                return false;
+            }
+        });
+
+        // Sort by date and time descending
+        filteredHistory.sort((a, b) => {
+            const [dayA, monthA, yearA] = a.tanggal.split('/');
+            const [dayB, monthB, yearB] = b.tanggal.split('/');
+            const dateA = new Date(yearA, monthA - 1, dayA, ...a.jam.split(':'));
+            const dateB = new Date(yearB, monthB - 1, dayB, ...b.jam.split(':'));
+            return dateB - dateA;
+        });
+
+        // Update display and pagination
+        displayHistory();
+        updatePagination();
+
+    } catch (error) {
+        console.error('Error in loadAdjustmentHistory:', error);
+        const historyContainer = document.getElementById('adjustmentHistory');
+        if (historyContainer) {
+            historyContainer.innerHTML = `
+                <div class="no-data">
+                    <h3>Terjadi kesalahan</h3>
+                    <p>Mohon muat ulang halaman atau hubungi administrator</p>
+                </div>
+            `;
+        }
+        
+        const paginationElement = document.getElementById('pagination');
+        if (paginationElement) {
+            paginationElement.style.display = 'none';
+        }
+    }
+}
+        // Display history with pagination
+        function displayHistory() {
+            const historyContainer = document.getElementById('adjustmentHistory');
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageItems = filteredHistory.slice(start, end);
+
+            if (pageItems.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="no-data">
+                        <h3>Tidak ada data yang sesuai</h3>
+                        <p>Coba ubah filter atau kata kunci pencarian</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyContainer.innerHTML = pageItems.map((adjustment, index) => `
+                <div class="history-card">
+                    <div class="history-header">
+                        <h3>Adjustment #${filteredHistory.length - (start + index)}</h3>
+                        <div>${adjustment.tanggal} ${adjustment.jam}</div>
+                    </div>
+                    
+                    <div class="history-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Total Item</span>
+                            <span class="detail-value">${adjustment.totalItem}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Selisih Plus</span>
+                            <span class="detail-value positive">${formatRupiah(adjustment.totalPlus)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Selisih Minus</span>
+                            <span class="detail-value negative">${formatRupiah(adjustment.totalMinus)}</span>
+                        </div>
+                    </div>
+                    
+                    <table class="adjustment-table">
+                        <thead>
+                            <tr>
+                                <th>Kode Barang</th>
+                                <th>Nama Barang</th>
+                                <th>Stok Awal</th>
+                                <th>Stok Akhir</th>
+                                <th>Selisih</th>
+                                <th>Nominal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${adjustment.items.map(item => `
+                                <tr>
+                                    <td>${item.kode}</td>
+                                    <td>${item.nama}</td>
+                                    <td>${item.stokAwal}</td>
+                                    <td>${item.stokAkhir}</td>
+                                    <td class="${item.selisih > 0 ? 'positive' : 'negative'}">${item.selisih}</td>
+                                    <td>${formatRupiah(item.nominal)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `).join('');
+        }
+
+        // Update pagination controls
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
+            const paginationElement = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                paginationElement.style.display = 'none';
+                return;
+            }
+
+            paginationElement.style.display = 'flex';
+            paginationElement.innerHTML = `
+                <button onclick="changePage(1)" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <button disabled>Halaman ${currentPage} dari ${totalPages}</button>
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button onclick="changePage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            `;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            displayHistory();
+            updatePagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Enhanced export functions
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            if (filteredHistory.length === 0) {
+                alert('Tidak ada data untuk di-export');
+                return;
+            }
+
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+            const margin = 15;
+
+            // Define colors
+            const primaryColor = [52, 152, 219];
+            const textColor = [44, 62, 80];
+            const lightGray = [236, 240, 241];
+
+            // Helper function for drawing lines
+            function drawLine(x1, y1, x2, y2, color, width) {
+                doc.setDrawColor(color[0], color[1], color[2]);
+                doc.setLineWidth(width);
+                doc.line(x1, y1, x2, y2);
+            }
+
+            // Add filters information
+            const dateFilter = document.getElementById('dateFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const searchTerm = document.getElementById('searchInput').value;
+
+            filteredHistory.forEach((adjustment, index) => {
+                if (index > 0) {
+                    doc.addPage();
+                }
+
+                let yPos = margin;
+
+                // Header
+                doc.setFillColor(255, 255, 255);
+                doc.rect(0, 0, pageWidth, 50, 'F');
+
+                // Title
+                doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+                doc.setFontSize(24);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Riwayat Adjustment Stok', margin, 30);
+
+                // Filter information
+                doc.setFontSize(10);
+                doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+                yPos = 45;
+                if (searchTerm) {
+                    doc.text(`Filter Pencarian: ${searchTerm}`, margin, yPos);
+                    yPos += 10;
+                }
+                if (dateFilter !== 'all') {
+                    doc.text(`Filter Tanggal: ${dateFilter}`, margin, yPos);
+                    yPos += 10;
+                }
+                if (typeFilter !== 'all') {
+                    doc.text(`Filter Tipe: ${typeFilter}`, margin, yPos);
+                    yPos += 10;
+                }
+
+                yPos += 10;
+
+                // Adjustment info
+                doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Adjustment #${filteredHistory.length - index}`, margin, yPos);
+                yPos += 8;
+
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Tanggal: ${adjustment.tanggal} ${adjustment.jam}`, margin, yPos);
+                yPos += 20;
+
+                // Summary box
+                doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
+                doc.roundedRect(margin, yPos, pageWidth - 2 * margin, 40, 2, 2, 'F');
+                
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Ringkasan:', margin + 5, yPos + 15);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Total Item: ${adjustment.totalItem}`, margin + 5, yPos + 25);
+                doc.text(`Total Selisih Plus: ${formatRupiah(adjustment.totalPlus)}`, margin + 5, yPos + 35);
+                doc.text(`Total Selisih Minus: ${formatRupiah(adjustment.totalMinus)}`, pageWidth / 2, yPos + 35);
+                yPos += 50;
+
+                // Table with improved styling
+                doc.autoTable({
+                    startY: yPos,
+                    head: [['Kode', 'Nama', 'Stok Awal', 'Stok Akhir', 'Selisih', 'Nominal']],
+                    body: adjustment.items.map(item => [
+                        item.kode,
+                        item.nama,
+                        item.stokAwal,
+                        item.stokAkhir,
+                        { 
+                            content: item.selisih,
+                            styles: { 
+                                textColor: item.selisih > 0 ? [39, 174, 96] : [231, 76, 60],
+                                fontStyle: 'bold'
+                            }
+                        },
+                        formatRupiah(item.nominal)
+                    ]),
+                    theme: 'striped',
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 4,
+                        overflow: 'linebreak',
+                        cellWidth: 'wrap'
+                    },
+                    headStyles: {
+                        fillColor: primaryColor,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 25 },
+                        1: { cellWidth: 'auto' },
+                        2: { cellWidth: 25, halign: 'right' },
+                        3: { cellWidth: 25, halign: 'right' },
+                        4: { cellWidth: 25, halign: 'right' },
+                        5: { cellWidth: 35, halign: 'right' },
+                    },
+                    alternateRowStyles: {
+                        fillColor: [248, 249, 250],
+                    },
+                    margin: { left: margin, right: margin },
+                    didDrawPage: function (data) {
+                        // Footer
+                        let footerYPos = pageHeight - 20;
+                        drawLine(margin, footerYPos, pageWidth - margin, footerYPos, lightGray, 0.5);
+                        doc.setFontSize(8);
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, margin, pageHeight - 10);
+                        doc.text(`Halaman ${data.pageNumber}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+                    }
+                });
+            });
+
+            doc.save(`riwayat-adjustment-stok-${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+
+        function exportToExcel() {
+            if (filteredHistory.length === 0) {
+                alert('Tidak ada data untuk di-export');
+                return;
+            }
+
+            const workbook = XLSX.utils.book_new();
+            
+            // Add filter information sheet
+            const filterInfo = [
+                ['Informasi Filter'],
+                ['Tanggal Export', new Date().toLocaleString('id-ID')],
+                ['Filter Pencarian', document.getElementById('searchInput').value || 'Semua'],
+                ['Filter Tanggal', document.getElementById('dateFilter').options[document.getElementById('dateFilter').selectedIndex].text],
+                ['Filter Tipe', document.getElementById('typeFilter').options[document.getElementById('typeFilter').selectedIndex].text],
+                ['Total Data', filteredHistory.length.toString()]
+            ];
+            
+            const wsFilter = XLSX.utils.aoa_to_sheet(filterInfo);
+            XLSX.utils.book_append_sheet(workbook, wsFilter, 'Informasi Filter');
+
+            // Add data sheets with enhanced styling
+            filteredHistory.forEach((adjustment, index) => {
+                const wsData = [
+                    [`Adjustment #${filteredHistory.length - index}`],
+                    [`Tanggal: ${adjustment.tanggal} ${adjustment.jam}`],
+                    [],
+                    ['Ringkasan'],
+                    ['Total Item', 'Total Selisih Plus', 'Total Selisih Minus'],
+                    [adjustment.totalItem, adjustment.totalPlus, adjustment.totalMinus],
+                    [],
+                    ['Kode', 'Nama', 'Stok Awal', 'Stok Akhir', 'Selisih', 'Nominal']
+                ];
+
+                adjustment.items.forEach(item => {
+                    wsData.push([
+                        item.kode,
+                        item.nama,
+                        item.stokAwal,
+                        item.stokAkhir,
+                        item.selisih,
+                        item.nominal
+                    ]);
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+                // Apply styles
+                const range = XLSX.utils.decode_range(ws['!ref']);
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    for (let C = range.s.c; C <= range.e.c; ++C) {
+                        const cell_address = { c: C, r: R };
+                        const cell_ref = XLSX.utils.encode_cell(cell_address);
+                        if (!ws[cell_ref]) continue;
+
+                        ws[cell_ref].s = {
+                            font: { name: 'Arial' },
+                            alignment: { vertical: 'center' },
+                            border: {
+                                top: { style: 'thin' },
+                                bottom: { style: 'thin' },
+                                left: { style: 'thin' },
+                                right: { style: 'thin' }
+                            }
+                        };
+
+                        if (R === 0 || R === 3) {
+                            ws[cell_ref].s.font = { bold: true, color: { rgb: '0000FF' }, sz: 14 };
+                        } else if (R === 4 || R === 7) {
+                            ws[cell_ref].s.font = { bold: true, color: { rgb: 'FFFFFF' } };
+                            ws[cell_ref].s.fill = { fgColor: { rgb: '3498DB' } };
+                        } else if (R > 7 && C === 4) {
+                            const value = ws[cell_ref].v;
+                            ws[cell_ref].s.font = {
+                                color: { rgb: value > 0 ? '27AE60' : 'E74C3C' },
+                                bold: true
+                            };
+                        }
+                    }
+                }
+
+                // Auto-size columns
+                const cols = wsData[7].map((_, i) => {
+                    const maxWidth = wsData.reduce((w, r) => {
+                        const cell = r[i];
+                        return cell ? Math.max(w, cell.toString().length) : w;
+                    }, 10);
+                    return { wch: maxWidth + 2 };
+                });
+                ws['!cols'] = cols;
+
+                XLSX.utils.book_append_sheet(workbook, ws, `Adjustment ${filteredHistory.length - index}`);
+            });
+
+            XLSX.writeFile(workbook, `riwayat-adjustment-stok-${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        // Format currency
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+            }).format(angka);
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAdjustmentHistory();
+            
+            document.getElementById('searchInput').addEventListener('input', () => {
+                currentPage = 1;
+                loadAdjustmentHistory();
+            });
+            
+            document.getElementById('dateFilter').addEventListener('change', () => {
+                currentPage = 1;
+                loadAdjustmentHistory();
+            });
+            
+            document.getElementById('typeFilter').addEventListener('change', () => {
+                currentPage = 1;
+                loadAdjustmentHistory();
+            });
+        });
+    </script>
+</body>
+</html>

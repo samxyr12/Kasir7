@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manajemen Barang Kedaluwarsa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .badge-danger { 
+            background-color: #dc3545; 
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .badge-warning { 
+            background-color: #ffc107; 
+            color: #000; 
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .badge-success { 
+            background-color: #28a745; 
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .card-exp { 
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+        }
+        .card-exp:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .statistics-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .action-buttons button {
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        .action-buttons button:hover {
+            transform: scale(1.05);
+        }
+        .filter-section {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(0,0,0,0.075);
+        }
+        .export-buttons {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="dashboard.html">
+                    <i class="fas fa-box-open"></i> Sistem Manajemen Barang
+                </a>
+                <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">
+                    Kembali ke Dashboard
+                </button>
+            </div>
+        </nav>
+
+        <h1 class="text-center mb-4">Manajemen Barang Kedaluwarsa</h1>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Filter Status:</label>
+                    <select class="form-select" id="filterStatus" onchange="filterBarang()">
+                        <option value="">Semua Status</option>
+                        <option value="Kedaluwarsa">Kedaluwarsa</option>
+                        <option value="Hampir Kedaluwarsa">Hampir Kedaluwarsa</option>
+                        <option value="Masih Layak">Masih Layak</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Urutkan Berdasarkan:</label>
+                    <select class="form-select" id="sortBy" onchange="sortBarang()">
+                        <option value="tanggalExp">Tanggal Kedaluwarsa</option>
+                        <option value="sisaHari">Sisa Hari</option>
+                        <option value="namaBarang">Nama Barang</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Cari Barang:</label>
+                    <input type="text" class="form-control" id="searchInput" onkeyup="searchBarang()" placeholder="Cari nama atau kode barang...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Barang</h5>
+                        <h2 id="totalBarang">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Kedaluwarsa</h5>
+                        <h2 id="totalKedaluwarsa">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">Hampir Kedaluwarsa</h5>
+                        <h2 id="totalHampirKedaluwarsa">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Masih Layak</h5>
+                        <h2 id="totalMasihLayak">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="card card-exp">
+                    <div class="card-body">
+                        <h5 class="card-title">Pengaturan Notifikasi</h5>
+                        <div class="input-group mb-2">
+                            <input type="number" id="batasKirimExp" class="form-control" value="30" min="1">
+                            <span class="input-group-text">hari</span>
+                        </div>
+                        <button class="btn btn-info w-100" onclick="cekBarangMendekatiExp()">
+                            Cek Barang Mendekati Expired
+                        </button>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="enableNotifikasi" onchange="toggleNotifikasi()">
+                            <label class="form-check-label" for="enableNotifikasi">
+                                Aktifkan Notifikasi Otomatis
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card card-exp">
+                    <div class="card-body">
+                        <h5 class="card-title">Analisis & Laporan</h5>
+                        <button class="btn btn-warning w-100 mb-2" onclick="tampilkanAnalisisExp()">
+                            Analisis Detail
+                        </button>
+                        <button class="btn btn-success w-100 mb-2" onclick="generateLaporanExp()">
+                            Generate Laporan
+                        </button>
+                        <div class="export-buttons">
+                            <button class="btn btn-outline-primary w-100 mb-2" onclick="exportToExcel()">
+                                Export ke Excel
+                            </button>
+                            <button class="btn btn-outline-danger w-100" onclick="exportToPDF()">
+                                Export ke PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card card-exp">
+                    <div class="card-body">
+                        <h5 class="card-title">Manajemen Barang</h5>
+                        <button class="btn btn-primary w-100 mb-2" onclick="tambahBarangExp()">
+                            Tambah Barang
+                        </button>
+                        <button class="btn btn-danger w-100 mb-2" onclick="hapusBanyakBarangExp()">
+                            Hapus Barang Expired
+                        </button>
+                        <button class="btn btn-secondary w-100" onclick="importData()">
+                            Import Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card chart-card">
+            <div class="card-body">
+                <h5 class="card-title">Distribusi Status Barang</h5>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card chart-card">
+            <div class="card-body">
+                <h5 class="card-title">Trend Kedaluwarsa per Bulan</h5>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- Summary Section -->
+        <div id="ringkasanBarangExp" class="mb-3"></div>
+
+        <!-- Main Table -->
+        <div class="table-responsive">
+            <table id="tabelBarangExp" class="table table-striped table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Tanggal Produksi</th>
+                        <th>Tanggal Kedaluwarsa</th>
+                        <th>Sisa Hari</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="bodyBarangExp">
+                    <!-- Data will be populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="dataTables_info" id="dataInfo"></div>
+            <div class="dataTables_paginate">
+                <ul class="pagination" id="pagination"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let barangExpData = JSON.parse(localStorage.getItem('barangExpData')) || [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let statusChart = null;
+    let trendChart = null;
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+        updateTabelBarangExp();
+        updateRingkasanBarangExp();
+        updateStatistics();
+        initializeCharts();
+        setupNotifications();
+    });
+
+    function setupNotifications() {
+        if ("Notification" in window) {
+            Notification.requestPermission();
+        }
+    }
+
+    function toggleNotifikasi() {
+        const enabled = document.getElementById('enableNotifikasi').checked;
+        if (enabled) {
+            startAutomaticChecks();
+        } else {
+            stopAutomaticChecks();
+        }
+    }
+
+    let notificationInterval;
+
+    function startAutomaticChecks() {
+        notificationInterval = setInterval(() => {
+            checkAndNotify();
+        }, 1000 * 60 * 60); // Check every hour
+    }
+
+    function stopAutomaticChecks() {
+        clearInterval(notificationInterval);
+    }
+
+    function checkAndNotify() {
+        const batasHari = parseInt(document.getElementById('batasKirimExp').value) || 30;
+        const barangMendekatiExp = getBarangMendekatiExp(batasHari);
+        
+        if (barangMendekatiExp.length > 0 && Notification.permission === "granted") {
+            new Notification("Peringatan Barang Kedaluwarsa", {
+                body: `${barangMendekatiExp.length} barang akan kedaluwarsa dalam ${batasHari} hari`,
+                icon: "/path/to/icon.png"
+            });
+        }
+    }
+
+    function initializeCharts() {
+    // Status Distribution Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    statusChart = new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Kedaluwarsa', 'Hampir Kedaluwarsa', 'Masih Layak'],
+            datasets: [{
+                data: [0, 0, 0],
+                backgroundColor: [
+                    'rgba(220, 53, 69, 0.7)',   // Kedaluwarsa (merah)
+                    'rgba(255, 193, 7, 0.7)',   // Hampir Kedaluwarsa (kuning)
+                    'rgba(40, 167, 69, 0.7)'    // Masih Layak (hijau)
+                ],
+                borderColor: [
+                    'rgba(220, 53, 69, 1)',
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(40, 167, 69, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: false  // Nonaktifkan title di chart
+                },
+                legend: {
+                    position: 'bottom',  // Letakkan legend di bawah
+                    labels: {
+                        boxWidth: 20,    // Kurangi lebar kotak warna
+                        padding: 10      // Atur padding
+                    }
+                }
+            }
+        }
+    });
+
+    // Trend Chart
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    trendChart = new Chart(trendCtx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Jumlah Barang Kedaluwarsa',
+                data: [],
+                backgroundColor: 'rgba(220, 53, 69, 0.6)',
+                borderColor: 'rgba(220, 53, 69, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Jumlah Barang'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: false  // Nonaktifkan title di chart
+                },
+                legend: {
+                    display: false  // Sembunyikan legend untuk bar chart
+                }
+            }
+        }
+    });
+
+    // Panggil update chart saat halaman dimuat
+    updateCharts();
+}
+
+function updateCharts() {
+    // Perhitungan untuk Status Distribution Chart
+    const stats = calculateStats();
+    if (statusChart) {
+        statusChart.data.datasets[0].data = [
+            stats.kedaluwarsa,
+            stats.hampirKedaluwarsa,
+            stats.masihLayak
+        ];
+        statusChart.update();
+    }
+
+    // Perhitungan untuk Trend Chart
+    const monthlyData = {};
+    const monthNames = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
+        'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'
+    ];
+
+    // Inisialisasi data bulanan
+    monthNames.forEach(month => {
+        monthlyData[month] = 0;
+    });
+
+    // Hitung jumlah barang kedaluwarsa per bulan
+    barangExpData.forEach(barang => {
+        if (barang.status === 'Kedaluwarsa') {
+            const expDate = new Date(barang.tanggalExp);
+            const monthName = monthNames[expDate.getMonth()];
+            monthlyData[monthName]++;
+        }
+    });
+
+    if (trendChart) {
+        trendChart.data.labels = monthNames;
+        trendChart.data.datasets[0].data = monthNames.map(month => monthlyData[month]);
+        trendChart.update();
+    }
+}
+
+// Modifikasi fungsi yang mempengaruhi chart
+function updateStatistics() {
+    const stats = calculateStats();
+    
+    document.getElementById('totalBarang').textContent = stats.total;
+    document.getElementById('totalKedaluwarsa').textContent = stats.kedaluwarsa;
+    document.getElementById('totalHampirKedaluwarsa').textContent = stats.hampirKedaluwarsa;
+    document.getElementById('totalMasihLayak').textContent = stats.masihLayak;
+
+    // Panggil update charts
+    updateCharts();
+}
+
+
+
+
+
+    function calculateStats() {
+    return {
+        total: barangExpData.length,
+        kedaluwarsa: barangExpData.filter(b => b.status === 'Kedaluwarsa').length,
+        hampirKedaluwarsa: barangExpData.filter(b => b.status === 'Hampir Kedaluwarsa').length,
+        masihLayak: barangExpData.filter(b => b.status === 'Masih Layak').length
+    };
+}
+
+    function updateTrendChart() {
+        // Group data by month
+        const monthlyData = {};
+        barangExpData.forEach(barang => {
+            const month = new Date(barang.tanggalExp).toLocaleString('default', { month: 'long' });
+            if (!monthlyData[month]) {
+                monthlyData[month] = 0;
+            }
+            if (barang.status === 'Kedaluwarsa') {
+                monthlyData[month]++;
+            }
+        });
+
+        if (trendChart) {
+            trendChart.data.labels = Object.keys(monthlyData);
+            trendChart.data.datasets[0].data = Object.values(monthlyData);
+            trendChart.update();
+        }
+    }
+
+    function tambahBarangExp() {
+        const barang = JSON.parse(localStorage.getItem('barang')) || [];
+
+        if (barang.length === 0) {
+            Swal.fire('Peringatan', 'Tidak ada barang yang tersedia. Silakan tambah barang terlebih dahulu.', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Tambah Barang Kedaluwarsa',
+            html: `
+                <select id="pilihBarang" class="form-control mb-2">
+                    <option value="">Pilih Barang</option>
+                    ${barang.map(item => `<option value="${item.kode}">${item.kode} - ${item.nama}</option>`).join('')}
+                </select>
+                <div class="mb-2">
+                    <label class="form-label">Tanggal Produksi</label>
+                    <input type="date" id="tanggalProduksi" class="form-control">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Tanggal Kedaluwarsa</label>
+                    <input type="date" id="tanggalExp" class="form-control">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Batch Number</label>
+                    <input type="text" id="batchNumber" class="form-control" placeholder="Optional">
+                </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            preConfirm: () => {
+                const kodeBarang = document.getElementById('pilihBarang').value;
+                const tanggalProduksi = document.getElementById('tanggalProduksi').value;
+                const tanggalExp = document.getElementById('tanggalExp').value;
+                const batchNumber = document.getElementById('batchNumber').value;
+
+                if (!kodeBarang || !tanggalProduksi || !tanggalExp) {
+                    Swal.showValidationMessage('Semua field wajib diisi kecuali Batch Number');
+                    return false;
+                }
+
+                if (new Date(tanggalProduksi) >= new Date(tanggalExp)) {
+                    Swal.showValidationMessage('Tanggal produksi harus lebih awal dari tanggal kedaluwarsa');
+                    return false;
+                }
+
+                return { kodeBarang, tanggalProduksi, tanggalExp, batchNumber };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const { kodeBarang, tanggalProduksi, tanggalExp, batchNumber } = result.value;
+                const barangTerpilih = barang.find(item => item.kode === kodeBarang);
+
+                const today = new Date();
+                const expDate = new Date(tanggalExp);
+                const sisaHari = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+
+                const statusExp = hitungStatusExp(tanggalExp);
+
+                const newBarangExp = {
+                    kodeBarang,
+                    namaBarang: barangTerpilih.nama,
+                    tanggalProduksi,
+                    tanggalExp,
+                    sisaHari,
+                    status: statusExp.text,
+                    batchNumber: batchNumber || '-'
+                };
+
+                barangExpData.push(newBarangExp);
+                simpanBarangExp();
+                updateTabelBarangExp();
+                updateRingkasanBarangExp();
+                updateStatistics();
+
+                Swal.fire('Sukses', 'Barang berhasil ditambahkan', 'success');
+            }
+        });
+    }
+
+    function filterBarang() {
+        const statusFilter = document.getElementById('filterStatus').value;
+        const filteredData = barangExpData.filter(barang => 
+            !statusFilter || barang.status === statusFilter
+        );
+        updateTabelBarangExp(filteredData);
+    }
+
+    function sortBarang() {
+        const sortBy = document.getElementById('sortBy').value;
+        const sortedData = [...barangExpData].sort((a, b) => {
+            switch(sortBy) {
+                case 'tanggalExp':
+                    return new Date(a.tanggalExp) - new Date(b.tanggalExp);
+                case 'sisaHari':
+                    return a.sisaHari - b.sisaHari;
+                case 'namaBarang':
+                    return a.namaBarang.localeCompare(b.namaBarang);
+                default:
+                    return 0;
+            }
+        });
+        updateTabelBarangExp(sortedData);
+    }
+
+    function searchBarang() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const filteredData = barangExpData.filter(barang => 
+            barang.namaBarang.toLowerCase().includes(searchTerm) ||
+            barang.kodeBarang.toLowerCase().includes(searchTerm)
+        );
+        updateTabelBarangExp(filteredData);
+    }
+
+    function exportToExcel() {
+        // Create worksheet
+        let csv = 'Kode Barang,Nama Barang,Tanggal Produksi,Tanggal Kedaluwarsa,Sisa Hari,Status\n';
+        barangExpData.forEach(barang => {
+            csv += `${barang.kodeBarang},${barang.namaBarang},${barang.tanggalProduksi},${barang.tanggalExp},${barang.sisaHari},${barang.status}\n`;
+        });
+
+        // Create download link
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'barang_kedaluwarsa.csv';
+        link.click();
+    }
+
+    function importData() {
+        Swal.fire({
+            title: 'Import Data',
+            html: `
+                <input type="file" id="fileInput" class="form-control" accept=".csv">
+                <small class="text-muted">Format: CSV dengan header Kode Barang,Nama Barang,Tanggal Produksi,Tanggal Kedaluwarsa</small>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Import',
+            cancelButtonText: 'Batal',
+            preConfirm: () => {
+                const file = document.getElementById('fileInput').files[0];
+                if (!file) {
+                    Swal.showValidationMessage('Pilih file terlebih dahulu');
+                    return false;
+                }
+                return file;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const file = result.value;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const text = e.target.result;
+                        const rows = text.split('\n');
+                        // Skip header row
+                        for (let i = 1; i < rows.length; i++) {
+                            const [kode, nama, produksi, exp] = rows[i].split(',');
+                            if (kode && nama && produksi && exp) {
+                                const today = new Date();
+                                const expDate = new Date(exp);
+                                const sisaHari = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+                                const statusExp = hitungStatusExp(exp);
+
+                                barangExpData.push({
+                                    kodeBarang: kode.trim(),
+                                    namaBarang: nama.trim(),
+                                    tanggalProduksi: produksi.trim(),
+                                    tanggalExp: exp.trim(),
+                                    sisaHari,
+                                    status: statusExp.text
+                                });
+                            }
+                        }
+                        simpanBarangExp();
+                        updateTabelBarangExp();
+                        updateRingkasanBarangExp();
+                        updateStatistics();
+                        Swal.fire('Sukses', 'Data berhasil diimport', 'success');
+                    } catch (error) {
+                        Swal.fire('Error', 'Format file tidak valid', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+    }
+
+    // ... (previous functions remain the same)
+
+    // Add pagination functionality
+    function updatePagination(totalItems) {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+
+        // Previous button
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>`;
+        pagination.appendChild(prevLi);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${currentPage === i ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+            pagination.appendChild(li);
+        }
+
+        // Next button
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>`;
+        pagination.appendChild(nextLi);
+
+        // Update info text
+        const start = (currentPage - 1) * itemsPerPage + 1;
+        const end = Math.min(currentPage * itemsPerPage, totalItems);
+        document.getElementById('dataInfo').textContent = 
+            `Showing ${start} to ${end} of ${totalItems} entries`;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        updateTabelBarangExp();
+    }
+    
+    function updateTabelBarangExp(customData = null) {
+    const dataToUse = customData || barangExpData;
+    const tbody = document.getElementById('bodyBarangExp');
+    tbody.innerHTML = '';
+
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedData = dataToUse.slice(startIndex, endIndex);
+
+    paginatedData.forEach((barang, index) => {
+        const actualIndex = startIndex + index;
+        const row = document.createElement('tr');
+        
+        // Update status and remaining days before rendering
+        const today = new Date();
+        const expDate = new Date(barang.tanggalExp);
+        const sisaHari = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+        const statusExp = hitungStatusExp(barang.tanggalExp);
+        
+        barang.sisaHari = sisaHari;
+        barang.status = statusExp.text;
+
+        row.innerHTML = `
+            <td>${barang.kodeBarang}</td>
+            <td>${barang.namaBarang}</td>
+            <td>${formatDate(barang.tanggalProduksi)}</td>
+            <td>${formatDate(barang.tanggalExp)}</td>
+            <td>${barang.sisaHari} hari</td>
+            <td><span class="badge ${getStatusClass(barang.status)}">${barang.status}</span></td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-warning" onclick="editBarang(${actualIndex})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="hapusBarisExp(${actualIndex})">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // Update pagination controls
+    updatePagination(dataToUse.length);
+    
+    // Update statistics and charts
+    updateStatistics();
+}
+
+function formatDate(dateString) {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('id-ID', options);
+}
+
+function editBarang(index) {
+    const barang = barangExpData[index];
+    
+    Swal.fire({
+        title: 'Edit Barang',
+        html: `
+            <div class="mb-3">
+                <label class="form-label">Nama Barang</label>
+                <input type="text" id="editNama" class="form-control" value="${barang.namaBarang}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tanggal Produksi</label>
+                <input type="date" id="editTanggalProduksi" class="form-control" value="${barang.tanggalProduksi}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tanggal Kedaluwarsa</label>
+                <input type="date" id="editTanggalExp" class="form-control" value="${barang.tanggalExp}">
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Simpan',
+        cancelButtonText: 'Batal',
+        preConfirm: () => {
+            const tanggalProduksi = document.getElementById('editTanggalProduksi').value;
+            const tanggalExp = document.getElementById('editTanggalExp').value;
+
+            if (!tanggalProduksi || !tanggalExp) {
+                Swal.showValidationMessage('Semua field harus diisi');
+                return false;
+            }
+
+            if (new Date(tanggalProduksi) >= new Date(tanggalExp)) {
+                Swal.showValidationMessage('Tanggal produksi harus lebih awal dari tanggal kedaluwarsa');
+                return false;
+            }
+
+            return { tanggalProduksi, tanggalExp };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const { tanggalProduksi, tanggalExp } = result.value;
+            
+            // Update the item
+            barangExpData[index].tanggalProduksi = tanggalProduksi;
+            barangExpData[index].tanggalExp = tanggalExp;
+            
+            // Recalculate status and remaining days
+            const today = new Date();
+            const expDate = new Date(tanggalExp);
+            const sisaHari = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+            const statusExp = hitungStatusExp(tanggalExp);
+            
+            barangExpData[index].sisaHari = sisaHari;
+            barangExpData[index].status = statusExp.text;
+
+            // Save and update display
+            simpanBarangExp();
+            updateTabelBarangExp();
+            updateRingkasanBarangExp();
+            
+            Swal.fire('Sukses', 'Data berhasil diupdate', 'success');
+        }
+    });
+}
+
+function hitungStatusExp(tanggalExp) {
+    const today = new Date();
+    const expDate = new Date(tanggalExp);
+    const diffInDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+
+    if (diffInDays < 0) {
+        return { text: 'Kedaluwarsa', class: 'badge-danger' };
+    } else if (diffInDays <= 30) {
+        return { text: 'Hampir Kedaluwarsa', class: 'badge-warning' };
+    } else {
+        return { text: 'Masih Layak', class: 'badge-success' };
+    }
+}
+
+function getStatusClass(status) {
+    switch(status) {
+        case 'Kedaluwarsa': return 'badge-danger';
+        case 'Hampir Kedaluwarsa': return 'badge-warning';
+        case 'Masih Layak': return 'badge-success';
+        default: return 'badge-secondary';
+    }
+}
+
+function getBarangMendekatiExp(batasHari) {
+    const today = new Date();
+    return barangExpData.filter(barang => {
+        const expDate = new Date(barang.tanggalExp);
+        const diffInDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+        return diffInDays > 0 && diffInDays <= batasHari;
+    });
+}
+
+function simpanBarangExp() {
+    localStorage.setItem('barangExpData', JSON.stringify(barangExpData));
+}
+
+function updateRingkasanBarangExp() {
+    const ringkasan = document.getElementById('ringkasanBarangExp');
+    const ringkasanData = {};
+
+    barangExpData.forEach(barang => {
+        if (!ringkasanData[barang.kodeBarang]) {
+            ringkasanData[barang.kodeBarang] = {
+                namaBarang: barang.namaBarang,
+                total: 1,
+                kedaluwarsa: barang.status === 'Kedaluwarsa' ? 1 : 0,
+                hampirKedaluwarsa: barang.status === 'Hampir Kedaluwarsa' ? 1 : 0,
+                masihLayak: barang.status === 'Masih Layak' ? 1 : 0
+            };
+        } else {
+            ringkasanData[barang.kodeBarang].total++;
+            if (barang.status === 'Kedaluwarsa') ringkasanData[barang.kodeBarang].kedaluwarsa++;
+            if (barang.status === 'Hampir Kedaluwarsa') ringkasanData[barang.kodeBarang].hampirKedaluwarsa++;
+            if (barang.status === 'Masih Layak') ringkasanData[barang.kodeBarang].masihLayak++;
+        }
+    });
+
+    let ringkasanHtml = `
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">Ringkasan Barang Kedaluwarsa</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+    `;
+    
+    for (const [kode, data] of Object.entries(ringkasanData)) {
+        ringkasanHtml += `
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">${kode} - ${data.namaBarang}</h5>
+                        <div class="mt-2">
+                            <p class="mb-1">Total: ${data.total} item</p>
+                            <p class="mb-1">Kedaluwarsa: ${data.kedaluwarsa}</p>
+                            <p class="mb-1">Hampir Kedaluwarsa: ${data.hampirKedaluwarsa}</p>
+                            <p class="mb-0">Masih Layak: ${data.masihLayak}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    ringkasanHtml += `
+                </div>
+            </div>
+        </div>
+    `;
+    
+    ringkasan.innerHTML = ringkasanHtml;
+}
+    
+    function tampilkanAnalisisExp() {
+    const statusStats = calculateStats();
+    
+    Swal.fire({
+        title: 'Analisis Detail Barang Kedaluwarsa',
+        html: `
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Total Barang</h5>
+                    <p>${statusStats.total}</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Barang Kedaluwarsa</h5>
+                    <p class="text-danger">${statusStats.kedaluwarsa}</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Barang Hampir Kedaluwarsa</h5>
+                    <p class="text-warning">${statusStats.hampirKedaluwarsa}</p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h5>Top 5 Barang Mendekati Kedaluwarsa</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nama Barang</th>
+                                <th>Sisa Hari</th>
+                                <th>Tanggal Kedaluwarsa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${barangExpData
+                                .filter(b => b.status !== 'Masih Layak')
+                                .sort((a, b) => a.sisaHari - b.sisaHari)
+                                .slice(0, 5)
+                                .map(barang => `
+                                    <tr>
+                                        <td>${barang.namaBarang}</td>
+                                        <td>${barang.sisaHari} hari</td>
+                                        <td>${formatDate(barang.tanggalExp)}</td>
+                                    </tr>
+                                `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `,
+        width: '800px'
+    });
+}
+
+function generateLaporanExp() {
+    const doc = new jspdf.jsPDF();
+    
+    // Judul Laporan
+    doc.setFontSize(18);
+    doc.text('Laporan Barang Kedaluwarsa', 105, 20, { align: 'center' });
+    
+    // Statistik
+    const stats = calculateStats();
+    doc.setFontSize(12);
+    doc.text(`Total Barang: ${stats.total}`, 20, 40);
+    doc.text(`Barang Kedaluwarsa: ${stats.kedaluwarsa}`, 20, 50);
+    doc.text(`Barang Hampir Kedaluwarsa: ${stats.hampirKedaluwarsa}`, 20, 60);
+    doc.text(`Barang Masih Layak: ${stats.masihLayak}`, 20, 70);
+    
+    // Tabel Barang
+    const columns = ["Kode", "Nama", "Tgl Produksi", "Tgl Kedaluwarsa", "Sisa Hari", "Status"];
+    const rows = barangExpData.map(b => [
+        b.kodeBarang,
+        b.namaBarang,
+        formatDate(b.tanggalProduksi),
+        formatDate(b.tanggalExp),
+        b.sisaHari,
+        b.status
+    ]);
+    
+    doc.autoTable({
+        startY: 90,
+        head: [columns],
+        body: rows
+    });
+    
+    doc.save('laporan_barang_kedaluwarsa.pdf');
+}
+
+function cekBarangMendekatiExp() {
+    const batasHari = parseInt(document.getElementById('batasKirimExp').value) || 30;
+    const barangMendekatiExp = getBarangMendekatiExp(batasHari);
+    
+    Swal.fire({
+        title: `Barang Mendekati Kedaluwarsa (${batasHari} hari)`,
+        html: barangMendekatiExp.length > 0 
+            ? barangMendekatiExp.map(barang => `
+                <div class="alert alert-warning">
+                    ${barang.namaBarang} - Kedaluwarsa dalam ${barang.sisaHari} hari
+                </div>
+            `).join('') 
+            : '<p>Tidak ada barang yang mendekati kedaluwarsa</p>',
+        icon: barangMendekatiExp.length > 0 ? 'warning' : 'info'
+    });
+}
+
+function hapusBanyakBarangExp() {
+    const barangKedaluwarsa = barangExpData.filter(b => b.status === 'Kedaluwarsa');
+    
+    Swal.fire({
+        title: 'Hapus Barang Kedaluwarsa',
+        text: `Anda akan menghapus ${barangKedaluwarsa.length} barang yang sudah kedaluwarsa. Lanjutkan?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Filter out expired items
+            barangExpData = barangExpData.filter(b => b.status !== 'Kedaluwarsa');
+            
+            // Save and update
+            simpanBarangExp();
+            updateTabelBarangExp();
+            updateRingkasanBarangExp();
+            updateStatistics();
+            
+            Swal.fire(
+                'Dihapus!',
+                `${barangKedaluwarsa.length} barang kedaluwarsa telah dihapus.`,
+                'success'
+            );
+        }
+    });
+}
+
+function generateLaporanExp() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Judul Laporan
+    doc.setFontSize(18);
+    doc.text('Laporan Barang Kedaluwarsa', 105, 20, { align: 'center' });
+    
+    // Statistik
+    const stats = calculateStats();
+    doc.setFontSize(12);
+    doc.text(`Total Barang: ${stats.total}`, 20, 40);
+    doc.text(`Barang Kedaluwarsa: ${stats.kedaluwarsa}`, 20, 50);
+    doc.text(`Barang Hampir Kedaluwarsa: ${stats.hampirKedaluwarsa}`, 20, 60);
+    doc.text(`Barang Masih Layak: ${stats.masihLayak}`, 20, 70);
+    
+    // Tabel Barang
+    const columns = ["Kode", "Nama", "Tgl Produksi", "Tgl Kedaluwarsa", "Sisa Hari", "Status"];
+    const rows = barangExpData.map(b => [
+        b.kodeBarang,
+        b.namaBarang,
+        formatDate(b.tanggalProduksi),
+        formatDate(b.tanggalExp),
+        b.sisaHari,
+        b.status
+    ]);
+    
+    doc.autoTable({
+        startY: 90,
+        head: [columns],
+        body: rows
+    });
+    
+    doc.save('laporan_barang_kedaluwarsa.pdf');
+}
+
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Judul
+    doc.setFontSize(18);
+    doc.text('Data Barang Kedaluwarsa', 105, 20, { align: 'center' });
+    
+    // Tabel
+    const columns = ["Kode", "Nama", "Tgl Produksi", "Tgl Kedaluwarsa", "Sisa Hari", "Status"];
+    const rows = barangExpData.map(b => [
+        b.kodeBarang,
+        b.namaBarang,
+        formatDate(b.tanggalProduksi),
+        formatDate(b.tanggalExp),
+        b.sisaHari,
+        b.status
+    ]);
+    
+    doc.autoTable({
+        startY: 40,
+        head: [columns],
+        body: rows
+    });
+    
+    doc.save('barang_kedaluwarsa.pdf');
+}
+
+function hapusBaris(index) {
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: 'Apakah Anda yakin ingin menghapus barang ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            barangExpData.splice( index, 1);
+            simpanBarangExp();
+            updateTabelBarangExp();
+            updateRingkasanBarangExp();
+            updateStatistics();
+            Swal.fire('Dihapus!', 'Barang berhasil dihapus.', 'success');
+        }
+    });
+}
+    
+    
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.15/jspdf.plugin.autotable.min.js"></script>
+    
+</body>
+</html>
