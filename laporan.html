@@ -1881,8 +1881,9 @@ function hitungSetoran() {
     totalTransaksiInfo.style.display = 'block';
     totalQRISElement.textContent = formatRupiah(totalPendapatanQRIS);
 
-    // Simpan total cash untuk digunakan nanti
+    // Simpan total cash dan total QRIS untuk digunakan nanti
     localStorage.setItem('tempTotalCash', totalPendapatanCash);
+    localStorage.setItem('tempTotalQRIS', totalPendapatanQRIS); // Simpan total QRIS
 
     // Tampilkan form setoran
     document.getElementById('formSetoran').style.display = 'block';
@@ -1904,6 +1905,7 @@ function simpanSetoran() {
     const tanggalSetoran = document.getElementById('tanggalSetoran').value;
     const nominalSetoran = parseFloat(document.getElementById('nominalSetoran').value);
     const totalPendapatanCash = parseFloat(localStorage.getItem('tempTotalCash')) || 0;
+    const totalPendapatanQRIS = parseFloat(localStorage.getItem('tempTotalQRIS')) || 0; // Ambil total QRIS
 
     if (isNaN(nominalSetoran) || nominalSetoran < 0) {
         showError('Silakan masukkan nominal setoran yang valid');
@@ -1941,6 +1943,7 @@ function simpanSetoran() {
         waktu: new Date().toLocaleString('id-ID') + urutanSetoran,
         nominalSetoran: nominalSetoran,
         totalCash: totalPendapatanCash,
+        totalQRIS: totalPendapatanQRIS, // Simpan total QRIS
         status: statusSetoran,
         varian: varianSetoran
     };
