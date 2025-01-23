@@ -1,14 +1,18 @@
-
-
+// Konfigurasi Lokasi
 const lokasiKoordinat = {
-    1: { latitude: -6.465556, longitude: 106.686828 }, // Kantor Utama
-    2: { latitude: -6.367006, longitude: 106.731574 }, // Cabang A
-    3: { latitude: -6.429668, longitude: 106.721050 }  // Cabang B
+    1: { latitude: -6.465556, longitude: 106.686828, nama: "Kantor Utama" },
+    2: { latitude: -6.367006, longitude: 106.731574, nama: "Cabang A" },
+    3: { latitude: -6.429668, longitude: 106.721050, nama: "Cabang B" }
 };
+
+// Konstanta Konfigurasi
 const RADIUS_MAKSIMAL = 100; // Dalam meter
 const UNIVERSAL_PIN = "451661750";
+const LOKASI_STORAGE_KEY = 'lokasiVerifikasi';
+const DURASI_VERIFIKASI = 10 * 60 * 1000; // 10 menit
+const INAKTIVITAS_TIMEOUT = 10 * 60 * 1000; // 10 menit
 
-// Elemen DOM
+// Referensi Elemen DOM
 const lokasiModal = document.getElementById('lokasiModal');
 const lokasiStatus = document.getElementById('lokasiStatus');
 const cekLokasiBtn = document.getElementById('cekLokasiBtn');
@@ -16,6 +20,11 @@ const loadingSpinner = document.getElementById('loadingSpinner');
 const lokasiSelect = document.getElementById('lokasiSelect');
 const pinContainer = document.getElementById('pinContainer');
 const pinInput = document.getElementById('pinInput');
+const sisaWaktuElem = document.getElementById('sisaWaktu');
+
+// Variabel Global untuk Timer
+let inaktivitasTimer = null;
+let lokasiBerhasilTimer = null;
 
 // Fungsi Haversine untuk menghitung jarak
 function hitungJarak(lat1, lon1, lat2, lon2) {
@@ -33,14 +42,110 @@ function hitungJarak(lat1, lon1, lat2, lon2) {
     return R * c; // dalam meter
 }
 
-// Toggle tampilan input PIN
+// Simpan Verifikasi Lokasi
+function simpanLokasiVerifikasi(lokasi) {
+    const verifikasiData = {
+        lokasi: lokasi,
+        waktuVerifikasi: Date.now()
+    };
+    localStorage.setItem(LOKASI_STORAGE_KEY, JSON.stringify(verifikasiData));
+    mulaiTimerLokasi();
+    mulaiPelacakInaktivitas();
+}
+
+// Cek Lokasi Tersimpan
+function cekLokasiTersimpan() {
+    const verifikasiData = JSON.parse(localStorage.getItem(LOKASI_STORAGE_KEY));
+    
+    if (verifikasiData) {
+        const waktuBerlalu = Date.now() - verifikasiData.waktuVerifikasi;
+        
+        if (waktuBerlalu < DURASI_VERIFIKASI) {
+            return verifikasiData.lokasi;
+        } else {
+            localStorage.removeItem(LOKASI_STORAGE_KEY);
+            return null;
+        }
+    }
+    
+    return null;
+}
+
+// Mulai Timer Lokasi
+function mulaiTimerLokasi() {
+    if (lokasiBerhasilTimer) {
+        clearInterval(lokasiBerhasilTimer);
+    }
+
+    const waktuMulai = Date.now();
+
+    lokasiBerhasilTimer = setInterval(() => {
+        const sisaWaktu = DURASI_VERIFIKASI - (Date.now() - waktuMulai);
+        
+        if (sisaWaktu <= 0) {
+            clearInterval(lokasiBerhasilTimer);
+            localStorage.removeItem(LOKASI_STORAGE_KEY);
+            Swal.fire({
+                icon: 'warning',
+                title: 'Sesi Lokasi Berakhir',
+                text: 'Verifikasi lokasi telah berakhir. Silakan verifikasi ulang.',
+                confirmButtonText: 'OK'
+            });
+            lokasiModal.style.display = 'flex';
+            return;
+        }
+
+        const menitSisa = Math.floor(sisaWaktu / 60000);
+        const detikSisa = Math.floor((sisaWaktu % 60000) / 1000);
+        
+        if (sisaWaktuElem) {
+            sisaWaktuElem.textContent = `Sisa Waktu: ${menitSisa} menit ${detikSisa} detik`;
+        }
+    }, 1000);
+}
+
+// Mulai Pelacak Inaktivitas
+function mulaiPelacakInaktivitas() {
+    if (inaktivitasTimer) {
+        clearTimeout(inaktivitasTimer);
+    }
+
+    inaktivitasTimer = setTimeout(() => {
+        localStorage.removeItem(LOKASI_STORAGE_KEY);
+        Swal.fire({
+            icon: 'warning',
+            title: 'Inaktivitas Terdeteksi',
+            text: 'Anda tidak aktif selama 10 menit. Silakan verifikasi ulang.',
+            confirmButtonText: 'OK'
+        });
+        lokasiModal.style.display = 'flex';
+    }, INAKTIVITAS_TIMEOUT);
+}
+
+// Reset Timer Inaktivitas
+function resetInaktivitasTimer() {
+    if (inaktivitasTimer) {
+        clearTimeout(inaktivitasTimer);
+    }
+    mulaiPelacakInaktivitas();
+}
+
+// Toggle Tampilan Input PIN
 function togglePinInput() {
     const isUniversal = lokasiSelect.value === "universal";
     pinContainer.style.display = isUniversal ? 'block' : 'none';
 }
 
-// Fungsi Cek Lokasi
+// Fungsi Cek Lokasi Utama
 function cekLokasi() {
+    // Cek lokasi tersimpan
+    const lokasiTersimpan = cekLokasiTersimpan();
+    if (lokasiTersimpan) {
+        lokasiSelect.value = lokasiTersimpan;
+        lokasiModal.style.display = 'none';
+        return;
+    }
+
     loadingSpinner.style.display = 'block';
     lokasiStatus.innerHTML = '';
 
@@ -51,12 +156,13 @@ function cekLokasi() {
         return;
     }
 
-    // Cek jika lokasi universal dipilih
+    // Cek PIN Universal
     if (selectedLocation === "universal") {
         const enteredPin = pinInput.value.trim();
         if (enteredPin === UNIVERSAL_PIN) {
             loadingSpinner.style.display = 'none';
             lokasiModal.style.display = 'none';
+            simpanLokasiVerifikasi(selectedLocation);
             Swal.fire({
                 icon: 'success',
                 title: 'Verifikasi Berhasil',
@@ -76,8 +182,10 @@ function cekLokasi() {
         }
     }
 
+    // Ambil Koordinat Lokasi Terpilih
     const { latitude, longitude } = lokasiKoordinat[selectedLocation];
 
+    // Cek Geolokasi
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
@@ -92,6 +200,7 @@ function cekLokasi() {
 
                 if (jarakKeDkantor <= RADIUS_MAKSIMAL) {
                     lokasiModal.style.display = 'none';
+                    simpanLokasiVerifikasi(selectedLocation);
                     Swal.fire({
                         icon: 'success',
                         title: 'Lokasi Valid',
@@ -138,12 +247,24 @@ function cekLokasi() {
     }
 }
 
-// Event listener untuk tombol cek lokasi
+// Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    lokasiModal.style.display = 'flex';
+    const lokasiTersimpan = cekLokasiTersimpan();
+    if (lokasiTersimpan) {
+        lokasiSelect.value = lokasiTersimpan;
+        lokasiModal.style.display = 'none';
+    } else {
+        lokasiModal.style.display = 'flex';
+    }
+
     cekLokasiBtn.addEventListener('click', cekLokasi);
     lokasiSelect.addEventListener('change', togglePinInput);
 });
+
+// Reset Timer saat Ada Aktivitas
+document.addEventListener('mousemove', resetInaktivitasTimer);
+document.addEventListener('keypress', resetInaktivitasTimer);
+document.addEventListener('click', resetInaktivitasTimer);
 
 
 
