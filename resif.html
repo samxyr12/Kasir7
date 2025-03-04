@@ -1803,136 +1803,392 @@ function exportToExcel(data, filename) {
         
         
   function uploadCSV() {
+    // Buat container untuk progress bar jika belum ada
+    let progressContainer = document.getElementById('progressContainer');
+    if (!progressContainer) {
+        progressContainer = document.createElement('div');
+        progressContainer.id = 'progressContainer';
+        progressContainer.style.width = '100%';
+        progressContainer.style.marginTop = '10px';
+        progressContainer.style.marginBottom = '10px';
+        progressContainer.style.display = 'none';
+        
+        const progressBar = document.createElement('div');
+        progressBar.id = 'progressBar';
+        progressBar.style.width = '0%';
+        progressBar.style.height = '20px';
+        progressBar.style.backgroundColor = '#4CAF50';
+        progressBar.style.textAlign = 'center';
+        progressBar.style.lineHeight = '20px';
+        progressBar.style.color = 'white';
+        progressBar.style.transition = 'width 0.3s';
+        
+        progressContainer.appendChild(progressBar);
+        
+        // Tambahkan container progress bar ke halaman
+        const parentElement = document.querySelector('table').parentNode;
+        parentElement.insertBefore(progressContainer, document.querySelector('table'));
+    }
+
+    // Buat input file dengan filter tipe file
     const input = document.createElement('input');
     input.type = 'file';
+    input.accept = '.csv';
     
-    
+    // Handler untuk saat file dipilih
     input.onchange = (event) => {
         const file = event.target.files[0];
+        
+        // Validasi file
+        if (!file) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File Tidak Dipilih',
+                text: 'Silakan pilih file CSV untuk diupload.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        
+        // Validasi tipe file
+        if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Format File Salah',
+                text: 'File harus berformat CSV.',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        // Tampilkan progress bar
+        progressContainer.style.display = 'block';
+        const progressBar = document.getElementById('progressBar');
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
+
+        // Gunakan FileReader untuk membaca file
         const reader = new FileReader();
         
+        // Simulasi progress saat membaca file
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            if (progress < 90) {  // Hanya sampai 90% untuk proses baca, 10% sisanya untuk proses data
+                progress += 5;
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+            }
+        }, 100);
+        
+        // Handler saat file selesai dibaca
         reader.onload = (e) => {
-            const text = e.target.result;
-            const rows = text.split('\n').map(row => row.split(','));
-            const tbody = document.getElementById('bodyPenerimaan');
-
-            // Ambil data barang dari localStorage
-            const barang = JSON.parse(localStorage.getItem('barang')) || [];
-
-            rows.forEach(row => {
-                if (row.length === 2) { // Pastikan ada 2 kolom: Kode Barang dan Jumlah
-                    const kodeBarang = row[0].trim();
-                    const jumlahDiterima = parseInt(row[1].trim(), 10);
-                    
-                    // Cek apakah kode barang ada di localStorage
-                    const barangDitemukan = barang.find(item => item.kode === kodeBarang);
-
-                    if (barangDitemukan && kodeBarang && !isNaN(jumlahDiterima)) {
-                        const newRow = tbody.insertRow();
+            clearInterval(progressInterval);
+            progressBar.style.width = '90%';
+            progressBar.textContent = '90%';
+            
+            try {
+                const text = e.target.result;
+                // Validasi minimal isi file
+                if (!text || text.trim() === '') {
+                    throw new Error('File CSV kosong atau tidak valid.');
+                }
+                
+                // Parsing CSV dengan handling baris kosong dan format yang tidak standar
+                const rows = text.split(/\r?\n/).filter(row => row.trim() !== '').map(row => {
+                    // Menangani CSV yang mungkin menggunakan quote
+                    if (row.includes('"')) {
+                        // Parsing CSV dengan quote (lebih kompleks, bisa menggunakan library jika perlu)
+                        const result = [];
+                        let inQuote = false;
+                        let currentValue = '';
                         
-                        // Tanggal
-                        const cellTanggal = newRow.insertCell(0);
-                        const tanggalInput = document.createElement('input');
-                        tanggalInput.type = 'date';
-                        tanggalInput.value = new Date().toISOString().split('T')[0];
-                        cellTanggal.appendChild(tanggalInput);
-                        
-                        // Kode Barang
-                        const cellKode = newRow.insertCell(1);
-                        const kodeInput = document.createElement('input');
-                        kodeInput.type = 'text';
-                        kodeInput.value = kodeBarang;
-                        kodeInput.readOnly = true; // Membuat input ini hanya untuk tampilan
-                        cellKode.appendChild(kodeInput);
-                        
-                        // Nama Barang
-                        const cellNama = newRow.insertCell(2);
-                        const namaInput = document.createElement('input');
-                        namaInput.type = 'text';
-                        namaInput.value = barangDitemukan.nama; // Mengisi nama barang dari localStorage
-                        cellNama.appendChild(namaInput);
-                        
-                        // Kategori
-                        const cellKategori = newRow.insertCell(3);
-                        const kategoriInput = document.createElement('select');
-                        const kategoriOptions = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7'];
-                        kategoriOptions.forEach(kategori => {
-                            const option = document.createElement('option');
-                            option.value = kategori;
-                            option.text = kategori;
-                            if (kategori === barangDitemukan.kategori) {
-                                option.selected = true; // Mengisi kategori dari localStorage
+                        for (let i = 0; i < row.length; i++) {
+                            const char = row[i];
+                            
+                            if (char === '"') {
+                                inQuote = !inQuote;
+                            } else if (char === ',' && !inQuote) {
+                                result.push(currentValue);
+                                currentValue = '';
+                            } else {
+                                currentValue += char;
                             }
-                            kategoriInput.appendChild(option);
-                        });
-                        cellKategori.appendChild(kategoriInput);
+                        }
                         
-                        // Kode Toko
-                        const cellKodeToko = newRow.insertCell(4);
-                        const kodeTokoInput = document.createElement('input');
-                        kodeTokoInput.type = 'text';
-                        kodeTokoInput.value = barangDitemukan.kodeToko; // Mengisi kode toko dari localStorage
-                        kodeTokoInput.readOnly = true; // Membuat input ini hanya untuk tampilan
-                        cellKodeToko.appendChild(kodeTokoInput);
-                        
-                        // Jumlah Diterima
-                        const cellJumlah = newRow.insertCell(5);
-                        const jumlahInput = document.createElement('input');
-                        jumlahInput.type = 'number';
-                        jumlahInput.value = jumlahDiterima;
-                        jumlahInput.min = '1';
-                        jumlahInput.addEventListener('change', hitungTotal);
-                        cellJumlah.appendChild(jumlahInput);
-                        
-                        // Harga Beli
-                        const cellHargaBeli = newRow.insertCell(6);
-                        const hargaBeliInput = document.createElement('input');
-                        hargaBeliInput.type = 'number';
-                        hargaBeliInput.value = barangDitemukan.hargaBeli; // Mengisi harga beli dari localStorage
-                        hargaBeliInput.addEventListener('change', hitungTotal);
-                        cellHargaBeli.appendChild(hargaBeliInput);
-                        
-                        // Harga Jual
-                        const cellHargaJual = newRow.insertCell(7);
-                        const hargaJualInput = document.createElement('input');
-                        hargaJualInput.type = 'number';
-                        hargaJualInput.value = barangDitemukan.hargaJual; // Mengisi harga jual dari localStorage
-                        hargaJualInput.addEventListener('change', hitungTotal);
-                        cellHargaJual.appendChild(hargaJualInput);
-                        
-                        // Total
-                        const cellTotal = newRow.insertCell(8);
-                        const totalInput = document.createElement('input');
-                        totalInput.type = 'number';
-                        totalInput.readOnly = true;
-                        totalInput.value = barangDitemukan.hargaJual * jumlahDiterima; // Menghitung total otomatis
-                        cellTotal.appendChild(totalInput);
-                        
-                        // Tombol Hapus
-                        const cellAksi = newRow.insertCell(9);
-                        const hapusBtn = document.createElement('button');
-                        hapusBtn.textContent = 'Hapus';
-                        hapusBtn.onclick = function() {
-                            tbody.removeChild(newRow);
-                        };
-                        cellAksi.appendChild(hapusBtn);
+                        result.push(currentValue);
+                        return result;
                     } else {
-                        // Jika kode barang tidak ditemukan, tampilkan notifikasi
+                        // CSV sederhana tanpa quote
+                        return row.split(',');
+                    }
+                });
+                
+                // Ambil referensi ke tabel
+                const tbody = document.getElementById('bodyPenerimaan');
+                
+                // Ambil data barang dari localStorage
+                const barang = JSON.parse(localStorage.getItem('barang')) || [];
+                
+                // Inisialisasi counters untuk pelaporan
+                let successCount = 0;
+                let errorCount = 0;
+                const errorItems = [];
+                
+                // Proses setiap baris CSV
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    
+                    if (row.length >= 2) { // Pastikan ada minimal 2 kolom: Kode Barang dan Jumlah
+                        const kodeBarang = row[0].trim();
+                        const jumlahDiterima = parseInt(row[1].trim(), 10);
+                        
+                        // Cek apakah kode barang ada di localStorage
+                        const barangDitemukan = barang.find(item => item.kode === kodeBarang);
+                        
+                        if (barangDitemukan && kodeBarang && !isNaN(jumlahDiterima)) {
+                            // Buat baris baru
+                            const newRow = tbody.insertRow();
+                            
+                            // Tanggal
+                            const cellTanggal = newRow.insertCell(0);
+                            const tanggalInput = document.createElement('input');
+                            tanggalInput.type = 'date';
+                            tanggalInput.classList.add('form-control');
+                            tanggalInput.value = new Date().toISOString().split('T')[0];
+                            cellTanggal.appendChild(tanggalInput);
+                            
+                            // Kode Barang
+                            const cellKode = newRow.insertCell(1);
+                            const kodeInput = document.createElement('input');
+                            kodeInput.type = 'text';
+                            kodeInput.classList.add('form-control');
+                            kodeInput.value = kodeBarang;
+                            kodeInput.readOnly = true;
+                            cellKode.appendChild(kodeInput);
+                            
+                            // Nama Barang
+                            const cellNama = newRow.insertCell(2);
+                            const namaInput = document.createElement('input');
+                            namaInput.type = 'text';
+                            namaInput.classList.add('form-control');
+                            namaInput.value = barangDitemukan.nama;
+                            cellNama.appendChild(namaInput);
+                            
+                            // Kategori
+                            const cellKategori = newRow.insertCell(3);
+                            const kategoriInput = document.createElement('select');
+                            kategoriInput.classList.add('form-control');
+                            const kategoriOptions = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7'];
+                            kategoriOptions.forEach(kategori => {
+                                const option = document.createElement('option');
+                                option.value = kategori;
+                                option.text = kategori;
+                                if (kategori === barangDitemukan.kategori) {
+                                    option.selected = true;
+                                }
+                                kategoriInput.appendChild(option);
+                            });
+                            cellKategori.appendChild(kategoriInput);
+                            
+                            // Kode Toko
+                            const cellKodeToko = newRow.insertCell(4);
+                            const kodeTokoInput = document.createElement('input');
+                            kodeTokoInput.type = 'text';
+                            kodeTokoInput.classList.add('form-control');
+                            kodeTokoInput.value = barangDitemukan.kodeToko;
+                            kodeTokoInput.readOnly = true;
+                            cellKodeToko.appendChild(kodeTokoInput);
+                            
+                            // Jumlah Diterima
+                            const cellJumlah = newRow.insertCell(5);
+                            const jumlahInput = document.createElement('input');
+                            jumlahInput.type = 'number';
+                            jumlahInput.classList.add('form-control');
+                            jumlahInput.value = jumlahDiterima;
+                            jumlahInput.min = '1';
+                            jumlahInput.addEventListener('change', hitungTotal);
+                            cellJumlah.appendChild(jumlahInput);
+                            
+                            // Harga Beli
+                            const cellHargaBeli = newRow.insertCell(6);
+                            const hargaBeliInput = document.createElement('input');
+                            hargaBeliInput.type = 'number';
+                            hargaBeliInput.classList.add('form-control');
+                            hargaBeliInput.value = barangDitemukan.hargaBeli;
+                            hargaBeliInput.addEventListener('change', hitungTotal);
+                            cellHargaBeli.appendChild(hargaBeliInput);
+                            
+                            // Harga Jual
+                            const cellHargaJual = newRow.insertCell(7);
+                            const hargaJualInput = document.createElement('input');
+                            hargaJualInput.type = 'number';
+                            hargaJualInput.classList.add('form-control');
+                            hargaJualInput.value = barangDitemukan.hargaJual;
+                            hargaJualInput.addEventListener('change', hitungTotal);
+                            cellHargaJual.appendChild(hargaJualInput);
+                            
+                            // Total
+                            const cellTotal = newRow.insertCell(8);
+                            const totalInput = document.createElement('input');
+                            totalInput.type = 'number';
+                            totalInput.classList.add('form-control');
+                            totalInput.readOnly = true;
+                            totalInput.value = barangDitemukan.hargaJual * jumlahDiterima;
+                            cellTotal.appendChild(totalInput);
+                            
+                            // Tombol Hapus
+                            const cellAksi = newRow.insertCell(9);
+                            const hapusBtn = document.createElement('button');
+                            hapusBtn.textContent = 'Hapus';
+                            hapusBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+                            hapusBtn.onclick = function() {
+                                tbody.removeChild(newRow);
+                                hitungGrandTotal(); // Update grand total setelah menghapus
+                            };
+                            cellAksi.appendChild(hapusBtn);
+                            
+                            successCount++;
+                        } else {
+                            errorCount++;
+                            errorItems.push({
+                                kodeBarang,
+                                jumlahDiterima,
+                                error: !barangDitemukan ? 'Kode barang tidak ditemukan' : 'Format jumlah tidak valid'
+                            });
+                        }
+                    } else {
+                        errorCount++;
+                        errorItems.push({
+                            row: i + 1,
+                            error: 'Format baris tidak valid (kurang dari 2 kolom)'
+                        });
+                    }
+                    
+                    // Update progress
+                    const currentProgress = 90 + ((i + 1) / rows.length) * 10;
+                    progressBar.style.width = currentProgress + '%';
+                    progressBar.textContent = Math.round(currentProgress) + '%';
+                }
+                
+                // Selesai - update progress bar
+                progressBar.style.width = '100%';
+                progressBar.textContent = '100%';
+                
+                // Hitung grand total
+                hitungGrandTotal();
+                
+                // Tampilkan summary
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    
+                    let resultMessage = `${successCount} item berhasil ditambahkan.`;
+                    
+                    if (errorCount > 0) {
+                        resultMessage += `\n${errorCount} item gagal diproses.`;
+                        console.log('Error items:', errorItems); // Log detail error untuk debugging
+                        
+                        // Show detailed error in alert
+                        let errorDetails = '';
+                        errorItems.slice(0, 5).forEach((item, index) => {
+                            if (item.kodeBarang) {
+                                errorDetails += `\n${index + 1}. Kode: ${item.kodeBarang} - ${item.error}`;
+                            } else {
+                                errorDetails += `\n${index + 1}. Baris ${item.row} - ${item.error}`;
+                            }
+                        });
+                        
+                        if (errorItems.length > 5) {
+                            errorDetails += `\n... dan ${errorItems.length - 5} error lainnya.`;
+                        }
+                        
                         Swal.fire({
                             icon: 'warning',
-                            title: 'Kode Barang Tidak Ditemukan',
-                            text: `Kode barang "${kodeBarang}" tidak ditemukan dalam penyimpanan.`,
+                            title: 'Upload Selesai dengan Peringatan',
+                            html: resultMessage.replace(/\n/g, '<br>') + '<br><br><strong>Detail Error:</strong><pre>' + errorDetails + '</pre>',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Upload Selesai',
+                            text: resultMessage,
                             confirmButtonText: 'OK'
                         });
                     }
-                }
-            });
+                }, 1000);
+            } catch (error) {
+                // Tampilkan error jika terjadi masalah saat memproses
+                clearInterval(progressInterval);
+                progressContainer.style.display = 'none';
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Saat Memproses File',
+                    text: error.message || 'Terjadi kesalahan saat memproses file CSV.',
+                    confirmButtonText: 'OK'
+                });
+                
+                console.error('CSV processing error:', error);
+            }
         };
         
+        // Handler untuk error saat membaca file
+        reader.onerror = (error) => {
+            clearInterval(progressInterval);
+            progressContainer.style.display = 'none';
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Error Saat Membaca File',
+                text: 'Terjadi kesalahan saat membaca file CSV.',
+                confirmButtonText: 'OK'
+            });
+            
+            console.error('FileReader error:', error);
+        };
+        
+        // Mulai membaca file
         reader.readAsText(file);
     };
     
+    // Simulasi klik untuk membuka dialog pemilihan file
     input.click();
+}
+
+// Fungsi untuk menghitung total per baris
+function hitungTotal() {
+    const row = this.closest('tr');
+    const jumlah = parseFloat(row.cells[5].querySelector('input').value) || 0;
+    const hargaJual = parseFloat(row.cells[7].querySelector('input').value) || 0;
+    
+    row.cells[8].querySelector('input').value = jumlah * hargaJual;
+    
+    // Update grand total setelah perubahan
+    hitungGrandTotal();
+}
+
+// Fungsi untuk menghitung grand total dari semua baris
+function hitungGrandTotal() {
+    const rows = document.getElementById('bodyPenerimaan').rows;
+    let grandTotal = 0;
+    
+    for (let i = 0; i < rows.length; i++) {
+        const totalInput = rows[i].cells[8].querySelector('input');
+        grandTotal += parseFloat(totalInput.value) || 0;
+    }
+    
+    // Update element grand total jika ada
+    const grandTotalElement = document.getElementById('grandTotal');
+    if (grandTotalElement) {
+        grandTotalElement.textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
+    } else {
+        // Buat element grand total jika belum ada
+        const table = document.querySelector('table');
+        const grandTotalDiv = document.createElement('div');
+        grandTotalDiv.className = 'mt-3 text-right';
+        grandTotalDiv.innerHTML = '<strong>Grand Total: <span id="grandTotal">Rp ' + grandTotal.toLocaleString('id-ID') + '</span></strong>';
+        table.parentNode.insertBefore(grandTotalDiv, table.nextSibling);
+    }
 }
         
    
