@@ -2995,79 +2995,400 @@ function saveItems(items) {
 
 
 
+/**
+ * Completely redesigned edit barang functionality
+ * with improved UI and workflow
+ */
+
+// Edit barang function - opens modal with item data
 function editBarang(kodeBarang) {
     let barang = JSON.parse(localStorage.getItem('barang')) || [];
     const item = barang.find(item => item.kode === kodeBarang);
     
-    if (item) {
-        Swal.fire({
-            title: 'Edit Barang',
-            html: `
-                <input id="swal-kodeBarang" class="swal2-input" value="${item.kode}" placeholder="Kode Barang" readonly>
-                <input id="swal-namaBarang" class="swal2-input" value="${item.nama}" placeholder="Nama Barang">
-                <input id="swal-hargaBeli" class="swal2-input" value="${item.hargaBeli}" placeholder="Harga Beli" type="number">
-                <input id="swal-hargaJual" class="swal2-input" value="${item.hargaJual}" placeholder="Harga Jual" type="number">
-                <div style="text-align: left; margin: 10px auto; width: 80%;">
-                    <label>Stok Barang: ${item.stok}</label>
-                    <input id="swal-stokBarang" type="hidden" value="${item.stok}">
-                    <p style="color: #666; font-size: 12px; margin-top: 5px;">*Stok tidak dapat diubah melalui form ini</p>
-                </div>
-                <input id="swal-kodeToko" class="swal2-input" value="${item.kodeToko}" placeholder="Kode Toko">
-            `,
-            focusConfirm: false,
-            confirmButtonText: 'Simpan',
-            cancelButtonText: 'Batal',
-            showCancelButton: true,
-            confirmButtonColor: '#4CAF50',
-            cancelButtonColor: '#f44336',
-            backdrop: `rgba(0, 0, 0, 0.5)`,
-            preConfirm: () => {
-                const namaBarang = document.getElementById('swal-namaBarang').value;
-                const hargaBeli = document.getElementById('swal-hargaBeli').value;
-                const hargaJual = document.getElementById('swal-hargaJual').value;
-                const kodeToko = document.getElementById('swal-kodeToko').value;
-                const stokBarang = document.getElementById('swal-stokBarang').value; // Hidden field
-
-                if (!namaBarang || !hargaBeli || !hargaJual || !kodeToko) {
-                    Swal.showValidationMessage('Semua data harus diisi');
-                    return false;
-                }
-                
-                return { namaBarang, hargaBeli, hargaJual, stokBarang, kodeToko };
+    if (!item) {
+        showNotification('error', 'Barang tidak ditemukan');
+        return;
+    }
+    
+    // Create modal backdrop
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.className = 'modal-backdrop';
+    modalBackdrop.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    `;
+    
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    modalContent.style.cssText = `
+        background-color: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.3s ease;
+    `;
+    
+    // Add animation style
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .form-row {
+            margin-bottom: 16px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        .form-input:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #3e8e41;
+        }
+        .btn-secondary {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #d32f2f;
+        }
+        .readonly-field {
+            background-color: #f9f9f9;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            color: #666;
+        }
+        .info-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+    `;
+    document.head.appendChild(styleElement);
+    
+    // Modal header
+    const modalHeader = document.createElement('div');
+    modalHeader.style.cssText = `
+        padding: 16px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    `;
+    
+    const modalTitle = document.createElement('h3');
+    modalTitle.textContent = 'Edit Data Barang';
+    modalTitle.style.cssText = `
+        margin: 0;
+        color: #333;
+        font-size: 18px;
+    `;
+    
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '&times;';
+    closeButton.style.cssText = `
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    `;
+    closeButton.onclick = () => document.body.removeChild(modalBackdrop);
+    
+    modalHeader.appendChild(modalTitle);
+    modalHeader.appendChild(closeButton);
+    
+    // Modal body with form
+    const modalBody = document.createElement('div');
+    modalBody.style.cssText = `
+        padding: 16px;
+    `;
+    
+    // Form content
+    modalBody.innerHTML = `
+        <div class="form-row">
+            <label class="form-label">Kode Barang</label>
+            <div class="readonly-field">${item.kode}</div>
+        </div>
+        
+        <div class="form-row">
+            <label class="form-label" for="edit-nama">Nama Barang</label>
+            <input type="text" id="edit-nama" class="form-input" value="${item.nama}" />
+        </div>
+        
+        <div class="form-row">
+            <label class="form-label" for="edit-harga-beli">Harga Beli</label>
+            <input type="number" id="edit-harga-beli" class="form-input" value="${item.hargaBeli}" />
+        </div>
+        
+        <div class="form-row">
+            <label class="form-label" for="edit-harga-jual">Harga Jual</label>
+            <input type="number" id="edit-harga-jual" class="form-input" value="${item.hargaJual}" />
+        </div>
+        
+        <div class="form-row">
+            <label class="form-label">Stok Barang</label>
+            <div class="readonly-field">${item.stok}</div>
+            <p class="info-text">* Stok hanya dapat diubah melalui transaksi</p>
+        </div>
+        
+        <div class="form-row">
+            <label class="form-label" for="edit-kode-toko">Kode Toko</label>
+            <input type="text" id="edit-kode-toko" class="form-input" value="${item.kodeToko}" />
+        </div>
+    `;
+    
+    // Modal footer with buttons
+    const modalFooter = document.createElement('div');
+    modalFooter.style.cssText = `
+        padding: 16px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    `;
+    
+    const cancelButton = document.createElement('button');
+    cancelButton.textContent = 'Batal';
+    cancelButton.className = 'btn btn-secondary';
+    cancelButton.onclick = () => document.body.removeChild(modalBackdrop);
+    
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Simpan';
+    saveButton.className = 'btn btn-primary';
+    saveButton.onclick = () => {
+        const namaBarang = document.getElementById('edit-nama').value;
+        const hargaBeli = document.getElementById('edit-harga-beli').value;
+        const hargaJual = document.getElementById('edit-harga-jual').value;
+        const kodeToko = document.getElementById('edit-kode-toko').value;
+        
+        // Validation
+        if (!namaBarang || !hargaBeli || !hargaJual || !kodeToko) {
+            showFormError('Semua field harus diisi');
+            return;
+        }
+        
+        if (parseFloat(hargaJual) <= parseFloat(hargaBeli)) {
+            showFormError('Harga jual harus lebih besar dari harga beli');
+            return;
+        }
+        
+        // Create updated data
+        const updatedData = {
+            nama: namaBarang,
+            hargaBeli: parseFloat(hargaBeli),
+            hargaJual: parseFloat(hargaJual),
+            kodeToko: kodeToko
+        };
+        
+        // Update the item
+        if (saveBarangChanges(kodeBarang, updatedData)) {
+            document.body.removeChild(modalBackdrop);
+        }
+    };
+    
+    modalFooter.appendChild(cancelButton);
+    modalFooter.appendChild(saveButton);
+    
+    // Assemble modal
+    modalContent.appendChild(modalHeader);
+    modalContent.appendChild(modalBody);
+    modalContent.appendChild(modalFooter);
+    modalBackdrop.appendChild(modalContent);
+    
+    // Show modal
+    document.body.appendChild(modalBackdrop);
+    
+    // Function to show validation errors
+    function showFormError(message) {
+        // Remove any existing error message
+        const existingError = document.getElementById('form-error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Create and show new error message
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'form-error-message';
+        errorDiv.style.cssText = `
+            background-color: #ffebee;
+            color: #d32f2f;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        `;
+        errorDiv.textContent = message;
+        
+        modalBody.insertBefore(errorDiv, modalBody.firstChild);
+        
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
             }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                updateBarang(kodeBarang, result.value);
-            }
-        });
-    } else {
-        Swal.fire('Error', 'Barang tidak ditemukan', 'error');
+        }, 3000);
     }
 }
 
-function updateBarang(kodeBarang, updatedData) {
-    let barang = JSON.parse(localStorage.getItem('barang')) || [];
-    let itemIndex = barang.findIndex(item => item.kode === kodeBarang);
-    
-    if (itemIndex !== -1) {
-        // Preserve the original stock value
-        const originalStok = barang[itemIndex].stok;
+// Function to save changes to localStorage
+function saveBarangChanges(kodeBarang, updatedData) {
+    try {
+        let barang = JSON.parse(localStorage.getItem('barang')) || [];
+        const index = barang.findIndex(item => item.kode === kodeBarang);
         
-        barang[itemIndex] = {
-            ...barang[itemIndex],
-            nama: updatedData.namaBarang,
-            hargaBeli: parseFloat(updatedData.hargaBeli),
-            hargaJual: parseFloat(updatedData.hargaJual),
-            stok: originalStok, // Use the original stock value
+        if (index === -1) {
+            showNotification('error', 'Barang tidak ditemukan');
+            return false;
+        }
+        
+        // Update item while preserving the stock
+        barang[index] = {
+            ...barang[index],
+            nama: updatedData.nama,
+            hargaBeli: updatedData.hargaBeli,
+            hargaJual: updatedData.hargaJual,
             kodeToko: updatedData.kodeToko
         };
         
+        // Save to localStorage
         localStorage.setItem('barang', JSON.stringify(barang));
         
-        Swal.fire('Berhasil', 'Data barang berhasil diperbarui', 'success');
+        // Show success notification
+        showNotification('success', 'Data barang berhasil diperbarui');
         
-        // Reload the search results
-        cariBarang(document.getElementById('searchInput').value);
+        // Refresh the data display
+        refreshDataDisplay();
+        
+        return true;
+    } catch (error) {
+        console.error('Error saving changes:', error);
+        showNotification('error', 'Terjadi kesalahan saat menyimpan data');
+        return false;
+    }
+}
+
+// Function to display notifications
+function showNotification(type, message) {
+    // Remove any existing notification
+    const existingNotification = document.getElementById('notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.id = 'notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px;
+        border-radius: 4px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1001;
+        animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+        max-width: 300px;
+    `;
+    
+    // Style based on notification type
+    if (type === 'success') {
+        notification.style.backgroundColor = '#4CAF50';
+    } else if (type === 'error') {
+        notification.style.backgroundColor = '#f44336';
+    } else if (type === 'warning') {
+        notification.style.backgroundColor = '#ff9800';
+    } else {
+        notification.style.backgroundColor = '#2196F3';
+    }
+    
+    notification.textContent = message;
+    
+    // Add animation
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+    `;
+    document.head.appendChild(styleElement);
+    
+    // Add to document
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// Function to refresh data display
+function refreshDataDisplay() {
+    // Check if search function exists
+    if (typeof cariBarang === 'function') {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            cariBarang(searchInput.value);
+        } else {
+            // Fallback if search input not found
+            displayBarang();
+        }
+    } else if (typeof displayBarang === 'function') {
+        // Fallback to display function
+        displayBarang();
+    } else {
+        // If neither function exists, reload the page
+        window.location.reload();
     }
 }
 
