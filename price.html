@@ -390,6 +390,104 @@
             color: #888;
             font-style: italic;
         }
+        
+        
+        
+           .price-tag-discount-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #e63946;
+        color: white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        transform: rotate(15deg);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        z-index: 2;
+    }
+    
+    .price-tag-discount-timer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(230, 57, 70, 0.1);
+        color: #e63946;
+        padding: 3px;
+        font-size: 10px;
+        text-align: center;
+        border-top: 1px dashed rgba(230, 57, 70, 0.3);
+    }
+    
+    .price-tag-discount {
+        background: linear-gradient(to bottom right, #fff5f7, white);
+        border: 2px solid #fecdd3 !important;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .price-tag-discount::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: linear-gradient(135deg, rgba(230, 57, 70, 0.1) 0%, rgba(230, 57, 70, 0) 60%);
+        z-index: 0;
+    }
+    
+    .price-tag-discount > * {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Style untuk modal pilih diskon */
+    .discount-selection-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    .discount-selection-table th, 
+    .discount-selection-table td {
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .discount-selection-table th {
+        background-color: #f1f5f9;
+        font-weight: 600;
+        color: #334155;
+    }
+    .discount-selection-table .checkbox-cell {
+        text-align: center;
+        width: 40px;
+    }
+    .discount-checkbox {
+        cursor: pointer;
+    }
+    .discount-selection-table tr:hover {
+        background-color: #f8fafc;
+    }
+    .select-all-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .select-all-container input {
+        margin-right: 8px;
+    }
+    .select-all-container label {
+        font-weight: 500;
+        cursor: pointer;
+    }
+        
     </style>
 </head>
 <body>
@@ -455,10 +553,39 @@
                     </div>
                 </div>
 
-                <div class="print-section">
-                    <button id="printButton"><i class="fas fa-print"></i> Cetak</button>
-                    <button id="downloadPdfButton"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                </div>
+               <div class="print-section">
+    <button id="printButton"><i class="fas fa-print"></i> Cetak</button>
+    
+    <button id="downloadPdfButton"><i class="fas fa-file-pdf"></i> Download PDF</button>
+</div>
+
+
+
+<template id="discount-selection-modal">
+    <div class="select-all-container">
+        <input type="checkbox" id="selectAllDiscounts">
+        <label for="selectAllDiscounts">Pilih Semua</label>
+    </div>
+    <div style="max-height: 400px; overflow-y: auto;">
+        <table class="discount-selection-table">
+            <thead>
+                <tr>
+                    <th class="checkbox-cell"></th>
+                    <th>Kode</th>
+                    <th>Nama Barang</th>
+                    <th>Harga Asli</th>
+                    <th>Harga Diskon</th>
+                    <th>Diskon</th>
+                    <th>Berakhir</th>
+                </tr>
+            </thead>
+            <tbody id="discountTableBody">
+                <!-- Item diskon akan ditambahkan secara dinamis -->
+            </tbody>
+        </table>
+    </div>
+</template>
+
 
                 <div id="priceTagsContainer" class="price-tags-container price-tags-print-container">
                     <!-- Price tags will be generated here -->
@@ -544,7 +671,7 @@
     <div class="loading" id="loading">
         <div class="spinner"></div>
     </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
   document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
@@ -602,54 +729,95 @@
     let selectedProducts = [];
 
     // Load products from localStorage
-    function loadProducts() {
-        const barang = JSON.parse(localStorage.getItem('barang')) || [];
+  function loadProducts() {
+    const barang = JSON.parse(localStorage.getItem('barang')) || [];
+    const diskon = JSON.parse(localStorage.getItem('diskon')) || [];
+    
+    // Map discount data to products
+    const productsWithDiscounts = barang.map(product => {
+        // Get current date for discount validation
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         
-        if (barang.length === 0) {
-            noDataMessage.style.display = 'block';
-            document.getElementById('productsTable').style.display = 'none';
-        } else {
-            noDataMessage.style.display = 'none';
-            document.getElementById('productsTable').style.display = 'table';
-            displayProducts(barang);
-        }
-    }
-
-    // Display products in the table
-    function displayProducts(products) {
-        productsTableBody.innerHTML = '';
-        
-        products.forEach(product => {
-            const row = document.createElement('tr');
+        // Find active discounts for this product
+        const activeDiscount = diskon.find(d => {
+            const startDate = new Date(d.tanggalMulai);
+            const endDate = new Date(d.tanggalBerakhir);
+            endDate.setHours(23, 59, 59, 999);
             
-            // Checkbox cell
-            const checkboxCell = document.createElement('td');
-            checkboxCell.className = 'checkbox-cell';
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.dataset.kode = product.kode;
-            checkbox.addEventListener('change', toggleProductSelection);
-            checkboxCell.appendChild(checkbox);
-            
-            // Create data cells
-            const cells = [
-                checkboxCell,
-                createCell(product.kodeToko || '-'),
-                createCell(product.kode || '-'),
-                createCell(product.plu || '-'),
-                createCell(product.nama || '-'),
-                createCell(product.kategori || '-'),
-                createCell(formatRupiah(product.hargaJual) || '-'),
-                createCell(product.stok || '0')
-            ];
-            
-            // Add cells to row
-            cells.forEach(cell => row.appendChild(cell));
-            
-            // Add row to table body
-            productsTableBody.appendChild(row);
+            return d.kode === product.kode && 
+                   startDate <= today && 
+                   endDate >= today && 
+                   d.status === 'active';
         });
+        
+        // Return product with discount info if available
+        return {
+            ...product,
+            hasDiscount: !!activeDiscount,
+            discountInfo: activeDiscount || null
+        };
+    });
+    
+    if (productsWithDiscounts.length === 0) {
+        noDataMessage.style.display = 'block';
+        document.getElementById('productsTable').style.display = 'none';
+    } else {
+        noDataMessage.style.display = 'none';
+        document.getElementById('productsTable').style.display = 'table';
+        displayProducts(productsWithDiscounts);
     }
+}
+
+  // Display products in the table with discount info
+function displayProducts(products) {
+    productsTableBody.innerHTML = '';
+    
+    products.forEach(product => {
+        const row = document.createElement('tr');
+        
+        // Checkbox cell
+        const checkboxCell = document.createElement('td');
+        checkboxCell.className = 'checkbox-cell';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.dataset.kode = product.kode;
+        checkbox.addEventListener('change', toggleProductSelection);
+        checkboxCell.appendChild(checkbox);
+        
+        // Create data cells
+        const cells = [
+            checkboxCell,
+            createCell(product.kodeToko || '-'),
+            createCell(product.kode || '-'),
+            createCell(product.plu || '-'),
+            createCell(product.nama || '-'),
+            createCell(product.kategori || '-')
+        ];
+        
+        // Price cell with discount indication
+        const priceCell = document.createElement('td');
+        if (product.hasDiscount) {
+            priceCell.innerHTML = `
+                <span style="text-decoration: line-through; color: #999;">${formatRupiah(product.hargaJual)}</span>
+                <span style="color: #e63946; font-weight: bold;">${formatRupiah(product.discountInfo.hargaDiskon)}</span>
+                <span style="background-color: #e6394620; font-size: 0.8em; padding: 2px 4px; border-radius: 3px; margin-left: 4px;">${product.discountInfo.persenDiskon}%</span>
+            `;
+        } else {
+            priceCell.textContent = formatRupiah(product.hargaJual) || '-';
+        }
+        cells.push(priceCell);
+        
+        // Stock cell
+        cells.push(createCell(product.stok || '0'));
+        
+        // Add cells to row
+        cells.forEach(cell => row.appendChild(cell));
+        
+        // Add row to table body
+        productsTableBody.appendChild(row);
+    });
+}
 
     // Helper function to create a table cell
     function createCell(text) {
@@ -669,32 +837,56 @@
         }).format(amount);
     }
 
-    // Toggle product selection
-    function toggleProductSelection(e) {
-        const kode = e.target.dataset.kode;
-        const isChecked = e.target.checked;
+ // Toggle product selection (updated to handle discount info)
+function toggleProductSelection(e) {
+    const kode = e.target.dataset.kode;
+    const isChecked = e.target.checked;
+    
+    const barang = JSON.parse(localStorage.getItem('barang')) || [];
+    const diskon = JSON.parse(localStorage.getItem('diskon')) || [];
+    
+    // Find the product
+    const product = barang.find(item => item.kode === kode);
+    
+    if (product) {
+        // Check for active discount
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         
-        const barang = JSON.parse(localStorage.getItem('barang')) || [];
-        const product = barang.find(item => item.kode === kode);
+        const activeDiscount = diskon.find(d => {
+            const startDate = new Date(d.tanggalMulai);
+            const endDate = new Date(d.tanggalBerakhir);
+            endDate.setHours(23, 59, 59, 999);
+            
+            return d.kode === product.kode && 
+                   startDate <= today && 
+                   endDate >= today && 
+                   d.status === 'active';
+        });
         
-        if (isChecked && product) {
-            selectedProducts.push(product);
+        if (isChecked) {
+            const productWithDiscount = {
+                ...product,
+                hasDiscount: !!activeDiscount,
+                discountInfo: activeDiscount || null
+            };
+            selectedProducts.push(productWithDiscount);
         } else {
             selectedProducts = selectedProducts.filter(item => item.kode !== kode);
         }
-        
-        // Highlight selected rows
-        const row = e.target.closest('tr');
-        if (isChecked) {
-            row.classList.add('selected-row');
-        } else {
-            row.classList.remove('selected-row');
-        }
-        
-        // Update "Select All" checkbox state
-        updateSelectAllCheckbox();
     }
-
+    
+    // Highlight selected rows
+    const row = e.target.closest('tr');
+    if (isChecked) {
+        row.classList.add('selected-row');
+    } else {
+        row.classList.remove('selected-row');
+    }
+    
+    // Update "Select All" checkbox state
+    updateSelectAllCheckbox();
+}
     // Update "Select All" checkbox state
     function updateSelectAllCheckbox() {
         const checkboxes = productsTableBody.querySelectorAll('input[type="checkbox"]');
@@ -759,7 +951,6 @@
 
     // Generate price tags based on selected products and settings
     
-    // Generate price tags based on selected products and settings
 function generatePriceTags() {
     priceTagsContainer.innerHTML = '';
     
@@ -803,7 +994,7 @@ function generatePriceTags() {
                         <span>${product.kode || '-'}</span>
                     </div>
                     <div class="price-tag-title" style="font-size: ${Math.max(10, settings.fontSize - 7)}px; font-weight: bold; margin: 3px 0; text-align: center; word-wrap: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${product.nama || '-'}</div>
-                    <div class="price-tag-price" style="font-size: ${settings.fontSize}px; font-weight: bold; text-align: center; color: #e63946; background-color: #f8f9fa; padding: 5px; margin: 8px -10px -10px -10px; border-top: 1px solid #e9ecef;">${formatRupiah(product.hargaJual)}</div>
+                    ${generatePriceContent(product, settings.fontSize, 'compact')}
                 `;
                 break;
                 
@@ -814,7 +1005,7 @@ function generatePriceTags() {
                         <span style="font-weight: 500;">Kode: ${product.kode || '-'}</span>
                     </div>
                     <div class="price-tag-title" style="font-size: ${Math.max(10, settings.fontSize - 7)}px; font-weight: bold; margin: 3px 0; text-align: center; word-wrap: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${product.nama || '-'}</div>
-                    <div class="price-tag-price" style="font-size: ${settings.fontSize}px; font-weight: bold; text-align: center; color: #e63946; margin: 5px 0; padding: 5px; border-radius: 4px; background-color: #fff5f5;">${formatRupiah(product.hargaJual)}</div>
+                    ${generatePriceContent(product, settings.fontSize, 'detailed')}
                     <div class="price-tag-footer" style="display: flex; justify-content: space-between; font-size: ${Math.max(8, settings.fontSize - 10)}px; color: #555; margin-top: 5px; background-color: #f8f9fa; padding: 5px; margin: 8px -10px -10px -10px; border-top: 1px solid #e9ecef;">
                         <span style="font-weight: 500;">Kat: ${product.kategori || '-'}</span>
                         <span style="font-weight: 500;">PLU: ${product.plu || '-'}</span>
@@ -830,7 +1021,7 @@ function generatePriceTags() {
                         <span style="font-weight: 500;">${product.kode || '-'}</span>
                     </div>
                     <div class="price-tag-title" style="font-size: ${Math.max(10, settings.fontSize - 7)}px; font-weight: bold; margin: 10px 0; text-align: center; word-wrap: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: #495057;">${product.nama || '-'}</div>
-                    <div class="price-tag-price" style="font-size: ${settings.fontSize}px; font-weight: bold; text-align: center; color: #e63946; background-color: #f8f9fa; padding: 8px 5px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 5px;">${formatRupiah(product.hargaJual)}</div>
+                    ${generatePriceContent(product, settings.fontSize, 'standard')}
                     <div class="price-tag-footer" style="display: flex; justify-content: center; font-size: ${Math.max(8, settings.fontSize - 10)}px; color: #6c757d; margin-top: auto; padding-top: 5px; border-top: 1px dashed #e9ecef;">
                         <span style="font-weight: 500;">PLU: ${product.plu || '-'}</span>
                     </div>
@@ -876,7 +1067,74 @@ function generatePriceTags() {
     `;
 }
 
-// Generate batch labels function with improved design
+function formatTanggal(tanggal) {
+    if (!tanggal) return '-';
+    return new Date(tanggal).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+    });
+}
+
+
+
+function generatePriceContent(product, fontSize, layout) {
+    if (!product.hasDiscount) {
+        // Regular price (no discount)
+        switch(layout) {
+            case 'compact':
+                return `<div class="price-tag-price" style="font-size: ${fontSize}px; font-weight: bold; text-align: center; color: #e63946; background-color: #f8f9fa; padding: 5px; margin: 8px -10px -10px -10px; border-top: 1px solid #e9ecef;">${formatRupiah(product.hargaJual)}</div>`;
+            
+            case 'detailed':
+                return `<div class="price-tag-price" style="font-size: ${fontSize}px; font-weight: bold; text-align: center; color: #e63946; margin: 5px 0; padding: 5px; border-radius: 4px; background-color: #fff5f5;">${formatRupiah(product.hargaJual)}</div>`;
+            
+            default: // standard
+                return `<div class="price-tag-price" style="font-size: ${fontSize}px; font-weight: bold; text-align: center; color: #e63946; background-color: #f8f9fa; padding: 8px 5px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 5px;">${formatRupiah(product.hargaJual)}</div>`;
+        }
+    } else {
+        // Discounted price
+        const discountInfo = product.discountInfo;
+        const discountPeriod = `${formatTanggal(discountInfo.tanggalMulai)} - ${formatTanggal(discountInfo.tanggalBerakhir)}`;
+        
+        switch(layout) {
+            case 'compact':
+                return `
+                    <div style="text-align: center; background-color: #fff2f2; border-radius: 4px; padding: 3px 0; margin: 0 -5px;">
+                        <div style="font-size: ${fontSize - 6}px; text-decoration: line-through; color: #888;">${formatRupiah(product.hargaJual)}</div>
+                        <div style="font-size: ${fontSize}px; font-weight: bold; color: #e63946;">${formatRupiah(discountInfo.hargaDiskon)}</div>
+                        <div style="font-size: ${fontSize - 10}px; color: #666; margin-top: 2px;">${discountInfo.persenDiskon}% s/d ${formatTanggal(discountInfo.tanggalBerakhir)}</div>
+                    </div>
+                `;
+            
+            case 'detailed':
+                return `
+                    <div style="background-color: #fff2f2; border-radius: 4px; padding: 5px; text-align: center;">
+                        <div style="position: relative; display: inline-block; margin-bottom: 4px;">
+                            <span style="font-size: ${fontSize - 4}px; text-decoration: line-through; color: #888;">${formatRupiah(product.hargaJual)}</span>
+                            <span style="position: absolute; top: -3px; right: -30px; background-color: #e63946; color: white; border-radius: 50%; font-size: ${fontSize - 10}px; padding: 3px 5px; transform: rotate(15deg);">-${discountInfo.persenDiskon}%</span>
+                        </div>
+                        <div style="font-size: ${fontSize}px; font-weight: bold; color: #e63946;">${formatRupiah(discountInfo.hargaDiskon)}</div>
+                        <div style="font-size: ${fontSize - 10}px; color: #666; margin-top: 3px;">Periode: ${discountPeriod}</div>
+                    </div>
+                `;
+            
+            default: // standard
+                return `
+                    <div style="background-color: #fff5f5; border-radius: 6px; padding: 8px 5px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                        <div style="font-size: ${fontSize - 5}px; text-decoration: line-through; color: #888;">${formatRupiah(product.hargaJual)}</div>
+                        <div style="font-size: ${fontSize}px; font-weight: bold; color: #e63946; margin: 4px 0;">${formatRupiah(discountInfo.hargaDiskon)}</div>
+                        <div style="display: inline-block; background-color: #e63946; color: white; font-size: ${fontSize - 10}px; padding: 2px 6px; border-radius: 4px; margin-top: 2px;">Diskon ${discountInfo.persenDiskon}%</div>
+                        <div style="font-size: ${fontSize - 10}px; color: #666; margin-top: 4px;">Berlaku s/d ${formatTanggal(discountInfo.tanggalBerakhir)}</div>
+                    </div>
+                `;
+        }
+    }
+}
+
+
+
+
+
 function generateBatchLabels(count) {
     if (selectedProducts.length === 0) {
         alert('Silakan pilih minimal satu produk untuk membuat label batch.');
@@ -927,7 +1185,7 @@ function generateBatchLabels(count) {
                             <span>${product.kode || '-'}</span>
                         </div>
                         <div class="price-tag-title" style="font-size: ${Math.max(10, settings.fontSize - 7)}px; font-weight: bold; margin: 3px 0; text-align: center; word-wrap: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${product.nama || '-'}</div>
-                        <div class="price-tag-price" style="font-size: ${settings.fontSize}px; font-weight: bold; text-align: center; color: #e63946; background-color: #f8f9fa; padding: 5px; margin: 8px -10px -10px -10px; border-top: 1px solid #e9ecef;">${formatRupiah(product.hargaJual)}</div>
+                        ${generatePriceContent(product, settings.fontSize, 'compact')}
                     `;
                     break;
                     
@@ -938,7 +1196,7 @@ function generateBatchLabels(count) {
                             <span style="font-weight: 500;">Kode: ${product.kode || '-'}</span>
                         </div>
                         <div class="price-tag-title" style="font-size: ${Math.max(10, settings.fontSize - 7)}px; font-weight: bold; margin: 3px 0; text-align: center; word-wrap: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${product.nama || '-'}</div>
-                        <div class="price-tag-price" style="font-size: ${settings.fontSize}px; font-weight: bold; text-align: center; color: #e63946; margin: 5px 0; padding: 5px; border-radius: 4px; background-color: #fff5f5;">${formatRupiah(product.hargaJual)}</div>
+                        ${generatePriceContent(product, settings.fontSize, 'detailed')}
                         <div class="price-tag-footer" style="display: flex; justify-content: space-between; font-size: ${Math.max(8, settings.fontSize - 10)}px; color: #555; margin-top: 5px; background-color: #f8f9fa; padding: 5px; margin: 8px -10px -10px -10px; border-top: 1px solid #e9ecef;">
                             <span style="font-weight: 500;">Kat: ${product.kategori || '-'}</span>
                             <span style="font-weight: 500;">PLU: ${product.plu || '-'}</span>
@@ -954,7 +1212,7 @@ function generateBatchLabels(count) {
                             <span style="font-weight: 500;">${product.kode || '-'}</span>
                         </div>
                         <div class="price-tag-title" style="font-size: ${Math.max(10, settings.fontSize - 7)}px; font-weight: bold; margin: 10px 0; text-align: center; word-wrap: break-word; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: #495057;">${product.nama || '-'}</div>
-                        <div class="price-tag-price" style="font-size: ${settings.fontSize}px; font-weight: bold; text-align: center; color: #e63946; background-color: #f8f9fa; padding: 8px 5px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 5px;">${formatRupiah(product.hargaJual)}</div>
+                        ${generatePriceContent(product, settings.fontSize, 'standard')}
                         <div class="price-tag-footer" style="display: flex; justify-content: center; font-size: ${Math.max(8, settings.fontSize - 10)}px; color: #6c757d; margin-top: auto; padding-top: 5px; border-top: 1px dashed #e9ecef;">
                             <span style="font-weight: 500;">PLU: ${product.plu || '-'}</span>
                         </div>
@@ -966,7 +1224,6 @@ function generateBatchLabels(count) {
         }
     });
 }
-
 // Function to add new layout options
 function addNewLayoutOptions() {
     const layoutOptionsContainer = document.querySelector('.layout-options');
@@ -1565,6 +1822,373 @@ document.head.appendChild(style);
         }
     });
 });
+  
+  
+  
+  // Tambahkan tombol diskon ke Print Section
+function addDiscountButtonToInterface() {
+    const printSection = document.querySelector('.print-section');
+    if (printSection) {
+        const discountButton = document.createElement('button');
+        discountButton.id = 'discountTagsButton';
+        discountButton.innerHTML = '<i class="fas fa-percent"></i> Label Diskon';
+        discountButton.addEventListener('click', generateDiscountTags);
+        
+        // Tambahkan sebelum tombol PDF jika ada
+        const pdfButton = document.getElementById('downloadPdfButton');
+        if (pdfButton) {
+            printSection.insertBefore(discountButton, pdfButton);
+        } else {
+            printSection.appendChild(discountButton);
+        }
+    }
+}
+
+// Fungsi untuk membuat price tag khusus diskon
+function generateDiscountTags() {
+    // Ambil data diskon dari localStorage
+    const diskon = JSON.parse(localStorage.getItem('diskon')) || [];
+    const barang = JSON.parse(localStorage.getItem('barang')) || [];
+    
+    if (diskon.length === 0) {
+        Swal.fire({
+            title: 'Tidak Ada Diskon',
+            text: 'Tidak ada data diskon yang tersedia. Tambahkan diskon terlebih dahulu.',
+            icon: 'info',
+            confirmButtonColor: '#3b82f6'
+        });
+        return;
+    }
+    
+    // Filter diskon yang aktif berdasarkan tanggal hari ini
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const activeDiscounts = diskon.filter(item => {
+        const startDate = new Date(item.tanggalMulai);
+        const endDate = new Date(item.tanggalBerakhir);
+        endDate.setHours(23, 59, 59, 999);
+        
+        return startDate <= today && endDate >= today && item.status === 'active';
+    });
+    
+    if (activeDiscounts.length === 0) {
+        Swal.fire({
+            title: 'Tidak Ada Diskon Aktif',
+            text: 'Tidak ada diskon yang aktif saat ini.',
+            icon: 'info',
+            confirmButtonColor: '#3b82f6'
+        });
+        return;
+    }
+    
+    // Tampilkan modal pilih diskon
+    showDiscountSelectionModal(activeDiscounts, barang);
+}
+
+// Modal untuk memilih diskon yang akan dibuat price tag-nya
+function showDiscountSelectionModal(discounts, products) {
+    // Siapkan data diskon dengan informasi lengkap produk
+    const discountItems = discounts.map(discount => {
+        const product = products.find(p => p.kode === discount.kode);
+        if (!product) return null;
+        
+        const hargaDiskon = Math.round(product.hargaJual * (1 - discount.persenDiskon / 100));
+        
+        return {
+            ...discount,
+            productName: product.nama,
+            originalPrice: product.hargaJual,
+            discountedPrice: hargaDiskon,
+            saving: product.hargaJual - hargaDiskon,
+            product: product
+        };
+    }).filter(item => item !== null);
+    
+    if (discountItems.length === 0) {
+        Swal.fire({
+            title: 'Gagal Memuat Data',
+            text: 'Tidak dapat menemukan data produk untuk diskon yang aktif.',
+            icon: 'error',
+            confirmButtonColor: '#3b82f6'
+        });
+        return;
+    }
+    
+    // Buat tabel diskon
+    let tableRows = '';
+    discountItems.forEach((item, index) => {
+        tableRows += `
+            <tr>
+                <td class="checkbox-cell">
+                    <input type="checkbox" class="discount-checkbox" data-index="${index}">
+                </td>
+                <td>${item.product.kode}</td>
+                <td>${item.productName}</td>
+                <td>${formatRupiah(item.originalPrice)}</td>
+                <td>${formatRupiah(item.discountedPrice)}</td>
+                <td>${item.persenDiskon}%</td>
+                <td>${formatTanggal(item.tanggalBerakhir)}</td>
+            </tr>
+        `;
+    });
+    
+    Swal.fire({
+        title: 'Pilih Diskon untuk Label',
+        width: '800px',
+        html: `
+            <style>
+                .discount-selection-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 20px;
+                    font-size: 14px;
+                }
+                .discount-selection-table th, 
+                .discount-selection-table td {
+                    padding: 8px 12px;
+                    text-align: left;
+                    border-bottom: 1px solid #e2e8f0;
+                }
+                .discount-selection-table th {
+                    background-color: #f1f5f9;
+                    font-weight: 600;
+                    color: #334155;
+                }
+                .discount-selection-table .checkbox-cell {
+                    text-align: center;
+                    width: 40px;
+                }
+                .discount-checkbox {
+                    cursor: pointer;
+                }
+                .discount-selection-table tr:hover {
+                    background-color: #f8fafc;
+                }
+                .select-all-container {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 12px;
+                }
+                .select-all-container input {
+                    margin-right: 8px;
+                }
+                .select-all-container label {
+                    font-weight: 500;
+                    cursor: pointer;
+                }
+            </style>
+            <div class="select-all-container">
+                <input type="checkbox" id="selectAllDiscounts">
+                <label for="selectAllDiscounts">Pilih Semua</label>
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table class="discount-selection-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-cell"></th>
+                            <th>Kode</th>
+                            <th>Nama Barang</th>
+                            <th>Harga Asli</th>
+                            <th>Harga Diskon</th>
+                            <th>Diskon</th>
+                            <th>Berakhir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Buat Label',
+        cancelButtonText: 'Batal',
+        didOpen: () => {
+            // Inisialisasi "Select All" checkbox
+            const selectAllCheckbox = document.getElementById('selectAllDiscounts');
+            const checkboxes = document.querySelectorAll('.discount-checkbox');
+            
+            selectAllCheckbox.addEventListener('change', function() {
+                const isChecked = this.checked;
+                
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = isChecked;
+                });
+            });
+            
+            // Update "Select All" checkbox state saat perubahan individual checkbox
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                    const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+                    
+                    selectAllCheckbox.checked = allChecked;
+                    selectAllCheckbox.indeterminate = anyChecked && !allChecked;
+                });
+            });
+        },
+        preConfirm: () => {
+            const selectedCheckboxes = document.querySelectorAll('.discount-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                Swal.showValidationMessage('Pilih minimal satu diskon untuk dibuat label');
+                return false;
+            }
+            
+            // Kumpulkan indeks yang dipilih
+            const selectedIndices = Array.from(selectedCheckboxes).map(
+                checkbox => parseInt(checkbox.dataset.index)
+            );
+            
+            // Filter item diskon yang dipilih
+            const selectedItems = selectedIndices.map(index => discountItems[index]);
+            return selectedItems;
+        }
+    }).then(result => {
+        if (result.isConfirmed && result.value) {
+            // Siapkan data produk untuk membuat price tags
+            const selectedProducts = result.value.map(item => ({
+                ...item.product,
+                hasDiscount: true,
+                discountInfo: {
+                    kode: item.kode,
+                    persenDiskon: item.persenDiskon,
+                    tanggalMulai: item.tanggalMulai,
+                    tanggalBerakhir: item.tanggalBerakhir,
+                    hargaDiskon: item.discountedPrice
+                }
+            }));
+            
+            // Set selected products dan generate price tags
+            window.selectedProducts = selectedProducts;
+            generatePriceTags();
+            
+            // Pindah ke tab preview
+            switchTab(document.querySelector('.tab[data-tab="preview"]'));
+        }
+    });
+}
+
+// Tambahkan ke dalam kode yang berjalan saat DOM loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Tambahkan tombol diskon ke interface
+    addDiscountButtonToInterface();
+    
+    // Tambahkan CSS untuk label diskon yang lebih menarik
+    const discountStyles = document.createElement('style');
+    discountStyles.textContent = `
+        .price-tag-discount-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e63946;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transform: rotate(15deg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+        
+        .price-tag-discount-timer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(230, 57, 70, 0.1);
+            color: #e63946;
+            padding: 3px;
+            font-size: 10px;
+            text-align: center;
+            border-top: 1px dashed rgba(230, 57, 70, 0.3);
+        }
+        
+        .price-tag-discount {
+            background: linear-gradient(to bottom right, #fff5f7, white);
+            border: 2px solid #fecdd3 !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .price-tag-discount::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(135deg, rgba(230, 57, 70, 0.1) 0%, rgba(230, 57, 70, 0) 60%);
+            z-index: 0;
+        }
+        
+        .price-tag-discount > * {
+            position: relative;
+            z-index: 1;
+        }
+    `;
+    document.head.appendChild(discountStyles);
+});
+
+// Helper untuk format tanggal
+function formatTanggal(tanggal) {
+    if (!tanggal) return '-';
+    const options = { day: 'numeric', month: 'short', year: 'numeric' };
+    return new Date(tanggal).toLocaleDateString('id-ID', options);
+}
+
+// Helper untuk format rupiah (mengambil dari kode yang sudah ada)
+function formatRupiah(amount) {
+    if (!amount) return 'Rp 0';
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+// Buat tampilan price tag diskon yang lebih mencolok
+const originalGeneratePriceTags = window.generatePriceTags;
+window.generatePriceTags = function() {
+    // Panggil fungsi original
+    originalGeneratePriceTags();
+    
+    // Tambahkan elemen khusus pada price tag dengan diskon
+    const priceTags = document.querySelectorAll('.price-tag');
+    priceTags.forEach((tag, index) => {
+        if (index < selectedProducts.length && selectedProducts[index].hasDiscount) {
+            // Tambahkan kelas khusus untuk price tag diskon
+            tag.classList.add('price-tag-discount');
+            
+            // Tambahkan badge persentase diskon
+            const discountBadge = document.createElement('div');
+            discountBadge.className = 'price-tag-discount-badge';
+            discountBadge.textContent = `-${selectedProducts[index].discountInfo.persenDiskon}%`;
+            tag.appendChild(discountBadge);
+            
+            // Tambahkan timer diskon
+            const discountTimer = document.createElement('div');
+            discountTimer.className = 'price-tag-discount-timer';
+            
+            const endDate = new Date(selectedProducts[index].discountInfo.tanggalBerakhir);
+            const options = { day: 'numeric', month: 'short' };
+            const formattedDate = endDate.toLocaleDateString('id-ID', options);
+            
+            discountTimer.textContent = `Berakhir: ${formattedDate}`;
+            tag.appendChild(discountTimer);
+        }
+    });
+};
+  
+  
+  
     </script>
 </body>
 </html>
