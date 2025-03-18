@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <title>Riwayat Retur Barang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f9c74f;
+            --danger-color: #ef476f;
+            --gray-dark: #2b2d42;
+            --gray-medium: #8d99ae;
+            --gray-light: #edf2f4;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            color: var(--gray-dark);
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 35px;
+            max-width: 1200px;
+            margin: 30px auto;
+            border: 1px solid #e9ecef;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .btn-kembali {
+            background-color: var(--gray-medium);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-decoration: none;
+        }
+
+        .btn-kembali:hover {
+            background-color: var(--gray-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-kembali i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .filters-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto;
+            gap: 15px;
+            background-color: var(--gray-light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            align-items: end;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--gray-dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+            outline: none;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.4s ease;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-filter {
+            background-color: var(--primary-color);
+            color: white;
+            height: 48px;
+        }
+
+        .btn-filter:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-reset {
+            background-color: var(--gray-medium);
+            color: white;
+            padding: 8px 15px;
+            margin-right: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .btn-reset:hover {
+            background-color: var(--gray-dark);
+        }
+
+        .btn-export {
+            background-color: #28a745;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-export:hover {
+            background-color: #218838;
+        }
+
+        .btn-detail {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        .btn-detail:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-duck {
+            background-color: #FFA500;
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+
+        .btn-duck:hover {
+            background-color: #FF8C00;
+        }
+
+        table {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 15px 12px;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.3s ease;
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #f1f4f9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-warning {
+            background-color: var(--warning-color);
+            color: #664d03;
+        }
+
+        .badge-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .badge-info {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .badge-dark {
+            background-color: var(--gray-dark);
+            color: white;
+        }
+
+        .action-column {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .summary-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #f7f9fc 0%, #e5ebee 100%);
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        .summary-card h4 {
+            margin-top: 0;
+            color: var(--gray-medium);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-card p {
+            margin: 5px 0 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--gray-dark);
+        }
+
+        .summary-card.total-items {
+            border-left-color: var(--primary-color);
+        }
+
+        .summary-card.expired-items {
+            border-left-color: var(--danger-color);
+        }
+
+        .summary-card.damaged-items {
+            border-left-color: var(--warning-color);
+        }
+
+        .summary-card.wrong-items {
+            border-left-color: var(--success-color);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+
+        .pagination button {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            color: var(--primary-color);
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .pagination button:hover, .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination button:disabled {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Duck modal */
+        .duck-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .duck {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .duck-body {
+            width: 120px;
+            height: 80px;
+            background-color: #FFF200;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: absolute;
+            top: 50px;
+            left: 40px;
+        }
+
+        .duck-head {
+            width: 80px;
+            height: 70px;
+            background-color: #FFF200;
+            border-radius: 50%;
+            position: absolute;
+            top: 25px;
+            left: 80px;
+        }
+
+        .duck-beak {
+            width: 40px;
+            height: 20px;
+            background-color: #FF8C00;
+            border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%;
+            position: absolute;
+            top: 50px;
+            left: 140px;
+            transform: rotate(10deg);
+        }
+
+        .duck-eye {
+            width: 12px;
+            height: 12px;
+            background-color: black;
+            border-radius: 50%;
+            position: absolute;
+            top: 40px;
+            left: 120px;
+        }
+
+        .duck-wing {
+            width: 40px;
+            height: 30px;
+            background-color: #FFF200;
+            border-radius: 50% 50% 50% 0;
+            position: absolute;
+            top: 70px;
+            left: 35px;
+            transform: rotate(-30deg);
+        }
+
+        .duck-feet {
+            width: 20px;
+            height: 10px;
+            background-color: #FF8C00;
+            border-radius: 50% 50% 0 0;
+            position: absolute;
+            top: 130px;
+            left: 60px;
+        }
+
+        .duck-feet.right {
+            left: 90px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .quack-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 20px;
+            color: var(--primary-color);
+        }
+
+        /* Custom duck audio controls */
+        .audio-controls {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .play-button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-button:hover {
+            background-color: #d1196f;
+            transform: scale(1.1);
+        }
+
+        .play-button i {
+            font-size: 20px;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 992px) {
+            .filters-section {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .summary-section {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+                margin: 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .filters-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-section {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        /* Export options */
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: flex-end;
+        }
+
+        .export-options button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .export-excel {
+            background-color: #217346;
+            color: white;
+        }
+
+        .export-excel:hover {
+            background-color: #1a5c38;
+        }
+
+        .export-pdf {
+            background-color: #f40f02;
+            color: white;
+        }
+
+        .export-pdf:hover {
+            background-color: #c70d02;
+        }
+
+        .export-zip {
+            background-color: #ffb300;
+            color: white;
+        }
+
+        .export-zip:hover {
+            background-color: #e09600;
+        }
+
+        /* Detail modal style */
+        .detail-container {
+            padding: 15px;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .detail-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .detail-id {
+            background-color: var(--gray-light);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .detail-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .detail-group {
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: var(--gray-medium);
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-weight: 600;
+        }
+
+        .detail-notes {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+            margin-top: 15px;
+        }
+
+        .detail-notes-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--gray-dark);
+        }
+
+        .status-history {
+            margin-top: 20px;
+        }
+
+        .status-timeline {
+            display: flex;
+            flex-direction: column;
+            margin-top: 15px;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .timeline-point {
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin-right: 15px;
+            position: relative;
+        }
+
+        .timeline-point::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background-color: #dee2e6;
+            top: 20px;
+            left: 9px;
+        }
+
+        .timeline-item:last-child .timeline-point::after {
+            display: none;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--gray-medium);
+            margin-bottom: 5px;
+        }
+
+        .timeline-text {
+            font-weight: 500;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="retur barang.html" class="btn-kembali">
+                <i class="fas fa-arrow-left"></i> Kembali ke Retur Barang
+            </a>
+            <h2><i class="fas fa-history"></i> Riwayat Retur Barang</h2>
+        </div>
+
+        <div class="summary-section">
+            <div class="summary-card total-items">
+                <h4>Total Retur</h4>
+                <p id="totalRetur">0</p>
+            </div>
+            <div class="summary-card expired-items">
+                <h4>Expired/Kadaluwarsa</h4>
+                <p id="totalExpired">0</p>
+            </div>
+            <div class="summary-card damaged-items">
+                <h4>Rusak</h4>
+                <p id="totalRusak">0</p>
+            </div>
+            <div class="summary-card wrong-items">
+                <h4>Salah Kirim</h4>
+                <p id="totalSalahKirim">0</p>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <div class="form-group">
+                <label><i class="fas fa-calendar-alt"></i> Dari Tanggal:</label>
+                <input type="date" id="dariTanggal">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-calendar-alt"></i> Sampai Tanggal:</label>
+                <input type="date" id="sampaiTanggal">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-exclamation-triangle"></i> Alasan Retur:</label>
+                <select id="filterAlasanRetur">
+                    <option value="">Semua Alasan</option>
+                    <option value="expired">Expired</option>
+                    <option value="rusak">Rusak</option>
+                    <option value="salah_kirim">Salah Kirim</option>
+                    <option value="kadaluwarsa">Kadaluwarsa</option>
+                    <option value="lainnya">Lainnya</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-search"></i> Cari Barang:</label>
+                <input type="text" id="cariBarang" placeholder="Kode atau Nama Barang">
+            </div>
+            <div>
+                <button class="btn btn-filter" id="btnFilter">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+            </div>
+        </div>
+
+        <div class="export-options">
+            <button id="btnReset" class="btn-reset">
+                <i class="fas fa-undo"></i> Reset Filter
+            </button>
+            <button id="exportExcel" class="export-excel">
+                <i class="fas fa-file-excel"></i> Export Excel
+            </button>
+            <button id="exportZip" class="export-zip">
+                <i class="fas fa-file-archive"></i> Export ZIP
+            </button>
+        </div>
+        
+        <table id="tabelRiwayatRetur">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tanggal</th>
+                    <th>Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Alasan</th>
+                    <th>Jumlah</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="listRiwayatRetur"></tbody>
+        </table>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const dariTanggalInput = document.getElementById('dariTanggal');
+            const sampaiTanggalInput = document.getElementById('sampaiTanggal');
+            const filterAlasanReturSelect = document.getElementById('filterAlasanRetur');
+            const cariBarangInput = document.getElementById('cariBarang');
+            const btnFilter = document.getElementById('btnFilter');
+            const btnReset = document.getElementById('btnReset');
+            const listRiwayatRetur = document.getElementById('listRiwayatRetur');
+            const paginationContainer = document.getElementById('pagination');
+            const exportExcelBtn = document.getElementById('exportExcel');
+            const exportZipBtn = document.getElementById('exportZip');
+            
+            // Stats elements
+            const totalReturEl = document.getElementById('totalRetur');
+            const totalExpiredEl = document.getElementById('totalExpired');
+            const totalRusakEl = document.getElementById('totalRusak');
+            const totalSalahKirimEl = document.getElementById('totalSalahKirim');
+            
+            // Set default date range (last 30 days)
+            const today = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            
+            dariTanggalInput.value = formatDateForInput(thirtyDaysAgo);
+            sampaiTanggalInput.value = formatDateForInput(today);
+            
+            // Pagination settings
+            let currentPage = 1;
+            const itemsPerPage = 10;
+            let filteredRiwayatRetur = [];
+            
+            // Load data from localStorage
+            let riwayatRetur = [];
+            
+            function loadRiwayatRetur() {
+                riwayatRetur = JSON.parse(localStorage.getItem('riwayatRetur')) || [];
+                return riwayatRetur;
+            }
+            
+            // Load data and initialize
+            riwayatRetur = loadRiwayatRetur();
+            
+            // Apply initial filter
+            applyFilters();
+            
+            // Duck audio
+            const quackAudio = new Audio('https://upload.wikimedia.org/wikipedia/commons/b/b4/Quack.ogg');
+            
+            // Event listeners
+            btnFilter.addEventListener('click', function() {
+                currentPage = 1;
+                applyFilters();
+            });
+            
+            btnReset.addEventListener('click', function() {
+                // Reset all filters
+                dariTanggalInput.value = formatDateForInput(thirtyDaysAgo);
+                sampaiTanggalInput.value = formatDateForInput(today);
+                filterAlasanReturSelect.value = '';
+                cariBarangInput.value = '';
+                
+                // Reset page and apply filters
+                currentPage = 1;
+                applyFilters();
+            });
+            
+            // Export to Excel
+            exportExcelBtn.addEventListener('click', function() {
+                exportToExcel(filteredRiwayatRetur);
+            });
+            
+            // Export to ZIP
+            exportZipBtn.addEventListener('click', function() {
+                exportToExcelZip(filteredRiwayatRetur);
+            });
+            
+            // Apply filters and update display
+            function applyFilters() {
+                const dariTanggal = dariTanggalInput.value ? new Date(dariTanggalInput.value) : null;
+                const sampaiTanggal = sampaiTanggalInput.value ? new Date(sampaiTanggalInput.value) : null;
+                const alasanRetur = filterAlasanReturSelect.value;
+                const cariBarang = cariBarangInput.value.toLowerCase();
+                
+                // If no dates are selected, show all data
+                if (!dariTanggal && !sampaiTanggal) {
+                    filteredRiwayatRetur = [...riwayatRetur];
+                } else {
+                    // Set time to end of day for sampaiTanggal for inclusive filtering
+                    if (sampaiTanggal) {
+                        sampaiTanggal.setHours(23, 59, 59, 999);
+                    }
+                    
+                    filteredRiwayatRetur = riwayatRetur.filter(item => {
+                        const itemDate = new Date(item.tanggal);
+                        
+                        // Date filter
+                        if (dariTanggal && itemDate < dariTanggal) return false;
+                        if (sampaiTanggal && itemDate > sampaiTanggal) return false;
+                        
+                        // Alasan filter
+                        if (alasanRetur && item.alasan !== alasanRetur) return false;
+                        
+                        // Search filter
+                        if (cariBarang && !item.kodeBarang.toLowerCase().includes(cariBarang) && !item.namaBarang.toLowerCase().includes(cariBarang)) {
+                            return false;
+                        }
+                        
+                        return true;
+                    });
+                }
+                
+                // Update stats
+                updateStats(filteredRiwayatRetur);
+                
+                // Sort by date descending
+                filteredRiwayatRetur.sort((a, b) => {
+                    const dateA = new Date(`${a.tanggal} ${a.jam || '00:00'}`);
+                    const dateB = new Date(`${b.tanggal} ${b.jam || '00:00'}`);
+                    return dateB - dateA;
+                });
+                
+                // Update display
+                updateDisplay();
+            }
+            
+            // Update stats based on filtered data
+            function updateStats(data) {
+                const stats = {
+                    total: data.length,
+                    expired: 0,
+                    rusak: 0,
+                    salahKirim: 0
+                };
+                
+                data.forEach(item => {
+                    if (item.alasan === 'expired' || item.alasan === 'kadaluwarsa') {
+                        stats.expired += item.jumlah;
+                    } else if (item.alasan === 'rusak') {
+                        stats.rusak += item.jumlah;
+                    } else if (item.alasan === 'salah_kirim') {
+                        stats.salahKirim += item.jumlah;
+                    }
+                });
+                
+                totalReturEl.textContent = stats.total;
+                totalExpiredEl.textContent = stats.expired;
+                totalRusakEl.textContent = stats.rusak;
+                totalSalahKirimEl.textContent = stats.salahKirim;
+            }
+            
+            // Update table and pagination
+            function updateDisplay() {
+                // Calculate pagination
+                const totalPages = Math.ceil(filteredRiwayatRetur.length / itemsPerPage);
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = Math.min(startIndex + itemsPerPage, filteredRiwayatRetur.length);
+                const currentItems = filteredRiwayatRetur.slice(startIndex, endIndex);
+                
+                // Clear table
+                listRiwayatRetur.innerHTML = '';
+                
+                if (currentItems.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `
+                        <td colspan="8" style="text-align: center; padding: 20px;">
+                            <i class="fas fa-info-circle" style="color: var(--gray-medium); font-size: 2rem; margin-bottom: 10px;"></i>
+                            <p style="color: var(--gray-medium);">Tidak ada data retur yang sesuai dengan filter</p>
+                        </td>
+                    `;
+                    listRiwayatRetur.appendChild(emptyRow);
+                } else {
+                    currentItems.forEach(item => {
+                        const row = document.createElement('tr');
+                        
+                        // Format alasan to be more readable
+                        let alasanFormatted = item.alasan;
+                        if (item.alasan === 'expired' || item.alasan === 'kadaluwarsa') {
+                            alasanFormatted = `<span class="badge badge-danger">${item.alasan}</span>`;
+                        } else if (item.alasan === 'rusak') {
+                            alasanFormatted = `<span class="badge badge-warning">${item.alasan}</span>`;
+                        } else if (item.alasan === 'salah_kirim') {
+                            alasanFormatted = `<span class="badge badge-info">Salah Kirim</span>`;
+                        } else {
+                            alasanFormatted = `<span class="badge badge-dark">${item.alasan}</span>`;
+                        }
+                        
+                        const tanggalFormatted = item.tanggal ? formatDate(item.tanggal) : '-';
+                        const jamFormatted = item.jam || '';
+                        
+                        row.innerHTML = `
+                            <td><strong>${item.id}</strong></td>
+                            <td>${tanggalFormatted} <br> <small>${jamFormatted}</small></td>
+                            <td>${item.kodeBarang}</td>
+                            <td>${item.namaBarang}</td>
+                            <td>${alasanFormatted}</td>
+                            <td><strong>${item.jumlah}</strong></td>
+                            <td><span class="badge badge-info">${item.status || 'Selesai'}</span></td>
+                            <td class="action-column">
+                                <button class="btn btn-detail" onclick="showDetail(${item.id})">
+                                    <i class="fas fa-eye"></i> Detail
+                                </button>
+                                <button class="btn btn-duck" onclick="showDuck(${item.id})">
+                                    <i class="fas fa-duck"></i> Bebek
+                                </button>
+                            </td>
+                        `;
+                        listRiwayatRetur.appendChild(row);
+                    });
+                }
+                
+                // Update pagination
+                updatePagination(totalPages);
+            }
+            
+            // Update pagination controls
+            function updatePagination(totalPages) {
+                paginationContainer.innerHTML = '';
+                
+                if (totalPages <= 1) return;
+                
+                // Previous button
+                const prevButton = document.createElement('button');
+                prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                prevButton.disabled = currentPage === 1;
+                prevButton.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        updateDisplay();
+                    }
+                });
+                paginationContainer.appendChild(prevButton);
+                
+                // Page buttons
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+                
+                if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = i;
+                    pageButton.className = i === currentPage ? 'active' : '';
+                    pageButton.addEventListener('click', () => {
+                        currentPage = i;
+                        updateDisplay();
+                    });
+                    paginationContainer.appendChild(pageButton);
+                }
+                
+                // Next button
+                const nextButton = document.createElement('button');
+                nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                nextButton.disabled = currentPage === totalPages;
+                nextButton.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        updateDisplay();
+                    }
+                });
+                paginationContainer.appendChild(nextButton);
+            }
+            
+            // Date formatting functions
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+            
+            function formatDateForInput(date) {
+                return date.toISOString().split('T')[0];
+            }
+            
+            // Export to Excel function
+            function exportToExcel(data) {
+                if (data.length === 0) {
+                    Swal.fire({
+                        title: 'Tidak Ada Data',
+                        text: 'Tidak ada data yang dapat diekspor',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee'
+                    });
+                    return;
+                }
+                
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                
+                // Transform data for export
+                const exportData = data.map(item => ({
+                    'ID': item.id,
+                    'Tanggal': item.tanggal,
+                    'Jam': item.jam || '',
+                    'Kode Barang': item.kodeBarang,
+                    'Nama Barang': item.namaBarang,
+                    'Alasan Retur': item.alasan,
+                    'Jumlah': item.jumlah,
+                    'Stok Awal': item.stokAwal,
+                    'Stok Akhir': item.stokAkhir,
+                    'Status': item.status || 'Selesai',
+                    'Keterangan': item.keterangan || ''
+                }));
+                
+                // Create worksheet from data
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                
+                // Auto-width columns
+                const colWidths = [];
+                exportData.forEach(row => {
+                    Object.entries(row).forEach(([key, value], i) => {
+                        const width = Math.max(key.length, String(value).length);
+                        colWidths[i] = Math.max(colWidths[i] || 0, width);
+                    });
+                });
+                
+                // Set column widths
+                ws['!cols'] = colWidths.map(width => ({ width }));
+                
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'Riwayat Retur');
+                
+                // Generate Excel file
+                const filename = `Riwayat_Retur_${new Date().toISOString().split('T')[0]}.xlsx`;
+                XLSX.writeFile(wb, filename);
+            }
+            
+            // Export to Excel ZIP function
+            function exportToExcelZip(data) {
+                if (data.length === 0) {
+                    Swal.fire({
+                        title: 'Tidak Ada Data',
+                        text: 'Tidak ada data yang dapat diekspor',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee'
+                    });
+                    return;
+                }
+                
+                // Change button text to show loading
+                exportZipBtn.innerHTML = '<span class="loading-spinner"></span> Memproses...';
+                exportZipBtn.disabled = true;
+                
+                // Create a new JSZip instance
+                const zip = new JSZip();
+                
+                // Create workbook and worksheet for all data
+                const wb = XLSX.utils.book_new();
+                
+                // Transform data for export
+                const exportData = data.map(item => ({
+                    'ID': item.id,
+                    'Tanggal': item.tanggal,
+                    'Jam': item.jam || '',
+                    'Kode Barang': item.kodeBarang,
+                    'Nama Barang': item.namaBarang,
+                    'Alasan Retur': item.alasan,
+                    'Jumlah': item.jumlah,
+                    'Stok Awal': item.stokAwal,
+                    'Stok Akhir': item.stokAkhir,
+                    'Status': item.status || 'Selesai',
+                    'Keterangan': item.keterangan || ''
+                }));
+                
+                // Create worksheet from data
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'Semua Retur');
+                
+                // Group data by reason
+                const reasonGroups = {
+                    expired: data.filter(item => item.alasan === 'expired' || item.alasan === 'kadaluwarsa'),
+                    rusak: data.filter(item => item.alasan === 'rusak'),
+                    salah_kirim: data.filter(item => item.alasan === 'salah_kirim'),
+                    lainnya: data.filter(item => item.alasan !== 'expired' && item.alasan !== 'kadaluwarsa' && 
+                                              item.alasan !== 'rusak' && item.alasan !== 'salah_kirim')
+                };
+                
+                // Write main Excel file
+                const mainExcelBinary = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+                zip.file('Semua_Retur.xlsx', s2ab(mainExcelBinary));
+                
+                // Create Excel files for each reason
+                Object.entries(reasonGroups).forEach(([reason, items]) => {
+                    if (items.length > 0) {
+                        // Create new workbook
+                        const reasonWb = XLSX.utils.book_new();
+                        
+                        // Transform data
+                        const reasonExportData = items.map(item => ({
+                            'ID': item.id,
+                            'Tanggal': item.tanggal,
+                            'Jam': item.jam || '',
+                            'Kode Barang': item.kodeBarang,
+                            'Nama Barang': item.namaBarang,
+                            'Jumlah': item.jumlah,
+                            'Stok Awal': item.stokAwal,
+                            'Stok Akhir': item.stokAkhir,
+                            'Status': item.status || 'Selesai',
+                            'Keterangan': item.keterangan || ''
+                        }));
+                        
+                        // Create worksheet
+                        const reasonWs = XLSX.utils.json_to_sheet(reasonExportData);
+                        
+                        // Add worksheet to workbook
+                        XLSX.utils.book_append_sheet(reasonWb, reasonWs, `Retur ${reason}`);
+                        
+                        // Write Excel file
+                        const reasonExcelBinary = XLSX.write(reasonWb, { bookType: 'xlsx', type: 'binary' });
+                        zip.file(`Retur_${reason}.xlsx`, s2ab(reasonExcelBinary));
+                    }
+                });
+                
+                // Create a monthly summary
+                const monthlyData = [];
+                
+                // Get all unique year-month combinations
+                const months = [...new Set(data.map(item => item.tanggal.substring(0, 7)))].sort();
+                
+                months.forEach(month => {
+                    const monthItems = data.filter(item => item.tanggal.startsWith(month));
+                    const totalItems = monthItems.length;
+                    const totalQuantity = monthItems.reduce((sum, item) => sum + item.jumlah, 0);
+                    
+                    // Count by reason
+                    const expiredCount = monthItems.filter(item => 
+                        item.alasan === 'expired' || item.alasan === 'kadaluwarsa'
+                    ).reduce((sum, item) => sum + item.jumlah, 0);
+                    
+                    const rusakCount = monthItems.filter(item => 
+                        item.alasan === 'rusak'
+                    ).reduce((sum, item) => sum + item.jumlah, 0);
+                    
+                    const salahKirimCount = monthItems.filter(item => 
+                        item.alasan === 'salah_kirim'
+                    ).reduce((sum, item) => sum + item.jumlah, 0);
+                    
+                    const lainnyaCount = monthItems.filter(item => 
+                        item.alasan !== 'expired' && item.alasan !== 'kadaluwarsa' && 
+                        item.alasan !== 'rusak' && item.alasan !== 'salah_kirim'
+                    ).reduce((sum, item) => sum + item.jumlah, 0);
+                    
+                    // Format date as "Bulan Tahun" (e.g., "Januari 2024")
+                    const [year, monthNum] = month.split('-');
+                    const monthNames = [
+                        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                    ];
+                    const formattedMonth = `${monthNames[parseInt(monthNum) - 1]} ${year}`;
+                    
+                    monthlyData.push({
+                        'Bulan': formattedMonth,
+                        'Total Retur': totalItems,
+                        'Total Jumlah': totalQuantity,
+                        'Expired/Kadaluwarsa': expiredCount,
+                        'Rusak': rusakCount,
+                        'Salah Kirim': salahKirimCount,
+                        'Lainnya': lainnyaCount
+                    });
+                });
+                
+                // Create monthly summary workbook
+                if (monthlyData.length > 0) {
+                    const summaryWb = XLSX.utils.book_new();
+                    const summaryWs = XLSX.utils.json_to_sheet(monthlyData);
+                    XLSX.utils.book_append_sheet(summaryWb, summaryWs, 'Ringkasan Bulanan');
+                    
+                    // Write Excel file
+                    const summaryExcelBinary = XLSX.write(summaryWb, { bookType: 'xlsx', type: 'binary' });
+                    zip.file('Ringkasan_Bulanan.xlsx', s2ab(summaryExcelBinary));
+                }
+                
+                // Generate ZIP file
+                zip.generateAsync({ type: 'blob' }).then(function(content) {
+                    // Reset button state
+                    exportZipBtn.innerHTML = '<i class="fas fa-file-archive"></i> Export ZIP';
+                    exportZipBtn.disabled = false;
+                    
+                    // Create download link
+                    const filename = `Riwayat_Retur_${new Date().toISOString().split('T')[0]}.zip`;
+                    saveAs(content, filename);
+                }).catch(error => {
+                    console.error('Error creating ZIP file:', error);
+                    
+                    // Reset button state
+                    exportZipBtn.innerHTML = '<i class="fas fa-file-archive"></i> Export ZIP';
+                    exportZipBtn.disabled = false;
+                    
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Gagal membuat file ZIP: ' + error.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee'
+                    });
+                });
+            }
+            
+            // Utility function to convert string to ArrayBuffer
+            function s2ab(s) {
+                const buf = new ArrayBuffer(s.length);
+                const view = new Uint8Array(buf);
+                for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+                return buf;
+            }
+            
+            // Show detail modal
+            window.showDetail = function(id) {
+                const item = riwayatRetur.find(item => item.id === id);
+                
+                if (!item) {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Detail retur tidak ditemukan',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee'
+                    });
+                    return;
+                }
+                
+                // Format alasan
+                let alasanFormatted = item.alasan;
+                if (item.alasan === 'expired' || item.alasan === 'kadaluwarsa') {
+                    alasanFormatted = 'Expired/Kadaluwarsa';
+                } else if (item.alasan === 'rusak') {
+                    alasanFormatted = 'Rusak';
+                } else if (item.alasan === 'salah_kirim') {
+                    alasanFormatted = 'Salah Kirim';
+                }
+                
+                // Create detail HTML
+                const detailHTML = `
+                    <div class="detail-container">
+                        <div class="detail-header">
+                            <div class="detail-title">Detail Retur Barang</div>
+                            <div class="detail-id">ID: ${item.id}</div>
+                        </div>
+                        
+                        <div class="detail-info">
+                            <div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Tanggal Retur</div>
+                                    <div class="detail-value">${formatDate(item.tanggal)} ${item.jam || ''}</div>
+                                </div>
+                                
+                                <div class="detail-group">
+                                    <div class="detail-label">Kode Barang</div>
+                                    <div class="detail-value">${item.kodeBarang}</div>
+                                </div>
+                                
+                                <div class="detail-group">
+                                    <div class="detail-label">Nama Barang</div>
+                                    <div class="detail-value">${item.namaBarang}</div>
+                                </div>
+                                
+                                <div class="detail-group">
+                                    <div class="detail-label">Alasan Retur</div>
+                                    <div class="detail-value">${alasanFormatted}</div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="detail-group">
+                                    <div class="detail-label">Jumlah Retur</div>
+                                    <div class="detail-value">${item.jumlah}</div>
+                                </div>
+                                
+                                <div class="detail-group">
+                                    <div class="detail-label">Stok Awal</div>
+                                    <div class="detail-value">${item.stokAwal}</div>
+                                </div>
+                                
+                                <div class="detail-group">
+                                    <div class="detail-label">Stok Akhir</div>
+                                    <div class="detail-value">${item.stokAkhir}</div>
+                                </div>
+                                
+                                <div class="detail-group">
+                                    <div class="detail-label">Status</div>
+                                    <div class="detail-value">${item.status || 'Selesai'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${item.keterangan ? `
+                            <div class="detail-notes">
+                                <div class="detail-notes-title">Keterangan:</div>
+                                <div>${item.keterangan}</div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="status-history">
+                            <div class="detail-notes-title">Riwayat Status:</div>
+                            <div class="status-timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-point"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-date">${formatDate(item.tanggal)} ${item.jam || ''}</div>
+                                        <div class="timeline-text">Retur barang berhasil diproses</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                Swal.fire({
+                    title: '',
+                    html: detailHTML,
+                    showConfirmButton: true,
+                    confirmButtonText: 'Tutup',
+                    confirmButtonColor: '#4361ee',
+                    width: '700px'
+                });
+            };
+            
+            // Show duck modal
+            window.showDuck = function(id) {
+                const item = riwayatRetur.find(item => item.id === id);
+                
+                if (!item) return;
+                
+                const duckHTML = `
+                    <div class="duck-container">
+                        <div class="duck">
+                            <div class="duck-body"></div>
+                            <div class="duck-head"></div>
+                            <div class="duck-beak"></div>
+                            <div class="duck-eye"></div>
+                            <div class="duck-wing"></div>
+                            <div class="duck-feet"></div>
+                            <div class="duck-feet right"></div>
+                        </div>
+                        <div class="quack-text">QUACK! Retur #${item.id}</div>
+                        <div class="audio-controls">
+                            <button id="playQuack" class="play-button">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                Swal.fire({
+                    title: '',
+                    html: duckHTML,
+                    showConfirmButton: true,
+                    confirmButtonText: 'Tutup',
+                    confirmButtonColor: '#4361ee',
+                    width: '500px'
+                });
+                
+                // Add event listener for quack sound after modal is shown
+                document.getElementById('playQuack').addEventListener('click', function() {
+                    quackAudio.currentTime = 0;
+                    quackAudio.play();
+                    
+                    // Add animation class to duck
+                    const duck = document.querySelector('.duck');
+                    duck.style.animation = 'none';
+                    setTimeout(() => {
+                        duck.style.animation = 'float 0.5s ease-in-out 3';
+                    }, 10);
+                });
+            };
+        });
+        
+        
+        
+        
+        
+        // RTR (Retur) namespace for functions
+const RTR = {
+    // Format date to Indonesian format (DD MMM YYYY)
+    formatDate: function(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: 'short', year: 'numeric' };
+        return date.toLocaleDateString('id-ID', options);
+    },
+    
+    // Format currency with Rupiah symbol
+    formatCurrency: function(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(amount);
+    },
+    
+    // Generate random color based on string
+    getColorFromString: function(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash % 360);
+        return `hsl(${hue}, 70%, 60%)`;
+    },
+    
+    // Get icon for specific return reason
+    getReasonIcon: function(reason) {
+        const icons = {
+            'expired': 'fas fa-calendar-times',
+            'kadaluwarsa': 'fas fa-calendar-times',
+            'rusak': 'fas fa-tools',
+            'salah_kirim': 'fas fa-exchange-alt',
+            'lainnya': 'fas fa-question-circle'
+        };
+        return icons[reason] || 'fas fa-undo-alt';
+    },
+    
+    // Generate return ID with prefix RTR and padded numbers
+    generateReturnId: function(id) {
+        return `RTR${String(id).padStart(5, '0')}`;
+    },
+    
+    // Create Excel file from data
+    createExcelFile: function(data, sheetName = 'Sheet1') {
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(data);
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        return wb;
+    },
+    
+    // Export Excel workbook to file
+    exportWorkbook: function(wb, filename) {
+        XLSX.writeFile(wb, filename);
+    },
+    
+    // Convert string to ArrayBuffer for binary operations
+    stringToArrayBuffer: function(s) {
+        const buf = new ArrayBuffer(s.length);
+        const view = new Uint8Array(buf);
+        for (let i = 0; i < s.length; i++) {
+            view[i] = s.charCodeAt(i) & 0xFF;
+        }
+        return buf;
+    },
+    
+    // Get data from localStorage with fallback to empty array
+    getDataFromStorage: function(key) {
+        try {
+            return JSON.parse(localStorage.getItem(key)) || [];
+        } catch (e) {
+            console.error('Error reading from localStorage:', e);
+            return [];
+        }
+    },
+    
+    // Save data to localStorage
+    saveDataToStorage: function(key, data) {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+            return true;
+        } catch (e) {
+            console.error('Error saving to localStorage:', e);
+            return false;
+        }
+    },
+    
+    // Format date for display in tables and details
+    formatDateDisplay: function(dateString, timeString) {
+        if (!dateString) return '-';
+        return `${this.formatDate(dateString)} ${timeString || ''}`;
+    },
+    
+    // Get status badge HTML based on status
+    getStatusBadge: function(status) {
+        const statusMap = {
+            'Selesai': 'badge-info',
+            'Pending': 'badge-warning',
+            'Dibatalkan': 'badge-danger',
+            'Diproses': 'badge-primary'
+        };
+        const badgeClass = statusMap[status] || 'badge-secondary';
+        return `<span class="badge ${badgeClass}">${status}</span>`;
+    },
+    
+    // Get formatted reason badge HTML
+    getReasonBadge: function(reason) {
+        if (reason === 'expired' || reason === 'kadaluwarsa') {
+            return `<span class="badge badge-danger">${reason}</span>`;
+        } else if (reason === 'rusak') {
+            return `<span class="badge badge-warning">${reason}</span>`;
+        } else if (reason === 'salah_kirim') {
+            return `<span class="badge badge-info">Salah Kirim</span>`;
+        } else {
+            return `<span class="badge badge-dark">${reason}</span>`;
+        }
+    }
+};
+
+
+// NDYQ namespace for utility functions
+const NDYQ = {
+    // Format date to Indonesian format (DD MMM YYYY)
+    formatDate: function(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        const options = { day: '2-digit', month: 'short', year: 'numeric' };
+        return date.toLocaleDateString('id-ID', options);
+    },
+    
+    // Format time to 24-hour format (HH:MM)
+    formatTime: function(timeString) {
+        if (!timeString) return '';
+        return timeString;
+    },
+    
+    // Format currency with Rupiah symbol
+    formatCurrency: function(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(amount);
+    },
+    
+    // Get data from localStorage with fallback to empty array
+    getDataFromStorage: function(key) {
+        try {
+            return JSON.parse(localStorage.getItem(key)) || [];
+        } catch (e) {
+            console.error('Error reading from localStorage:', e);
+            return [];
+        }
+    },
+    
+    // Save data to localStorage
+    saveDataToStorage: function(key, data) {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+            return true;
+        } catch (e) {
+            console.error('Error saving to localStorage:', e);
+            return false;
+        }
+    },
+    
+    // Generate a unique ID
+    generateUniqueId: function() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5).toUpperCase();
+    },
+    
+    // Convert string to ArrayBuffer for binary operations
+    stringToArrayBuffer: function(s) {
+        const buf = new ArrayBuffer(s.length);
+        const view = new Uint8Array(buf);
+        for (let i = 0; i < s.length; i++) {
+            view[i] = s.charCodeAt(i) & 0xFF;
+        }
+        return buf;
+    },
+    
+    // Format date for input fields (YYYY-MM-DD)
+    formatDateForInput: function(date) {
+        return date.toISOString().split('T')[0];
+    },
+    
+    // Create Excel file from data
+    createExcelFile: function(data, sheetName = 'Sheet1') {
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(data);
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        return wb;
+    },
+    
+    // Show alert with SweetAlert2
+    showAlert: function(title, message, icon = 'info') {
+        Swal.fire({
+            title: title,
+            text: message,
+            icon: icon,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#4361ee'
+        });
+    },
+    
+    // Show confirmation dialog
+    showConfirm: function(title, message, callback, icon = 'question') {
+        Swal.fire({
+            title: title,
+            text: message,
+            icon: icon,
+            showCancelButton: true,
+            confirmButtonText: 'Ya',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#4361ee',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed && callback) {
+                callback();
+            }
+        });
+    },
+    
+    // Show loading indicator
+    showLoading: function(message = 'Memproses...') {
+        return Swal.fire({
+            title: message,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    },
+    
+    // Close loading indicator
+    closeLoading: function() {
+        Swal.close();
+    },
+    
+    // Format date and time together
+    formatDateTime: function(dateString, timeString) {
+        return `${this.formatDate(dateString)} ${this.formatTime(timeString)}`;
+    },
+    
+    // Get current date in YYYY-MM-DD format
+    getCurrentDate: function() {
+        return this.formatDateForInput(new Date());
+    },
+    
+    // Get current time in HH:MM format
+    getCurrentTime: function() {
+        const now = new Date();
+        return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
+};
+
+
+    </script>
+    
+</body>
+</html>
