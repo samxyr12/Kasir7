@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Biometrik fxid</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --accent-color: #e74c3c;
+    --background-color: #f0f4f8;
+    --text-color: #2c3e50;
+    --border-radius: 12px;
+    --box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #3498db, #1abc9c);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.biometric-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.auth-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 30px;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.logo {
+    font-size: 48px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+p {
+    color: #7f8c8d;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.fingerprint-area {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 30px;
+    border: 2px dashed var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.fingerprint-area.active {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+}
+
+.fingerprint-area.error {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.5);
+}
+
+.fingerprint-icon {
+    font-size: 64px;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.fingerprint-area.active .fingerprint-icon {
+    color: var(--secondary-color);
+}
+
+.fingerprint-area.error .fingerprint-icon {
+    color: var(--accent-color);
+}
+
+.scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: rgba(52, 152, 219, 0.5);
+    box-shadow: 0 0 10px var(--primary-color);
+    opacity: 0;
+    animation: scanAnimation 1.5s ease-in-out infinite;
+}
+
+.fingerprint-area.active .scan-line {
+    opacity: 1;
+}
+
+@keyframes scanAnimation {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(150px); }
+    100% { transform: translateY(0); }
+}
+
+.auth-button {
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto 20px;
+    width: 80%;
+    max-width: 250px;
+    transition: all 0.3s ease;
+}
+
+.auth-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.auth-button:active {
+    transform: scale(0.98);
+}
+
+.alternative-auth {
+    margin-top: 20px;
+    border-top: 1px solid #ecf0f1;
+    padding-top: 20px;
+}
+
+.alternative-auth p {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.pin-button {
+    background: none;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+}
+
+.pin-button:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.pin-auth-container {
+    display: none;
+    margin-top: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+.pin-auth-container input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: center;
+    letter-spacing: 5px;
+    margin-bottom: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.pin-auth-container input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.pin-auth-container button {
+    background: linear-gradient(135deg, var(--primary-color), #2980b9);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.pin-auth-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.auth-status {
+    margin-top: 15px;
+    font-weight: 500;
+    height: 24px;
+    transition: all 0.3s ease;
+}
+
+.auth-status.success {
+    color: var(--secondary-color);
+}
+
+.auth-status.error {
+    color: var(--accent-color);
+}
+
+/* Animation for success & error */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.fingerprint-area.success, .fingerprint-area.error {
+    animation: pulse 0.5s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 20px 15px;
+    }
+    
+    .fingerprint-area {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .fingerprint-icon {
+        font-size: 48px;
+    }
+}  
+        
+        
+    </style>
+</head>
+<body>
+    <div class="biometric-container">
+        <div class="auth-card">
+            <div class="logo">
+                <i class="fas fa-fingerprint"></i>
+            </div>
+            <h1>Verifikasi Biometrik</h1>
+            <p>Silakan gunakan sidik jari Anda untuk melanjutkan ke halaman Daftar Barang</p>
+            
+            <div class="fingerprint-area" id="fingerprintArea">
+                <div class="fingerprint-icon">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                <div class="scan-line"></div>
+            </div>
+            
+            <button id="authButton" class="auth-button">
+                <i class="fas fa-fingerprint"></i> Scan Sidik Jari
+            </button>
+            
+            <div class="alternative-auth">
+                <p>Atau gunakan</p>
+                <button id="pinButton" class="pin-button">
+                    <i class="fas fa-key"></i> PIN
+                </button>
+            </div>
+            
+            <div id="pinAuthContainer" class="pin-auth-container">
+                <input type="password" id="pinInput" placeholder="Masukkan PIN" maxlength="6">
+                <button id="submitPinButton">Verifikasi</button>
+            </div>
+            
+            <div id="authStatus" class="auth-status"></div>
+        </div>
+    </div>
+    
+    <script>
+        
+        // Correct PIN for backup authentication
+const CORRECT_PIN = "123456";
+
+// Main page to redirect after successful authentication
+const MAIN_PAGE = "barang.html";
+
+// Session timeout settings (in milliseconds)
+const INITIAL_TIMEOUT = 3 * 60 * 1000; // 3 minutes
+const EXTENDED_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+
+document.addEventListener('DOMContentLoaded', function() {
+    const authButton = document.getElementById('authButton');
+    const pinButton = document.getElementById('pinButton');
+    const pinAuthContainer = document.getElementById('pinAuthContainer');
+    const submitPinButton = document.getElementById('submitPinButton');
+    const fingerprintArea = document.getElementById('fingerprintArea');
+    const authStatus = document.getElementById('authStatus');
+    
+    // Check if WebAuthn/FIDO2 is supported by the browser
+    const isBiometricSupported = window.PublicKeyCredential && 
+                                 typeof window.PublicKeyCredential !== 'undefined' &&
+                                 typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function';
+    
+    // Check specifically for fingerprint capability (this is a best effort check)
+    if (isBiometricSupported) {
+        window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+            .then(available => {
+                if (!available) {
+                    authButton.disabled = true;
+                    authButton.innerHTML = '<i class="fas fa-times-circle"></i> Sidik Jari Tidak Tersedia';
+                    authStatus.textContent = 'Perangkat Anda tidak mendukung autentikasi sidik jari.';
+                    authStatus.className = 'auth-status error';
+                }
+            });
+    } else {
+        authButton.disabled = true;
+        authButton.innerHTML = '<i class="fas fa-times-circle"></i> Tidak Didukung';
+        authStatus.textContent = 'Browser Anda tidak mendukung Web Authentication API.';
+        authStatus.className = 'auth-status error';
+    }
+    
+    // Event listeners
+    authButton.addEventListener('click', startFingerprintAuth);
+    pinButton.addEventListener('click', () => {
+        pinAuthContainer.style.display = 'block';
+    });
+    
+    submitPinButton.addEventListener('click', () => {
+        const pinInput = document.getElementById('pinInput');
+        validatePin(pinInput.value);
+    });
+    
+    // Function to start fingerprint authentication
+    function startFingerprintAuth() {
+        if (!isBiometricSupported) return;
+        
+        authStatus.textContent = 'Memulai pemindaian sidik jari...';
+        authStatus.className = 'auth-status';
+        fingerprintArea.classList.add('active');
+        
+        // This is a simplified implementation. In a real scenario, you would need
+        // server communication for proper WebAuthn implementation.
+        const publicKey = {
+            challenge: new Uint8Array([21, 31, 105, ...Array(26).fill(0).map(() => Math.floor(Math.random() * 255))]),
+            rp: {
+                name: "Sistem Kasir"
+            },
+            user: {
+                id: new Uint8Array(16),
+                name: "user@example.com",
+                displayName: "Authorized User"
+            },
+            pubKeyCredParams: [
+                { type: "public-key", alg: -7 },  // ES256
+                { type: "public-key", alg: -257 } // RS256
+            ],
+            authenticatorSelection: {
+                authenticatorAttachment: "platform",
+                userVerification: "required"
+            },
+            timeout: 60000
+        };
+        
+        // Simulate fingerprint auth with WebAuthn API
+        navigator.credentials.create({ publicKey })
+            .then(credential => {
+                // Success - authentication passed
+                fingerprintArea.classList.remove('active');
+                fingerprintArea.classList.add('success');
+                authStatus.textContent = 'Verifikasi berhasil! Mengalihkan...';
+                authStatus.className = 'auth-status success';
+                
+                setTimeout(() => {
+                    redirectToMainPage();
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Authentication failed:', error);
+                fingerprintArea.classList.remove('active');
+                fingerprintArea.classList.add('error');
+                authStatus.textContent = 'Verifikasi gagal. Silakan coba lagi.';
+                authStatus.className = 'auth-status error';
+                
+                setTimeout(() => {
+                    fingerprintArea.classList.remove('error');
+                }, 2000);
+            });
+    }
+    
+    // Function to validate PIN
+    function validatePin(pin) {
+        if (pin === CORRECT_PIN) {
+            authStatus.textContent = 'PIN benar! Mengalihkan...';
+            authStatus.className = 'auth-status success';
+            
+            setTimeout(() => {
+                redirectToMainPage();
+            }, 1500);
+        } else {
+            authStatus.textContent = 'PIN salah. Silakan coba lagi.';
+            authStatus.className = 'auth-status error';
+        }
+    }
+    
+    // Function to redirect to main page after successful authentication
+    function redirectToMainPage() {
+        // Store auth token and timestamp in localStorage
+        const authData = {
+            token: generateAuthToken(),
+            timestamp: Date.now(),
+            expiresAt: Date.now() + INITIAL_TIMEOUT
+        };
+        
+        localStorage.setItem('authData', JSON.stringify(authData));
+        
+        // Redirect to main page
+        window.location.href = MAIN_PAGE;
+    }
+    
+    // Generate a simple authentication token
+    function generateAuthToken() {
+        const randomPart = Math.random().toString(36).substring(2, 15);
+        const timePart = Date.now().toString(36);
+        return `auth_${randomPart}_${timePart}`;
+    }
+});
+
+// Function to check if biometric authentication is available
+async function checkBiometricAvailability() {
+    if (!window.PublicKeyCredential || 
+        typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable !== 'function') {
+        return false;
+    }
+    
+    return await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+}
+    </script>
+</body>
+</html>
