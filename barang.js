@@ -2349,7 +2349,7 @@ function tambahBarang() {
     const currentAccount = accounts.find(account => account.username === username);
     const kodeToko = currentAccount ? currentAccount.kodeToko : ''; // Ambil kode toko dari akun yang login
 
-    if (kodeBarang && pluBarang && namaBarang && hargaBeli && hargaJual && stokBarang && kodeToko) {
+    if (kodeBarang && pluBarang && namaBarang && hargaBeli && hargaJual && stokBarang) {
         let barang = JSON.parse(localStorage.getItem('barang')) || [];
         
         let existingItem = barang.find(item => item.kode === kodeBarang);
@@ -2364,7 +2364,7 @@ function tambahBarang() {
                 hargaBeli: parseFloat(hargaBeli),
                 hargaJual: parseFloat(hargaJual),
                 stok: parseInt(stokBarang),
-                kodeToko: kodeToko, // Simpan kode toko dari akun yang login
+                kodeToko: kodeToko || null, // Simpan kode toko dari akun yang login, atau null jika tidak ada
                 kategori: document.getElementById('kategoriBarang').value,
                 terjual: 0
             });
