@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         :root {
             --primary-color: #4a6da7;
@@ -357,7 +359,7 @@
         <div class="card">
             <div class="btn-row">
                 <div>
-                    <button id="downloadButton" onclick="downloadExcel()">
+                    <button id="downloadButton" onclick="downloadExcelZip()">
                         <i class="fas fa-file-excel"></i> Download Excel
                     </button>
                     <button id="resetButton" onclick="resetFilter()">
@@ -734,10 +736,137 @@
             }, 500);
         }
 
-        // Download Excel
+        // Download Excel as ZIP
+        function downloadExcelZip() {
+            if (filteredData.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tidak Ada Data',
+                    text: 'Tidak ada data yang dapat diunduh',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            // Show loading indicator
+            Swal.fire({
+                title: 'Memproses Data',
+                text: 'Sedang menyiapkan file Excel dan ZIP...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            setTimeout(() => {
+                try {
+                    // Generate Excel data
+                    const dataToExport = filteredData.map(item => ({
+                        ID_Transaksi: item.id || '',
+                        Username: item.username || '',
+                        Jam_Retur: item.jamRetur || '',
+                        Tanggal_Retur: item.tanggalRetur || '',
+                        Kode_Barang: item.kodeBarang || '',
+                        Nama_Barang: item.namaBarang || '',
+                        Jumlah: item.jumlah || 0,
+                        Total: (item.total || 0).toString(),
+                        Tanggal_Transaksi: item.tanggal || ''
+                    }));
+                    
+                    const ws = XLSX.utils.json_to_sheet(dataToExport);
+                    
+                    // Format columns
+                    const range = XLSX.utils.decode_range(ws['!ref']);
+                    for (let C = range.s.c; C <= range.e.c; C++) {
+                        const address = XLSX.utils.encode_col(C) + '1';
+                        if (!ws[address]) continue;
+                        ws[address].s = { font: { bold: true }, alignment: { horizontal: 'center' } };
+                    }
+                    
+                    // Auto-size columns
+                    const colWidths = [];
+                    for (let C = range.s.c; C <= range.e.c; C++) {
+                        let maxLen = 10; // default
+                        for (let R = range.s.r; R <= range.e.r; R++) {
+                            const address = XLSX.utils.encode_cell({ c: C, r: R });
+                            if (!ws[address]) continue;
+                            const cellText = String(ws[address].v || '');
+                            maxLen = Math.max(maxLen, cellText.length);
+                        }
+                        colWidths.push({ wch: maxLen + 2 });
+                    }
+                    ws['!cols'] = colWidths;
+                    
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Retur Transaksi');
+                    
+                    // Get current date for filename
+                    const today = new Date();
+                    const day = String(today.getDate()).padStart(2, '0');
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const year = today.getFullYear();
+                    const hour = String(today.getHours()).padStart(2, '0');
+                    const minute = String(today.getMinutes()).padStart(2, '0');
+                    
+                    const excelFileName = `retur_${day}-${month}-${year}_${hour}${minute}.xlsx`;
+                    const zipFileName = `retur_${day}-${month}-${year}_${hour}${minute}.zip`;
+                    
+                    // Create Excel binary data
+                    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                    
+                    // Create a ZIP file
+                    const zip = new JSZip();
+                    
+                    // Add the Excel file to the ZIP
+                    zip.file(excelFileName, excelBuffer);
+                    
+                    // Add a readme.txt file with information
+                    const fileCount = filteredData.length;
+                    const totalAmount = filteredData.reduce((sum, item) => sum + (item.total || 0), 0);
+                    const readmeContent = 
+                        `Laporan Retur Transaksi\n` +
+                        `------------------------\n` +
+                        `Tanggal ekspor: ${today.toLocaleString('id-ID')}\n` +
+                        `Jumlah data: ${fileCount}\n` +
+                        `Total nilai retur: ${formatRupiah(totalAmount)}\n\n` +
+                        `File ini dibuat otomatis dari sistem retur.\n` +
+                        `© ${year} Sistem Manajemen Toko`;
+                    
+                    zip.file("readme.txt", readmeContent);
+                    
+                    // Generate the ZIP file
+                    zip.generateAsync({ type: 'blob' }).then(function(content) {
+                        // Save the ZIP file
+                        saveAs(content, zipFileName);
+                        
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Download Berhasil',
+                            text: `File "${zipFileName}" telah diunduh`,
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                    });
+                } catch (error) {
+                    console.error("Error creating ZIP file:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan',
+                        text: 'Gagal membuat file ZIP. Silakan coba lagi.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }, 500); // Adding a small delay for better UX
+        }
+        
+        // Regular Excel download (as backup)
         function downloadExcel() {
             if (filteredData.length === 0) {
                 Swal.fire({
+
                     icon: 'warning',
                     title: 'Tidak Ada Data',
                     text: 'Tidak ada data yang dapat diunduh',
@@ -987,10 +1116,10 @@
                 resetFilter();
             }
             
-            // Alt + D - Download Excel
+            // Alt + D - Download Excel Zip
             if (event.altKey && event.key === 'd') {
                 event.preventDefault();
-                downloadExcel();
+                downloadExcelZip();
             }
             
             // Alt + Left/Right - Navigate pages
