@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    
+    <title>Redeem Poin Member</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --success-color: #10b981;
+            --success-hover: #059669;
+            --success-light: #ecfdf5;
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+            --warning-color: #f59e0b;
+            --info-color: #17a2b8;
+            --info-hover: #138496;
+            --background: #f9fafb;
+            --card-bg: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-light: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --discount-color: #ef4444;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            padding: 2rem;
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+            font-size: 2.5rem;
+        }
+
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            border-left: 4px solid var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-right: 1rem;
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success-color);
+        }
+
+        .stat-card.success i {
+            color: var(--success-color);
+        }
+
+        .stat-card.danger {
+            border-left-color: var(--danger-color);
+        }
+
+        .stat-card.danger i {
+            color: var(--danger-color);
+        }
+
+        .stat-info h3 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-info p {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .redeem-section {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .redeem-section:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .sort-dropdown {
+            position: relative;
+            min-width: 200px;
+        }
+
+        .sort-dropdown select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            appearance: none;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%234b5563' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E") no-repeat right 1rem center;
+            transition: var(--transition);
+        }
+
+        .sort-dropdown select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .item-card {
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .item-image {
+            height: 160px;
+            background-color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-image i {
+            font-size: 3rem;
+            color: var(--primary-color);
+        }
+
+        .item-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: var(--discount-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .item-details {
+            padding: 1.25rem;
+        }
+
+        .item-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 2.8rem;
+        }
+
+        .item-code {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-price {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-original {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .price-discount {
+            color: var(--discount-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .points-required {
+            margin-top: 0.5rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .points-required i {
+            color: var(--primary-color);
+        }
+
+        .stock-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .stock-amount {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .low-stock {
+            color: var(--danger-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th:first-child {
+            border-top-left-radius: 0.5rem;
+        }
+
+        th:last-child {
+            border-top-right-radius: 0.5rem;
+        }
+
+        tbody tr {
+            transition: var(--transition);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn i {
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--success-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: var(--info-hover);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-light);
+        }
+
+        .btn-redeem {
+            background: var(--success-color);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-redeem:hover {
+            background: var(--success-hover);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--danger-color);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .price-info {
+            margin-top: 1rem;
+            padding: 1.25rem;
+            background: var(--primary-light);
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .custom-select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .custom-select-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .custom-select-input:hover {
+            border-color: var(--primary-hover);
+        }
+
+        .custom-select-input.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .custom-select-input:after {
+            content: '';
+            width: 0.8em;
+            height: 0.5em;
+            background-color: var(--text-secondary);
+            clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+            transition: var(--transition);
+        }
+
+        .custom-select-input.active:after {
+            transform: rotate(180deg);
+        }
+
+        .custom-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-top: 0.25rem;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: var(--shadow-md);
+        }
+
+        .custom-select-dropdown.active {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .custom-select-search {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            outline: none;
+            background: #f9fafb;
+        }
+
+        .custom-select-options {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .custom-select-option {
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .custom-select-option:last-child {
+            border-bottom: none;
+        }
+
+        .custom-select-option:hover {
+            background-color: var(--primary-light);
+        }
+
+        .custom-select-option.selected {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .member-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .member-points {
+            color: var(--success-color);
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background: var(--success-light);
+        }
+
+        .pin-input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .qr-scanner-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #qr-reader {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 2px solid var(--primary-color);
+        }
+
+        .redeem-confirmation {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--success-light);
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--success-color);
+            display: none;
+        }
+
+        .redeem-confirmation.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: var(--background);
+            border-radius: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .detail-item:hover {
+            background-color: var(--primary-light);
+        }
+
+        .detail-item strong {
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .detail-item p {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .tab:hover {
+            color: var(--primary-color);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .pagination-item {
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .pagination-item:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+        }
+
+        .pagination-item.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 992px) {
+            .header-stats {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .item-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .redeem-section {
+                padding: 1.25rem;
+            }
+
+            .filter-options {
+                flex-direction: column;
+            }
+
+            .sort-dropdown {
+                width: 100%;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .item-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons .btn {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Redeem Poin Member</h1>
+        
+        <div class="header-section">
+            <div class="header-stats">
+                <div class="stat-card">
+                    <i class="fas fa-tag"></i>
+                    <div class="stat-info">
+                        <h3>Total Items</h3>
+                        <p id="statTotalItems">0</p>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <i class="fas fa-exchange-alt"></i>
+                    <div class="stat-info">
+                        <h3>Total Redemptions</h3>
+                        <p id="statTotalRedemptions">0</p>
+                    </div>
+                </div>
+                <div class="stat-card danger">
+                    <i class="fas fa-coins"></i>
+                    <div class="stat-info">
+                        <h3>Total Points Redeemed</h3>
+                        <p id="statTotalPoints">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="showRiwayatModal()">
+                    <i class="fas fa-history"></i> Riwayat Penukaran
+                </button>
+                <button class="btn btn-outline" onclick="window.location.href='member.html';">
+                    <i class="fas fa-users"></i> Halaman Member
+                </button>
+            </div>
+        </div>
+        
+        <div class="redeem-section">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('grid')">
+                    <i class="fas fa-th"></i> Grid View
+                </div>
+                <div class="tab" onclick="switchTab('table')">
+                    <i class="fas fa-list"></i> Table View
+                </div>
+            </div>
+            
+            <div class="filter-options">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchBarang" placeholder="Cari barang..." oninput="cariBarang()">
+                </div>
+                <div class="sort-dropdown">
+                    <select id="sortOptions" onchange="sortItems()">
+                        <option value="default">Urutkan Barang</option>
+                        <option value="name-asc">Nama (A-Z)</option>
+                        <option value="name-desc">Nama (Z-A)</option>
+                        <option value="price-asc">Harga (Rendah-Tinggi)</option>
+                        <option value="price-desc">Harga (Tinggi-Rendah)</option>
+                        <option value="points-asc">Poin (Rendah-Tinggi)</option>
+                        <option value="points-desc">Poin (Tinggi-Rendah)</option>
+                        <option value="stock-asc">Stok (Rendah-Tinggi)</option>
+                        <option value="stock-desc">Stok (Tinggi-Rendah)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Grid View -->
+            <div id="gridView" class="tab-content active">
+                <div class="item-grid" id="itemGrid">
+                    <!-- Items will be loaded here -->
+                </div>
+                <div class="pagination" id="gridPagination">
+                    <!-- Pagination will be generated here -->
+                </div>
+            </div>
+            
+            <!-- Table View -->
+            <div id="tableView" class="tab-content">
+                <table id="tabelBarang">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Nama Barang</th>
+                            <th>Harga Normal</th>
+                            <th>Harga Poin</th>
+                            <th>Stok</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="daftarBarang">
+                        <!-- Items will be loaded here -->
+                    </tbody>
+                </table>
+                <div class="pagination" id="tablePagination">
+                    <!-- Pagination will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Riwayat Redeem -->
+        <div id="riwayatRedeemModal" class="modal">
+            <div class="modal-content">
+                <button class="modal-close" onclick="hideRiwayatModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="modal-header">
+                    <h2><i class="fas fa-history"></i> Riwayat Penukaran Poin</h2>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchRiwayat" placeholder="Cari riwayat..." oninput="cariRiwayat()">
+                    </div>
+
+                    <table id="tabelRiwayat">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Member</th>
+                                <th>Barang</th>
+                                <th>Poin Digunakan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daftarRiwayat">
+                            <!-- Riwayat redeem akan dimuat di sini -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-danger" onclick="hideRiwayatModal()">
+                        <i class="fas fa-times"></i> Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Detail Riwayat -->
+        <div id="detailRiwayatModal" class="modal">
+            <div class="modal-content">
+                <button class="modal-close" onclick="hideDetailRiwayatModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="modal-header">
+                    <h2><i class="fas fa-info-circle"></i> Detail Penukaran</h2>
+                </div>
+                
+                <div class="modal-body">
+                    <div id="detailRiwayatContent">
+                        <!-- Detail riwayat akan dimuat di sini -->
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-danger" onclick="hideDetailRiwayatModal()">
+                        <i class="fas fa-times"></i> Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Redeem -->
+        <div id="redeemModal" class="modal">
+            <div class="modal-content">
+                <button class="modal-close" onclick="hideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="modal-header">
+                    <h2><i class="fas fa-exchange-alt"></i> Redeem Barang</h2>
+                </div>
+                
+                <div class="modal-body">
+                    <div id="barangInfo" class="price-info">
+                        <!-- Info barang akan ditampilkan di sini -->
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="memberSearchInput"><i class="fas fa-user"></i> Pilih Member</label>
+                        <div class="custom-select-container">
+                            <div class="custom-select-input" id="memberSelectDisplay">
+                                Pilih Member
+                            </div>
+                            <div class="custom-select-dropdown" id="memberSelectDropdown">
+                                <input type="text" 
+                                       class="custom-select-search" 
+                                       id="memberSearchInput" 
+                                       placeholder="Cari member...">
+                                <ul class="custom-select-options" id="memberOptions">
+                                    <!-- Member options will be populated here -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pinInput"><i class="fas fa-lock"></i> Masukkan PIN</label>
+                        <div class="pin-input-container">
+                            <input type="password" id="pinInput" placeholder="Masukkan PIN member">
+                            <button class="btn btn-info" onclick="openQRScanner()">
+                                <i class="fas fa-qrcode"></i> Scan QR
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-coins"></i> Poin Anda: <span id="poinDimiliki" class="member-points">0</span></label>
+                    </div>
+                    
+                    <div id="redeemConfirmation" class="redeem-confirmation">
+                        <p><i class="fas fa-check-circle"></i> Anda akan menukarkan <strong id="confirmPointsAmount">0</strong> poin untuk <strong id="confirmItemName">item</strong>. Lanjutkan?</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-danger" onclick="hideModal()">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                    <button class="btn btn-success" onclick="konfirmasiRedeem()">
+                        <i class="fas fa-check"></i> Konfirmasi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal QR Scanner -->
+        <div id="qrScannerModal" class="modal">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeQRScanner()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="modal-header">
+                    <h2><i class="fas fa-qrcode"></i> Scan QR PIN Member</h2>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="qr-scanner-container">
+                        <div id="qr-reader"></div>
+                        <p>Arahkan kamera ke QR code yang berisi PIN member</p>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-danger" onclick="closeQRScanner()">
+                        <i class="fas fa-times"></i> Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        // Global variables
+        let selectedBarangKode = '';
+        let requiredPoin = 0;
+        let selectedMemberId = '';
+        let html5QrcodeScanner = null;
+        let allItems = [];
+        let filteredItems = [];
+        let currentPage = 1;
+        let itemsPerPage = 12;
+        let currentView = 'grid';
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBarang();
+            loadMembers();
+            updateStats();
+            setupEventListeners();
+        });
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Close modals when clicking outside content
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        if (modal.id === 'qrScannerModal') {
+                            closeQRScanner();
+                        } else if (modal.id === 'redeemModal') {
+                            hideModal();
+                        } else if (modal.id === 'riwayatRedeemModal') {
+                            hideRiwayatModal();
+                        } else if (modal.id === 'detailRiwayatModal') {
+                            hideDetailRiwayatModal();
+                        }
+                    }
+                });
+            });
+            
+            // Add keyboard event listeners for modal escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        if (getComputedStyle(modal).display !== 'none') {
+                            if (modal.id === 'qrScannerModal') {
+                                closeQRScanner();
+                            } else if (modal.id === 'redeemModal') {
+                                hideModal();
+                            } else if (modal.id === 'riwayatRedeemModal') {
+                                hideRiwayatModal();
+                            } else if (modal.id === 'detailRiwayatModal') {
+                                hideDetailRiwayatModal();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Format currency to Rupiah
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Calculate discounted price (15% off)
+        function calculateDiscountedPrice(originalPrice) {
+            return Math.floor(originalPrice * 0.85); // 15% discount
+        }
+        
+        // Update dashboard statistics
+        function updateStats() {
+            const barang = JSON.parse(localStorage.getItem('barang')) || [];
+            const riwayatRedeem = JSON.parse(localStorage.getItem('riwayatRedeem')) || [];
+            
+            // Count available items
+            const availableItems = barang.filter(item => item.stok > 0).length;
+            document.getElementById('statTotalItems').textContent = availableItems;
+            
+            // Count total redemptions
+            document.getElementById('statTotalRedemptions').textContent = riwayatRedeem.length;
+            
+            // Calculate total points redeemed
+            const totalPoints = riwayatRedeem.reduce((sum, riwayat) => sum + riwayat.poinDigunakan, 0);
+            document.getElementById('statTotalPoints').textContent = totalPoints.toLocaleString();
+        }
+        
+        // Load items from localStorage
+        function loadBarang() {
+            const barang = JSON.parse(localStorage.getItem('barang')) || [];
+            allItems = barang.filter(item => item.stok > 0).map(item => {
+                const originalPrice = item.hargaJual;
+                const discountedPrice = calculateDiscountedPrice(originalPrice);
+                const poinRequired = discountedPrice;
+                
+                return {
+                    kode: item.kode,
+                    nama: item.nama,
+                    hargaAsli: originalPrice,
+                    hargaDiskon: discountedPrice,
+                    poin: poinRequired,
+                    stok: item.stok
+                };
+            });
+            
+            filteredItems = [...allItems];
+            sortItems(); // This will also trigger renderItems
+        }
+        
+        // Load members from localStorage
+        function loadMembers() {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const optionsList = document.getElementById('memberOptions');
+            optionsList.innerHTML = '';
+
+            members.forEach(member => {
+                const option = document.createElement('li');
+                option.className = 'custom-select-option';
+                option.innerHTML = `
+                    <div class="member-info">
+                        <span>${member.nama}</span>
+                        <span class="member-points">${member.poin} poin</span>
+                    </div>
+                `;
+                option.dataset.memberId = member.id;
+                option.dataset.poin = member.poin;
+                option.onclick = () => selectMember(member);
+                optionsList.appendChild(option);
+            });
+
+            // Add click event for custom select input
+            document.getElementById('memberSelectDisplay').onclick = toggleDropdown;
+
+            // Add search functionality
+            document.getElementById('memberSearchInput').oninput = searchMembers;
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                const container = document.querySelector('.custom-select-container');
+                if (container && !container.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+        }
+        
+        // Search for items based on input
+        function cariBarang() {
+            const searchTerm = document.getElementById('searchBarang').value.toLowerCase();
+            
+            if (searchTerm.trim() === '') {
+                filteredItems = [...allItems];
+            } else {
+                filteredItems = allItems.filter(item => {
+                    return item.kode.toLowerCase().includes(searchTerm) || 
+                           item.nama.toLowerCase().includes(searchTerm);
+                });
+            }
+            
+            currentPage = 1;
+            renderItems();
+        }
+        
+        // Sort items based on selected option
+        function sortItems() {
+            const sortOption = document.getElementById('sortOptions').value;
+            
+            switch (sortOption) {
+                case 'name-asc':
+                    filteredItems.sort((a, b) => a.nama.localeCompare(b.nama));
+                    break;
+                case 'name-desc':
+                    filteredItems.sort((a, b) => b.nama.localeCompare(a.nama));
+                    break;
+                case 'price-asc':
+                    filteredItems.sort((a, b) => a.hargaAsli - b.hargaAsli);
+                    break;
+                case 'price-desc':
+                    filteredItems.sort((a, b) => b.hargaAsli - a.hargaAsli);
+                    break;
+                case 'points-asc':
+                    filteredItems.sort((a, b) => a.poin - b.poin);
+                    break;
+                case 'points-desc':
+                    filteredItems.sort((a, b) => b.poin - a.poin);
+                    break;
+                case 'stock-asc':
+                    filteredItems.sort((a, b) => a.stok - b.stok);
+                    break;
+                case 'stock-desc':
+                    filteredItems.sort((a, b) => b.stok - a.stok);
+                    break;
+                default:
+                    // Default sorting (by name ascending)
+                    filteredItems.sort((a, b) => a.nama.localeCompare(b.nama));
+            }
+            
+            renderItems();
+        }
+        
+        // Render items based on current view and pagination
+        function renderItems() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const itemsToDisplay = filteredItems.slice(startIndex, endIndex);
+            
+            if (currentView === 'grid') {
+                renderGridView(itemsToDisplay);
+            } else {
+                renderTableView(itemsToDisplay);
+            }
+            
+            renderPagination();
+        }
+        
+        // Render grid view of items
+        function renderGridView(items) {
+            const grid = document.getElementById('itemGrid');
+            grid.innerHTML = '';
+            
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><p>Tidak ada barang yang tersedia</p></div>';
+                return;
+            }
+            
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                
+                const isLowStock = item.stok < 5;
+                
+                card.innerHTML = `
+                    <div class="item-badge">Hemat 15%</div>
+                    <div class="item-image">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div class="item-details">
+                        <div class="item-title">${item.nama}</div>
+                        <div class="item-code">${item.kode}</div>
+                        <div class="item-price">
+                            <span class="price-original">${formatRupiah(item.hargaAsli)}</span>
+                            <span class="price-discount">${formatRupiah(item.hargaDiskon)}</span>
+                        </div>
+                        <div class="points-required">
+                            <i class="fas fa-coins"></i> ${item.poin} poin
+                        </div>
+                        <div class="stock-info">
+                            <div class="stock-amount ${isLowStock ? 'low-stock' : ''}">
+                                <i class="fas fa-${isLowStock ? 'exclamation-triangle' : 'box'}"></i> 
+                                ${isLowStock ? 'Stok terbatas: ' : 'Stok: '}${item.stok}
+                            </div>
+                            <button class="btn btn-redeem" onclick="showRedeemModal('${item.kode}', ${item.poin}, '${item.nama}', ${item.hargaDiskon}, ${item.hargaAsli})">
+                                <i class="fas fa-exchange-alt"></i> Tukar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+        
+        // Render table view of items
+        function renderTableView(items) {
+            const tbody = document.getElementById('daftarBarang');
+            tbody.innerHTML = '';
+            
+            if (items.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="6" style="text-align: center;">Tidak ada barang yang tersedia</td>';
+                tbody.appendChild(row);
+                return;
+            }
+            
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                const isLowStock = item.stok < 5;
+                
+                row.innerHTML = `
+                    <td>${item.kode}</td>
+                    <td>${item.nama}</td>
+                    <td>${formatRupiah(item.hargaAsli)}</td>
+                    <td>
+                        <div class="price-display">
+                            <span class="price-original">${formatRupiah(item.hargaAsli)}</span>
+                            <span class="price-discount">${formatRupiah(item.hargaDiskon)}</span>
+                            <span>(${item.poin} poin)</span>
+                            <span class="discount-badge">Hemat 15%</span>
+                        </div>
+                    </td>
+                    <td class="${isLowStock ? 'low-stock' : ''}">${item.stok} ${isLowStock ? '<i class="fas fa-exclamation-triangle"></i>' : ''}</td>
+                    <td>
+                        <button class="btn btn-success" onclick="showRedeemModal('${item.kode}', ${item.poin}, '${item.nama}', ${item.hargaDiskon}, ${item.hargaAsli})">
+                            <i class="fas fa-exchange-alt"></i> Tukar
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Render pagination controls
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+            const paginationEl = document.getElementById(
+                currentView === 'grid' ? 'gridPagination' : 'tablePagination'
+            );
+            
+            paginationEl.innerHTML = '';
+            
+            if (totalPages <= 1) {
+                return;
+            }
+            
+            // Previous button
+            const prevBtn = document.createElement('div');
+            prevBtn.className = 'pagination-item';
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderItems();
+                }
+            };
+            paginationEl.appendChild(prevBtn);
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('div');
+                pageBtn.className = `pagination-item ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => {
+                    currentPage = i;
+                    renderItems();
+                };
+                paginationEl.appendChild(pageBtn);
+            }
+            
+            // Next button
+            const nextBtn = document.createElement('div');
+            nextBtn.className = 'pagination-item';
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderItems();
+                }
+            };
+            paginationEl.appendChild(nextBtn);
+        }
+        
+        // Switch between grid and table views
+        function switchTab(viewType) {
+            currentView = viewType;
+            
+            // Update tab states
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Update content visibility
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            if (viewType === 'grid') {
+                tabs[0].classList.add('active');
+                document.getElementById('gridView').classList.add('active');
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('tableView').classList.add('active');
+            }
+            
+            renderItems();
+        }
+        
+        // Toggle custom select dropdown
+        function toggleDropdown() {
+            const dropdown = document.getElementById('memberSelectDropdown');
+            const input = document.getElementById('memberSelectDisplay');
+            dropdown.classList.toggle('active');
+            input.classList.toggle('active');
+            
+            if (dropdown.classList.contains('active')) {
+                document.getElementById('memberSearchInput').focus();
+            }
+        }
+
+        // Close custom select dropdown
+        function closeDropdown() {
+            document.getElementById('memberSelectDropdown').classList.remove('active');
+            document.getElementById('memberSelectDisplay').classList.remove('active');
+        }
+
+        // Select a member from dropdown
+        function selectMember(member) {
+            selectedMemberId = member.id;
+            document.getElementById('memberSelectDisplay').textContent = member.nama;
+            document.getElementById('poinDimiliki').textContent = member.poin;
+            closeDropdown();
+
+            // Clear search input when member is selected
+            document.getElementById('memberSearchInput').value = '';
+            
+            // Show confirmation message if applicable
+            updateRedeemConfirmation(member.poin);
+        }
+        
+        // Update redemption confirmation message
+        function updateRedeemConfirmation(memberPoints) {
+            const confirmationEl = document.getElementById('redeemConfirmation');
+            
+            if (memberPoints >= requiredPoin) {
+                document.getElementById('confirmPointsAmount').textContent = requiredPoin;
+                confirmationEl.classList.add('show');
+            } else {
+                confirmationEl.classList.remove('show');
+            }
+        }
+
+        // Search for members in dropdown
+        function searchMembers(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const options = document.querySelectorAll('.custom-select-option');
+            
+            options.forEach(option => {
+                const memberName = option.querySelector('.member-info span').textContent.toLowerCase();
+                if (memberName.includes(searchTerm)) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+        
+        // Show redeem modal
+        function showRedeemModal(kodeBarang, poinNeeded, namaBarang, discountedPrice, originalPrice) {
+            selectedBarangKode = kodeBarang;
+            requiredPoin = poinNeeded;
+            
+            const barangInfo = document.getElementById('barangInfo');
+            barangInfo.innerHTML = `
+                <h3>${namaBarang}</h3>
+                <p>Kode: <strong>${kodeBarang}</strong></p>
+                <p>Harga Normal: <span class="original-price">${formatRupiah(originalPrice)}</span></p>
+                <p>Harga Setelah Diskon: <span class="price-discount">${formatRupiah(discountedPrice)}</span></p>
+                <p>Poin yang Diperlukan: <strong>${poinNeeded} poin</strong></p>
+                <p class="discount-badge">Hemat 15%</p>
+            `;
+            
+            document.getElementById('confirmItemName').textContent = namaBarang;
+            
+            // Reset member selection when opening modal
+            resetMemberSelection();
+            
+            // Show the modal with animation
+            const modal = document.getElementById('redeemModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+                modal.classList.add('show');
+            }, 10);
+        }
+
+        // Reset member selection form
+        function resetMemberSelection() {
+            selectedMemberId = '';
+            document.getElementById('memberSelectDisplay').textContent = 'Pilih Member';
+            document.getElementById('poinDimiliki').textContent = '0';
+            document.getElementById('memberSearchInput').value = '';
+            document.getElementById('pinInput').value = '';
+            document.getElementById('redeemConfirmation').classList.remove('show');
+            closeDropdown();
+        }
+
+        // Hide redeem modal
+        function hideModal() {
+            const modal = document.getElementById('redeemModal');
+            modal.classList.remove('active');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            resetMemberSelection();
+        }
+        
+        // Open QR code scanner
+        function openQRScanner() {
+            const modal = document.getElementById('qrScannerModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+                modal.classList.add('show');
+            }, 10);
+            
+            html5QrcodeScanner = new Html5Qrcode("qr-reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, 
+                {
+                    fps: 10,
+                    qrbox: 250
+                },
+                onScanSuccess
+            );
+        }
+        
+        // QR scan success handler
+        function onScanSuccess(decodedText, decodedResult) {
+            try {
+                // Decrypt PIN from QR Code
+                const decryptedPin = decryptPIN(decodedText);
+                
+                // Set PIN in input
+                document.getElementById('pinInput').value = decryptedPin;
+                
+                // Close scanner
+                closeQRScanner();
+            } catch (error) {
+                console.error("Error decrypting PIN:", error);
+                alert("QR PIN tidak valid");
+            }
+        }
+        
+        // Close QR scanner
+        function closeQRScanner() {
+            const modal = document.getElementById('qrScannerModal');
+            modal.classList.remove('active');
+            modal.classList.remove('show');
+            
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner = null;
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 300);
+                }).catch(error => {
+                    console.error("Error stopping scanner", error);
+                    modal.style.display = 'none';
+                });
+            } else {
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+        
+        // Decrypt PIN from QR code
+        function decryptPIN(encryptedPin) {
+            try {
+                const SECRET_KEY = "MembershipSystem2024!@#";
+                const bytes = CryptoJS.AES.decrypt(encryptedPin, SECRET_KEY);
+                return bytes.toString(CryptoJS.enc.Utf8);
+            } catch (error) {
+                console.error('Error decrypting PIN:', error);
+                throw error;
+            }
+        }
+        
+        // Confirm redemption
+        function konfirmasiRedeem() {
+            const pin = document.getElementById('pinInput').value;
+            
+            if (!selectedMemberId || !pin) {
+                alert('Silakan pilih member dan masukkan PIN');
+                return;
+            }
+
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const memberIndex = members.findIndex(m => m.id === selectedMemberId);
+
+            if (memberIndex === -1) {
+                alert('Member tidak ditemukan');
+                return;
+            }
+
+            // Decrypt the stored PIN to compare with input
+            const storedPin = members[memberIndex].pin;
+            let isValidPin = false;
+            
+            try {
+                const decryptedPin = decryptPIN(storedPin);
+                isValidPin = (pin === decryptedPin);
+            } catch (error) {
+                // Fallback for direct comparison if decryption fails
+                isValidPin = (pin === storedPin);
+            }
+            
+            if (!isValidPin) {
+                alert('PIN tidak valid');
+                return;
+            }
+
+            if (members[memberIndex].poin < requiredPoin) {
+                alert('Poin tidak mencukupi');
+                return;
+            }
+
+            // Process the redemption
+            const barang = JSON.parse(localStorage.getItem('barang')) || [];
+            const barangIndex = barang.findIndex(b => b.kode === selectedBarangKode);
+
+            if (barangIndex === -1 || barang[barangIndex].stok <= 0) {
+                alert('Barang tidak tersedia');
+                return;
+            }
+
+            // Update item stock
+            barang[barangIndex].stok--;
+            localStorage.setItem('barang', JSON.stringify(barang));
+
+            // Get item name for the record
+            const barangName = barang[barangIndex].nama;
+            
+            // Update member points
+            const oldPoin = members[memberIndex].poin;
+            members[memberIndex].poin -= requiredPoin;
+            
+            // Add point transaction to member's history
+            if (!members[memberIndex].pointHistory) {
+                members[memberIndex].pointHistory = [];
+            }
+            
+            // Add point redemption record to member's history
+            members[memberIndex].pointHistory.push({
+                date: new Date().toISOString(),
+                amount: requiredPoin,
+                type: 'redeem',
+                note: `Penukaran barang: ${barangName}`,
+                balance: members[memberIndex].poin
+            });
+            
+            // Save updated member data
+            localStorage.setItem('members', JSON.stringify(members));
+
+            // Add to global redemption history
+            const riwayatRedeem = JSON.parse(localStorage.getItem('riwayatRedeem')) || [];
+            const riwayat = {
+                id: Date.now().toString(),
+                tanggal: new Date().toISOString(),
+                memberId: members[memberIndex].id,
+                memberNama: members[memberIndex].nama,
+                barangKode: selectedBarangKode,
+                barangNama: barang[barangIndex].nama,
+                poinDigunakan: requiredPoin,
+                poinSebelumnya: oldPoin,
+                poinSetelahnya: members[memberIndex].poin
+            };
+            
+            riwayatRedeem.push(riwayat);
+            localStorage.setItem('riwayatRedeem', JSON.stringify(riwayatRedeem));
+
+           // Show success message
+            alert('Penukaran berhasil!');
+            hideModal();
+            loadBarang();
+            updateStats();
+        }
+        
+        // Show redemption history modal
+        function showRiwayatModal() {
+            const riwayatRedeem = JSON.parse(localStorage.getItem('riwayatRedeem')) || [];
+            const tbody = document.getElementById('daftarRiwayat');
+            tbody.innerHTML = '';
+
+            // Sort history by date (newest first)
+            riwayatRedeem.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+            if (riwayatRedeem.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="5" style="text-align: center;">Belum ada riwayat penukaran</td>';
+                tbody.appendChild(row);
+            } else {
+                riwayatRedeem.forEach(riwayat => {
+                    const row = document.createElement('tr');
+                    const tanggal = new Date(riwayat.tanggal).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    row.innerHTML = `
+                        <td>${tanggal}</td>
+                        <td>${riwayat.memberNama}</td>
+                        <td>${riwayat.barangNama}</td>
+                        <td>${riwayat.poinDigunakan.toLocaleString()} poin</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="showDetailRiwayat('${riwayat.id}')">
+                                <i class="fas fa-info-circle"></i> Detail
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Show the modal with animation
+            const modal = document.getElementById('riwayatRedeemModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+                modal.classList.add('show');
+            }, 10);
+        }
+
+        // Hide redemption history modal
+        function hideRiwayatModal() {
+            const modal = document.getElementById('riwayatRedeemModal');
+            modal.classList.remove('active');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Search in redemption history
+        function cariRiwayat() {
+            const searchTerm = document.getElementById('searchRiwayat').value.toLowerCase();
+            const rows = document.getElementById('daftarRiwayat').getElementsByTagName('tr');
+
+            Array.from(rows).forEach(row => {
+                if (row.cells.length < 3) return; // Skip empty state row
+                
+                const member = row.cells[1].textContent.toLowerCase();
+                const barang = row.cells[2].textContent.toLowerCase();
+                const tanggal = row.cells[0].textContent.toLowerCase();
+                
+                row.style.display = 
+                    member.includes(searchTerm) || 
+                    barang.includes(searchTerm) || 
+                    tanggal.includes(searchTerm) 
+                        ? '' : 'none';
+            });
+        }
+
+ function showDetailRiwayat(riwayatId) {
+    const riwayatRedeem = JSON.parse(localStorage.getItem('riwayatRedeem')) || [];
+    const riwayat = riwayatRedeem.find(r => r.id === riwayatId);
+
+    if (riwayat) {
+        const tanggal = new Date(riwayat.tanggal).toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const members = JSON.parse(localStorage.getItem('members')) || [];
+        const member = members.find(m => m.id === riwayat.memberId);
+
+        const barang = JSON.parse(localStorage.getItem('barang')) || [];
+        const barangDetail = barang.find(b => b.kode === riwayat.barangKode) || { hargaJual: 0 };
+        
+        // Make sure values exist or provide defaults
+        const poinDigunakan = riwayat.poinDigunakan || 0;
+        const poinSebelumnya = riwayat.poinSebelumnya || 0;
+        const poinSetelahnya = riwayat.poinSetelahnya || 0;
+
+        const detailContent = document.getElementById('detailRiwayatContent');
+        detailContent.innerHTML = `
+            <div class="detail-item">
+                <strong><i class="fas fa-calendar-alt"></i> Tanggal Penukaran</strong>
+                <p>${tanggal}</p>
+            </div>
+            <div class="detail-item">
+                <strong><i class="fas fa-user"></i> Nama Member</strong>
+                <p>${riwayat.memberNama || 'Tidak tersedia'}</p>
+            </div>
+            <div class="detail-item">
+                <strong><i class="fas fa-id-card"></i> Kode Member</strong>
+                <p>${riwayat.memberId || 'Tidak tersedia'}</p>
+            </div>
+            <div class="detail-item">
+                <strong><i class="fas fa-gift"></i> Barang Ditukar</strong>
+                <p>${riwayat.barangNama || 'Tidak tersedia'}</p>
+            </div>
+            <div class="detail-item">
+                <strong><i class="fas fa-barcode"></i> Kode Barang</strong>
+                <p>${riwayat.barangKode || 'Tidak tersedia'}</p>
+            </div>
+            <div class="detail-item">
+                <strong><i class="fas fa-coins"></i> Poin Digunakan</strong>
+                <p>${Number(poinDigunakan).toLocaleString()} poin</p>
+            </div>
+            <div class="detail-item">
+                <strong><i class="fas fa-wallet"></i> Poin Sebelum Penukaran</strong>
+                <p>${Number(poinSebelumnya).toLocaleString()} poin</p>
+            </div>
+            <div class="detail-item">
+                <strong><i class="fas fa-wallet"></i> Poin Setelah Penukaran</strong>
+                <p>${Number(poinSetelahnya).toLocaleString()} poin</p>
+            </div>
+            <div class="detail-item">
+                <strong><i class="fas fa-tag"></i> Harga Barang</strong>
+                <p>${formatRupiah(barangDetail.hargaJual)}</p>
+            </div>
+            <div class="detail-item">
+                <strong><i class="fas fa-percent"></i> Harga Setelah Diskon</strong>
+                <p>${formatRupiah(calculateDiscountedPrice(barangDetail.hargaJual))}</p>
+            </div>
+        `;
+
+        // Show the detail modal with animation
+        const modal = document.getElementById('detailRiwayatModal');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('active');
+            modal.classList.add('show');
+        }, 10);
+    }
+}
+
+        // Hide detail history modal
+        function hideDetailRiwayatModal() {
+            const modal = document.getElementById('detailRiwayatModal');
+            modal.classList.remove('active');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+        
+        // Generate test data if needed (for development purposes)
+        function generateTestData() {
+            // Only generate if items don't exist
+            if (!localStorage.getItem('barang') || JSON.parse(localStorage.getItem('barang')).length === 0) {
+                const testItems = [
+                    { kode: 'P001', nama: 'Smartphone XYZ 128GB', hargaJual: 3500000, stok: 10 },
+                    { kode: 'P002', nama: 'Headphone Wireless Premium', hargaJual: 850000, stok: 15 },
+                    { kode: 'P003', nama: 'Smartwatch Fitness Tracker', hargaJual: 1200000, stok: 8 },
+                    { kode: 'P004', nama: 'Bluetooth Speaker Waterproof', hargaJual: 450000, stok: 20 },
+                    { kode: 'P005', nama: 'Power Bank 20000mAh', hargaJual: 350000, stok: 25 },
+                    { kode: 'P006', nama: 'Wireless Charger Pad', hargaJual: 175000, stok: 30 },
+                    { kode: 'P007', nama: 'Gaming Mouse RGB', hargaJual: 550000, stok: 12 },
+                    { kode: 'P008', nama: 'Mechanical Keyboard', hargaJual: 950000, stok: 7 },
+                    { kode: 'P009', nama: 'USB-C Hub Multiport', hargaJual: 280000, stok: 18 },
+                    { kode: 'P010', nama: 'Webcam HD 1080p', hargaJual: 320000, stok: 14 },
+                    { kode: 'P011', nama: 'External SSD 500GB', hargaJual: 1100000, stok: 9 },
+                    { kode: 'P012', nama: 'Noise Cancelling Earbuds', hargaJual: 750000, stok: 11 },
+                    { kode: 'P013', nama: 'Smart Light Bulb Set', hargaJual: 220000, stok: 22 },
+                    { kode: 'P014', nama: 'Portable Bluetooth Printer', hargaJual: 680000, stok: 6 },
+                    { kode: 'P015', nama: 'Digital Drawing Tablet', hargaJual: 1500000, stok: 5 },
+                    { kode: 'P016', nama: 'Mini Projector HD', hargaJual: 1800000, stok: 4 },
+                    { kode: 'P017', nama: 'Drone with Camera', hargaJual: 2200000, stok: 3 },
+                    { kode: 'P018', nama: 'VR Headset', hargaJual: 1650000, stok: 6 }
+                ];
+                
+                localStorage.setItem('barang', JSON.stringify(testItems));
+            }
+            
+            // Only generate if members don't exist
+            if (!localStorage.getItem('members') || JSON.parse(localStorage.getItem('members')).length === 0) {
+                // Encrypted PIN using the same SECRET_KEY as in the code
+                const SECRET_KEY = "MembershipSystem2024!@#";
+                
+                function encryptPin(pin) {
+                    return CryptoJS.AES.encrypt(pin, SECRET_KEY).toString();
+                }
+                
+                const testMembers = [
+                    { id: 'M001', nama: 'Budi Santoso', pin: encryptPin('1234'), poin: 5000, pointHistory: [] },
+                    { id: 'M002', nama: 'Ani Wijaya', pin: encryptPin('2345'), poin: 7500, pointHistory: [] },
+                    { id: 'M003', nama: 'Dedi Kurniawan', pin: encryptPin('3456'), poin: 3000, pointHistory: [] },
+                    { id: 'M004', nama: 'Siti Rahayu', pin: encryptPin('4567'), poin: 9000, pointHistory: [] },
+                    { id: 'M005', nama: 'Rudi Hermawan', pin: encryptPin('5678'), poin: 2500, pointHistory: [] }
+                ];
+                
+                localStorage.setItem('members', JSON.stringify(testMembers));
+            }
+        }
+        
+        // Uncomment line below to generate test data
+        // generateTestData();
+        
+    </script>
+</body>
+</html>
