@@ -1,0 +1,3291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+   
+    <title>Sistem Registrasi Member Premium</title>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: rgba(79, 70, 229, 0.1);
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --background: #f9fafb;
+            --card-bg: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .app-title {
+            background: linear-gradient(135deg, var(--primary-color), #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), #818cf8);
+            color: white;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-md);
+            padding: 1.25rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--background);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group-append {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .strength-meter {
+            height: 4px;
+            background: #ddd;
+            margin-top: 0.5rem;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .strength-meter div {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+            width: 0;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #0ca678;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid var(--info-color);
+            color: var(--info-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
+        .member-list {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .member-card {
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .member-header {
+            background: linear-gradient(135deg, var(--primary-color), #818cf8);
+            color: white;
+            padding: 1.25rem;
+            position: relative;
+        }
+
+        .member-id {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .member-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .member-since {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .member-body {
+            padding: 1.25rem;
+        }
+
+        .member-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-weight: 500;
+        }
+
+        .qr-container {
+            background: var(--background);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), #818cf8);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            background: var(--background);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--text-primary);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 1rem;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .member-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 90%;
+            }
+        }
+        
+        
+        
+        /* PIN QR Modal Styles */
+.text-center {
+    text-align: center;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+.text-lg {
+    font-size: 1.125rem;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.my-4 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.flex {
+    display: flex;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+/* Additional QR Container Styles */
+#pinQRContainer {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    display: inline-block;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Hover Effects */
+.btn-warning {
+    background: var(--warning-color);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+    transform: translateY(-2px);
+}
+
+/* PIN QR Card Styles (used in download function) */
+.pin-qr-card {
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+.pin-qr-header {
+    padding: 1.25rem;
+    color: white;
+    text-align: center;
+}
+
+.pin-qr-body {
+    padding: 1.5rem;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pin-qr-footer {
+    padding: 1rem;
+    color: white;
+    text-align: center;
+    font-size: 0.75rem;
+}
+     .nav-redeem-button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        background-color: #5e35b1;
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        margin: 15px 0;
+    }
+    
+    .nav-redeem-button:hover {
+        background-color: #4527a0;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transform: translateY(-2px);
+    }
+    
+    .nav-redeem-button i {
+        font-size: 20px;
+    }
+    
+    .nav-redeem-button span {
+        font-size: 16px;
+    }     
+    </style>
+</head>
+<body>
+       
+    <div class="app-container">
+        <div class="header">
+            <h1 class="app-title">Sistem Registrasi Member Premium</h1>
+            <p class="app-subtitle">Kelola member, poin reward, dan kartu QR dengan mudah</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="totalMembers">0</div>
+                <div class="stat-label">Total Member</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeMembersCount">0</div>
+                <div class="stat-label">Member Aktif</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalPoints">0</div>
+                <div class="stat-label">Total Poin</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgPoints">0</div>
+                <div class="stat-label">Rata-rata Poin</div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Kelola Member</h2>
+                </div>
+                <div class="card-body">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="registration">Registrasi</div>
+                        <div class="tab" data-tab="management">Point Management</div>
+                        <div class="tab" data-tab="settings">Pengaturan</div>
+                    </div>
+
+                    <div id="registrationTab" class="tab-content active">
+                        <div id="maxMembersNotice" class="alert alert-warning hidden">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Batas maksimum member telah tercapai. Upgrade paket atau hapus member lama.</span>
+                        </div>
+
+                        <form id="memberForm">
+                            <div class="form-group">
+                                <label for="namaMember">Nama Lengkap</label>
+                                <input type="text" id="namaMember" class="form-control" placeholder="Masukkan nama lengkap" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="noTelpMember">Nomor Telepon</label>
+                                <input type="tel" id="noTelpMember" class="form-control" placeholder="Contoh: 081234567890" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="emailMember">Email</label>
+                                <input type="email" id="emailMember" class="form-control" placeholder="Masukkan email" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pinMember">PIN Member (6 digit)</label>
+                                <div class="input-group">
+                                    <input type="password" id="pinMember" class="form-control" maxlength="6" pattern="[0-9]{6}" placeholder="Masukkan 6 digit PIN" required>
+                                    <div class="input-group-append">
+                                        <i class="toggle-password" onclick="togglePinVisibility('pinMember')">👁️</i>
+                                    </div>
+                                </div>
+                                <div class="strength-meter">
+                                    <div id="strengthMeter"></div>
+                                </div>
+                                <div id="pinFeedback" class="mt-1 text-sm"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="memberType">Tipe Member</label>
+                                <select id="memberType" class="form-control">
+                                    <option value="standard">Standard</option>
+                                    <option value="silver">Silver</option>
+                                    <option value="gold">Gold</option>
+                                    <option value="platinum">Platinum</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" id="registerBtn" class="btn btn-primary btn-full">
+                                <span>Daftar Member</span>
+                            </button>
+                            <a href="redem.html" class="nav-redeem-button">
+    <i class="fas fa-gift"></i>
+    <span>Redeem Rewards</span>
+</a>
+                        </form>
+                    </div>
+
+                    <div id="managementTab" class="tab-content">
+                        <div class="form-group">
+                            <label for="memberIdPoint">Member ID</label>
+                            <input type="text" id="memberIdPoint" class="form-control" placeholder="Masukkan ID Member">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointsAmount">Jumlah Poin</label>
+                            <input type="number" id="pointsAmount" class="form-control" placeholder="Masukkan jumlah poin">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointsNote">Keterangan</label>
+                            <input type="text" id="pointsNote" class="form-control" placeholder="Contoh: Pembelian Produk">
+                        </div>
+
+                        <div class="btn-group">
+                            <button id="addPointsBtn" class="btn btn-success">
+                                <span>Tambah Poin</span>
+                            </button>
+                            <button id="redeemPointsBtn" class="btn btn-warning">
+                                <span>Tukar Poin</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="settingsTab" class="tab-content">
+                        <div class="form-group">
+                            <label for="maxMembersSetting">Batas Maksimum Member</label>
+                            <input type="number" id="maxMembersSetting" class="form-control" min="1" value="2">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pointExpiryDays">Masa Berlaku Poin (Hari)</label>
+                            <input type="number" id="pointExpiryDays" class="form-control" min="30" value="365">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="secretKey">Secret Key untuk Enkripsi</label>
+                            <div class="input-group">
+                                <input type="password" id="secretKey" class="form-control" value="MembershipSystem2024!@#">
+                                <div class="input-group-append">
+                                    <i class="toggle-password" onclick="togglePinVisibility('secretKey')">👁️</i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="saveSettingsBtn" class="btn btn-primary btn-full">
+                            <span>Simpan Pengaturan</span>
+                        </button>
+
+                        <div class="form-group mt-4">
+                            <label>Manajemen Data</label>
+                            <div class="btn-group">
+                            <button id="syncButton" class="btn btn-primary" onclick="downloadCompleteDataZip()">
+    <span>Download Data Lengkap (ZIP)</span>
+</button>
+                                <button id="exportDataBtn" class="btn btn-outline">
+                                    <span>Export Data</span>
+                                </button>
+                                <button id="clearDataBtn" class="btn btn-danger">
+                                    <span>Hapus Semua Data</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Daftar Member</h2>
+                </div>
+                <div class="card-body">
+                    <div class="search-box">
+                        <input type="text" id="searchMember" class="form-control" placeholder="Cari member berdasarkan nama, email, atau ID...">
+                    </div>
+
+                    <div id="memberList" class="member-list">
+                        <!-- Member cards will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Detail Modal -->
+    <div id="memberDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Detail Member</h3>
+                <button class="modal-close" onclick="toggleModal('memberDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="memberDetailContent">
+                <!-- Member details will be added here dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="toggleModal('memberDetailModal')">Tutup</button>
+                <button class="btn btn-primary" id="editMemberBtn">Edit Member</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Member Modal -->
+    <div id="editMemberModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Member</h3>
+                <button class="modal-close" onclick="toggleModal('editMemberModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editMemberForm">
+                    <input type="hidden" id="editMemberId">
+                    <div class="form-group">
+                        <label for="editNamaMember">Nama Lengkap</label>
+                        <input type="text" id="editNamaMember" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editNoTelpMember">Nomor Telepon</label>
+                        <input type="tel" id="editNoTelpMember" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEmailMember">Email</label>
+                        <input type="email" id="editEmailMember" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editMemberType">Tipe Member</label>
+                        <select id="editMemberType" class="form-control">
+                            <option value="standard">Standard</option>
+                            <option value="silver">Silver</option>
+                            <option value="gold">Gold</option>
+                            <option value="platinum">Platinum</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editMemberStatus">Status</label>
+                        <select id="editMemberStatus" class="form-control">
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Tidak Aktif</option>
+                            <option value="suspended">Ditangguhkan</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="toggleModal('editMemberModal')">Batal</button>
+                <button class="btn btn-primary" id="saveEditMemberBtn">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+
+<div id="pinQRModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">QR Code PIN Member</h3>
+            <button class="modal-close" onclick="toggleModal('pinQRModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="text-center">
+                <p>Berikut adalah QR Code yang berisi PIN terenkripsi untuk member:</p>
+                <p id="pinQRMemberName" class="font-bold text-lg mb-2"></p>
+                <div id="pinQRContainer" class="flex justify-center my-4"></div>
+                <p class="text-sm text-secondary mb-4">PIN telah dienkripsi untuk keamanan. QR Code ini dapat digunakan untuk verifikasi member pada aplikasi terpisah.</p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="toggleModal('pinQRModal')">Tutup</button>
+            <button class="btn btn-primary" id="downloadPinQRBtn">Download QR PIN</button>
+        </div>
+    </div>
+</div>
+
+    <!-- Point History Modal -->
+    <div id="pointHistoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Riwayat Poin</h3>
+                <button class="modal-close" onclick="toggleModal('pointHistoryModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="pointHistoryContent">
+                <!-- Point history will be added here dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="toggleModal('pointHistoryModal')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Konfirmasi</h3>
+                <button class="modal-close" onclick="toggleModal('confirmationModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="confirmationContent">
+                <!-- Confirmation message will be added here dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="toggleModal('confirmationModal')">Batal</button>
+                <button class="btn btn-danger" id="confirmActionBtn">Konfirmasi</button>
+            </div>
+        </div>
+    </div>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        function showPinQR(memberId) {
+    const members = getMembers();
+    const member = members.find(m => m.id === memberId);
+    
+    if (!member) {
+        showAlert('Member tidak ditemukan!', 'danger');
+        return;
+    }
+    
+    // Get the encrypted PIN
+    const encryptedPin = member.pin;
+    
+    // Set member name in modal
+    document.getElementById('pinQRMemberName').textContent = member.nama;
+    
+    // Clear previous QR code
+    const pinQRContainer = document.getElementById('pinQRContainer');
+    pinQRContainer.innerHTML = '';
+    
+    // Create QR code for the encrypted PIN
+    createPinQRCode(member.id, encryptedPin, pinQRContainer);
+    
+    // Set download button action
+    document.getElementById('downloadPinQRBtn').onclick = function() {
+        downloadPinQR(memberId);
+    };
+    
+    // Show modal
+    toggleModal('pinQRModal');
+}
+
+// Create QR code for the encrypted PIN
+function createPinQRCode(memberId, encryptedPin, container) {
+    // Create QR code
+    new QRCode(container, {
+        text: JSON.stringify({
+            id: memberId,
+            pin: encryptedPin
+        }),
+        width: 200,
+        height: 200,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+// Redesigned PIN QR code download function - balanced approach
+function downloadPinQR(memberId) {
+    const members = getMembers();
+    const member = members.find(m => m.id === memberId);
+    
+    if (!member) {
+        showAlert('Member tidak ditemukan!', 'danger');
+        return;
+    }
+    
+    try {
+        // Get the QR canvas from the container
+        const pinQRCanvas = document.querySelector('#pinQRContainer canvas');
+        
+        if (!pinQRCanvas) {
+            showAlert('QR code tidak ditemukan!', 'danger');
+            return;
+        }
+        
+        // Create a canvas element for the PIN QR card
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set QR card dimensions - slightly wider than tall for better layout
+        const cardWidth = 700;
+        const cardHeight = 450;
+        canvas.width = cardWidth;
+        canvas.height = cardHeight;
+        
+        // Get balanced color palette based on member type
+        let colors;
+        switch(member.type) {
+            case 'platinum':
+                colors = {
+                    bg: '#F1F5F9',
+                    primary: '#0F172A',
+                    accent: '#38BDF8',
+                    secondary: '#94A3B8',
+                    highlight: '#7DD3FC'
+                };
+                break;
+            case 'gold':
+                colors = {
+                    bg: '#FEF3C7',
+                    primary: '#78350F',
+                    accent: '#F59E0B',
+                    secondary: '#B45309',
+                    highlight: '#FCD34D'
+                };
+                break;
+            case 'silver':
+                colors = {
+                    bg: '#F3F4F6',
+                    primary: '#374151',
+                    accent: '#9CA3AF',
+                    secondary: '#6B7280',
+                    highlight: '#D1D5DB'
+                };
+                break;
+            default: // standard
+                colors = {
+                    bg: '#ECFEFF',
+                    primary: '#0F3460',
+                    accent: '#00B8A9',
+                    secondary: '#1A508B',
+                    highlight: '#5FE0D6'
+                };
+        }
+        
+ctx.fillStyle = colors.bg;
+ctx.fillRect(0, 0, cardWidth, cardHeight);
+
+// Add a subtle pattern overlay dengan pola yang lebih modern
+drawSubtlePattern(ctx, cardWidth, cardHeight, colors);
+
+// Add a stylish header area dengan desain yang lebih elegan
+const headerHeight = 90;
+
+// Header background dengan gradien yang lebih halus
+const headerGradient = ctx.createLinearGradient(0, 0, cardWidth, 0);
+headerGradient.addColorStop(0, colors.primary);
+headerGradient.addColorStop(0.8, colors.secondary);
+headerGradient.addColorStop(1, colors.secondary);
+
+ctx.fillStyle = headerGradient;
+ctx.beginPath();
+ctx.moveTo(0, 0);
+ctx.lineTo(cardWidth, 0);
+ctx.lineTo(cardWidth, headerHeight);
+// Membuat bentuk yang lebih modern dengan kurva
+ctx.lineTo(cardWidth - 30, headerHeight);
+ctx.quadraticCurveTo(cardWidth - 60, headerHeight - 20, cardWidth - 90, headerHeight - 30);
+ctx.lineTo(90, headerHeight - 30);
+ctx.quadraticCurveTo(60, headerHeight - 20, 30, headerHeight);
+ctx.lineTo(0, headerHeight);
+ctx.closePath();
+ctx.fill();
+
+// Add header content dengan font yang lebih modern
+ctx.font = "bold 22px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillStyle = '#FFFFFF';
+ctx.textAlign = "left";
+ctx.fillText("SECURE MEMBER PIN", 40, 45);
+
+// Subtitle
+ctx.font = "14px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillStyle = '#FFFFFF';
+ctx.fillText(" ", 40, 70);
+
+// Add member type badge in header dengan desain yang lebih menarik
+drawMemberTypeBadge(ctx, cardWidth - 180, 40, member.type, colors);
+
+// Divide the card into two sections dengan proporsi yang lebih baik
+const leftWidth = cardWidth * 0.46;
+
+// Add member info section dengan font yang lebih jelas
+ctx.fillStyle = colors.primary;
+ctx.font = "bold 24px 'Segoe UI', 'Arial', sans-serif";
+ctx.textAlign = "left";
+ctx.fillText(member.nama, 40, headerHeight + 50);
+
+// Add separator line dengan garis yang lebih menarik
+ctx.strokeStyle = colors.accent;
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(40, headerHeight + 65);
+ctx.lineTo(leftWidth - 40, headerHeight + 65);
+ctx.stroke();
+
+// Add member ID with label dengan tata letak yang lebih baik
+ctx.font = "16px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillStyle = colors.secondary;
+ctx.fillText("MEMBER ID", 40, headerHeight + 100);
+
+ctx.font = "bold 22px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillStyle = colors.primary;
+ctx.fillText(member.id, 40, headerHeight + 130);
+
+// Add security message dengan tata letak yang lebih rapi
+ctx.font = "bold 16px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillStyle = colors.secondary;
+ctx.fillText("KEAMANAN", 40, headerHeight + 170);
+
+ctx.font = "15px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillStyle = colors.primary;
+ctx.fillText("PIN telah dienkripsi untuk", 40, headerHeight + 200);
+ctx.fillText("keamanan & verifikasi member", 40, headerHeight + 225);
+
+// Add warning dengan desain yang lebih eye-catching
+const warningY = headerHeight + 280;
+
+// Warning box dengan sudut yang lebih rounded
+ctx.fillStyle = `${colors.accent}20`;
+roundRect(ctx, 40, warningY - 25, leftWidth - 80, 55, 8);
+ctx.fill();
+
+ctx.strokeStyle = colors.accent;
+ctx.lineWidth = 2;
+roundRect(ctx, 40, warningY - 25, leftWidth - 80, 55, 8);
+ctx.stroke();
+
+// Warning icon yang lebih modern
+drawWarningIcon(ctx, 60, warningY, colors);
+
+// Warning text dengan font yang lebih tegas
+ctx.font = "bold 14px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillStyle = colors.primary;
+ctx.fillText("JANGAN DIBAGIKAN", 100, warningY);
+ctx.font = "12px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillText("RAHASIA ", 100, warningY + 20);
+
+// Add QR section dengan posisi yang lebih seimbang
+const qrX = leftWidth + 30;
+const qrY = headerHeight + 40;
+const qrSize = 240;
+
+// QR background dengan efek bayangan
+ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+ctx.shadowBlur = 10;
+ctx.shadowOffsetX = 0;
+ctx.shadowOffsetY = 4;
+ctx.fillStyle = '#FFFFFF';
+roundRect(ctx, qrX, qrY, qrSize, qrSize, 12);
+ctx.fill();
+ctx.shadowColor = 'transparent';
+
+// QR border dengan warna yang lebih harmonis
+ctx.strokeStyle = colors.accent;
+ctx.lineWidth = 3;
+roundRect(ctx, qrX, qrY, qrSize, qrSize, 12);
+ctx.stroke();
+
+// Draw decorative elements around QR dengan elemen dekoratif yang lebih minimalis
+drawQRDecorations(ctx, qrX, qrY, qrSize, colors);
+
+// Draw the QR code dengan posisi yang lebih proporsional
+ctx.drawImage(pinQRCanvas, qrX + 15, qrY + 15, qrSize - 30, qrSize - 30);
+
+// Add "SCAN ME" text under QR dengan font yang lebih modern
+ctx.font = "bold 20px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillStyle = colors.primary;
+ctx.textAlign = "center";
+ctx.fillText("SCAN ME", qrX + qrSize/2, qrY + qrSize + 35);
+
+// Tambahkan teks kecil untuk petunjuk
+ctx.font = "13px 'Segoe UI', 'Arial', sans-serif";
+ctx.fillStyle = colors.secondary;
+ctx.fillText("untuk verifikasi member", qrX + qrSize/2, qrY + qrSize + 60);
+
+
+
+
+        // Add footer
+        const footerHeight = 50;
+        
+        // Footer background
+        const footerGradient = ctx.createLinearGradient(0, cardHeight - footerHeight, cardWidth, cardHeight - footerHeight);
+        footerGradient.addColorStop(0, colors.secondary);
+        footerGradient.addColorStop(1, colors.primary);
+        
+        ctx.fillStyle = footerGradient;
+        ctx.beginPath();
+        ctx.moveTo(0, cardHeight);
+        ctx.lineTo(cardWidth, cardHeight);
+        ctx.lineTo(cardWidth, cardHeight - footerHeight);
+        ctx.lineTo(cardWidth - 60, cardHeight - footerHeight);
+        ctx.lineTo(cardWidth - 100, cardHeight - footerHeight + 20);
+        ctx.lineTo(100, cardHeight - footerHeight + 20);
+        ctx.lineTo(60, cardHeight - footerHeight);
+        ctx.lineTo(0, cardHeight - footerHeight);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Add date generated
+        const now = new Date();
+        const formattedDate = new Intl.DateTimeFormat('id-ID', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        }).format(now);
+        
+        ctx.font = "14px 'Arial', sans-serif";
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = "center";
+        ctx.fillText(`Generated: ${formattedDate}`, cardWidth / 2, cardHeight - 20);
+        
+        // Add logo/emblem to the card
+        drawEmblem(ctx, leftWidth - 60, cardHeight - 85, 30, colors);
+        
+        // Convert canvas to image and download
+        const link = document.createElement('a');
+        link.download = `member_pin_${member.id}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        showAlert('QR PIN berhasil diunduh dengan desain baru!', 'success');
+    } catch (error) {
+        console.error('Error generating PIN QR code:', error);
+        showAlert('Terjadi kesalahan saat membuat QR PIN. Silakan coba lagi.', 'danger');
+    }
+}
+
+// Function to draw a subtle pattern overlay
+function drawSubtlePattern(ctx, width, height, colors) {
+    ctx.strokeStyle = `${colors.primary}08`; // Very light
+    ctx.lineWidth = 1;
+    
+    // Draw a grid pattern
+    const gridSize = 30;
+    
+    for (let x = 0; x < width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+    }
+    
+    for (let y = 0; y < height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+    }
+    
+    // Add a few diagonal lines for interest
+    ctx.strokeStyle = `${colors.accent}10`;
+    ctx.lineWidth = 2;
+    
+    for (let i = 0; i < width; i += 100) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i + 100, height);
+        ctx.stroke();
+    }
+}
+
+// Function to draw member type badge
+function drawMemberTypeBadge(ctx, x, y, type, colors) {
+    // Badge background
+    ctx.fillStyle = '#FFFFFF';
+    roundRect(ctx, x - 10, y - 15, 140, 30, 15);
+    ctx.fill();
+    
+    // Badge text
+    ctx.font = "bold 16px 'Arial', sans-serif";
+    ctx.fillStyle = colors.primary;
+    ctx.textAlign = "center";
+    ctx.fillText(`${type.toUpperCase()} MEMBER`, x + 60, y + 5);
+}
+
+// Function to draw warning icon
+function drawWarningIcon(ctx, x, y, colors) {
+    // Warning triangle
+    ctx.fillStyle = colors.accent;
+    ctx.beginPath();
+    ctx.moveTo(x, y + 10);
+    ctx.lineTo(x + 15, y - 10);
+    ctx.lineTo(x + 30, y + 10);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Exclamation mark
+    ctx.fillStyle = colors.bg;
+    ctx.beginPath();
+    ctx.arc(x + 15, y + 5, 3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillRect(x + 13, y - 7, 4, 10);
+}
+
+// Function to draw QR decorations
+function drawQRDecorations(ctx, x, y, size, colors) {
+    // Corner accents
+    ctx.strokeStyle = colors.accent;
+    ctx.lineWidth = 5;
+    
+    // Top left
+    ctx.beginPath();
+    ctx.moveTo(x - 10, y + 30);
+    ctx.lineTo(x - 10, y - 10);
+    ctx.lineTo(x + 30, y - 10);
+    ctx.stroke();
+    
+    // Top right
+    ctx.beginPath();
+    ctx.moveTo(x + size - 30, y - 10);
+    ctx.lineTo(x + size + 10, y - 10);
+    ctx.lineTo(x + size + 10, y + 30);
+    ctx.stroke();
+    
+    // Bottom left
+    ctx.beginPath();
+    ctx.moveTo(x - 10, y + size - 30);
+    ctx.lineTo(x - 10, y + size + 10);
+    ctx.lineTo(x + 30, y + size + 10);
+    ctx.stroke();
+    
+    // Bottom right
+    ctx.beginPath();
+    ctx.moveTo(x + size - 30, y + size + 10);
+    ctx.lineTo(x + size + 10, y + size + 10);
+    ctx.lineTo(x + size + 10, y + size - 30);
+    ctx.stroke();
+    
+    // Add decorative dots
+    ctx.fillStyle = colors.highlight;
+    
+    // Top
+    ctx.beginPath();
+    ctx.arc(x + size/2, y - 15, 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Right
+    ctx.beginPath();
+    ctx.arc(x + size + 15, y + size/2, 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Bottom
+    ctx.beginPath();
+    ctx.arc(x + size/2, y + size + 15, 5, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Left
+    ctx.beginPath();
+    ctx.arc(x - 15, y + size/2, 5, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+// Function to draw emblem/logo
+function drawEmblem(ctx, x, y, radius, colors) {
+    // Outer circle
+    ctx.fillStyle = colors.primary;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Inner circle
+    ctx.fillStyle = colors.bg;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 0.7, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Center design
+    ctx.fillStyle = colors.accent;
+    
+    // Shield-like shape
+    ctx.beginPath();
+    ctx.moveTo(x, y - radius * 0.4);
+    ctx.lineTo(x + radius * 0.3, y);
+    ctx.lineTo(x, y + radius * 0.4);
+    ctx.lineTo(x - radius * 0.3, y);
+    ctx.closePath();
+    ctx.fill();
+}
+
+// Helper function to draw rounded rectangle
+function roundRect(ctx, x, y, width, height, radius) {
+    if (radius === undefined) {
+        radius = 5;
+    }
+    
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
+        
+        
+        
+        
+        // Global variables
+        let MAX_MEMBERS = 2;
+        let SECRET_KEY = "MembershipSystem2024!@#";
+        let POINT_EXPIRY_DAYS = 365;
+        let selectedMemberId = null;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            refreshMemberList();
+            updateDashboardStats();
+            setupEventListeners();
+            checkMemberLimit();
+        });
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('memberSystemSettings')) || {};
+            MAX_MEMBERS = settings.maxMembers || 2;
+            SECRET_KEY = settings.secretKey || "MembershipSystem2024!@#";
+            POINT_EXPIRY_DAYS = settings.pointExpiryDays || 365;
+            
+            // Update settings form
+            document.getElementById('maxMembersSetting').value = MAX_MEMBERS;
+            document.getElementById('pointExpiryDays').value = POINT_EXPIRY_DAYS;
+            document.getElementById('secretKey').value = SECRET_KEY;
+        }
+
+   // Save settings to localStorage
+function saveSettings() {
+    const settings = {
+        maxMembers: parseInt(document.getElementById('maxMembersSetting').value),
+        secretKey: document.getElementById('secretKey').value,
+        pointExpiryDays: parseInt(document.getElementById('pointExpiryDays').value)
+    };
+    
+    localStorage.setItem('memberSystemSettings', JSON.stringify(settings));
+    MAX_MEMBERS = settings.maxMembers;
+    SECRET_KEY = settings.secretKey;
+    POINT_EXPIRY_DAYS = settings.pointExpiryDays;
+    
+    showAlert('Pengaturan berhasil disimpan!', 'success');
+    checkMemberLimit();
+}
+
+// Set up event listeners
+function setupEventListeners() {
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Show corresponding tab content
+            const tabName = this.getAttribute('data-tab');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        });
+    });
+    
+    // Member registration form submission
+    document.getElementById('memberForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        registerMember();
+    });
+    
+    // PIN strength meter
+    document.getElementById('pinMember').addEventListener('input', updatePinStrength);
+    
+    // Points management
+    document.getElementById('addPointsBtn').addEventListener('click', addPoints);
+    document.getElementById('redeemPointsBtn').addEventListener('click', redeemPoints);
+    
+    // Settings management
+    document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+    document.getElementById('exportDataBtn').addEventListener('click', exportData);
+    document.getElementById('clearDataBtn').addEventListener('click', promptClearData);
+    
+    // Database sync
+    document.getElementById('syncButton').addEventListener('click', syncWithDatabase);
+    
+    // Search functionality
+    document.getElementById('searchMember').addEventListener('input', function() {
+        filterMembers(this.value);
+    });
+    
+    // Edit member
+    document.getElementById('editMemberBtn').addEventListener('click', function() {
+        toggleModal('memberDetailModal');
+        openEditMemberModal(selectedMemberId);
+    });
+    
+    // Save edit member changes
+    document.getElementById('saveEditMemberBtn').addEventListener('click', saveEditMember);
+}
+
+// Toggle PIN visibility
+function togglePinVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+// Update PIN strength meter
+function updatePinStrength() {
+    const pin = document.getElementById('pinMember').value;
+    const meter = document.getElementById('strengthMeter');
+    const feedback = document.getElementById('pinFeedback');
+    
+    // Reset meter
+    meter.style.width = '0%';
+    feedback.textContent = '';
+    
+    if (pin.length === 0) return;
+    
+    // Simple PIN strength calculation
+    let strength = 0;
+    let message = '';
+    
+    // Length check
+    if (pin.length >= 6) {
+        strength += 25;
+    } else {
+        message = 'PIN terlalu pendek';
+    }
+    
+    // Repeated digits check
+    if (/^(?!.*(\d)\1{2,}).*$/.test(pin)) {
+        strength += 25;
+    } else {
+        message = message || 'PIN memiliki terlalu banyak digit yang berulang';
+    }
+    
+    // Sequential digits check
+    if (!/^(?:012345|123456|234567|345678|456789|987654|876543|765432|654321|543210)$/.test(pin)) {
+        strength += 25;
+    } else {
+        message = message || 'PIN terlalu mudah ditebak (urutan berurutan)';
+    }
+    
+    // Unique digits check
+    if (new Set(pin.split('')).size >= 4) {
+        strength += 25;
+    } else {
+        message = message || 'Gunakan lebih banyak angka yang berbeda';
+    }
+    
+    // Update meter
+    meter.style.width = strength + '%';
+    
+    // Set color based on strength
+    if (strength < 50) {
+        meter.style.backgroundColor = 'var(--danger-color)';
+        feedback.style.color = 'var(--danger-color)';
+        feedback.textContent = message || 'PIN lemah';
+    } else if (strength < 75) {
+        meter.style.backgroundColor = 'var(--warning-color)';
+        feedback.style.color = 'var(--warning-color)';
+        feedback.textContent = 'PIN cukup kuat';
+    } else {
+        meter.style.backgroundColor = 'var(--success-color)';
+        feedback.style.color = 'var(--success-color)';
+        feedback.textContent = 'PIN kuat';
+    }
+}
+
+// Check if member limit has been reached
+function checkMemberLimit() {
+    const members = getMembers();
+    const maxMembersNotice = document.getElementById('maxMembersNotice');
+    const registerBtn = document.getElementById('registerBtn');
+    
+    if (members.length >= MAX_MEMBERS) {
+        maxMembersNotice.classList.remove('hidden');
+        registerBtn.disabled = true;
+    } else {
+        maxMembersNotice.classList.add('hidden');
+        registerBtn.disabled = false;
+    }
+}
+
+// Get members from localStorage
+function getMembers() {
+    return JSON.parse(localStorage.getItem('members')) || [];
+}
+
+// Save members to localStorage
+function saveMembers(members) {
+    localStorage.setItem('members', JSON.stringify(members));
+}
+
+// Show alert
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    
+    alert.innerHTML = `
+        <span>${message}</span>
+        <button class="modal-close" onclick="this.parentElement.remove()">&times;</button>
+    `;
+    
+    alertContainer.appendChild(alert);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alert.parentElement) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Register new member
+function registerMember() {
+    const members = getMembers();
+    
+    if (members.length >= MAX_MEMBERS) {
+        showAlert('Batas maksimum member telah tercapai!', 'danger');
+        return;
+    }
+    
+    const nama = document.getElementById('namaMember').value.trim();
+    const noTelp = document.getElementById('noTelpMember').value.trim();
+    const email = document.getElementById('emailMember').value.trim();
+    const pin = document.getElementById('pinMember').value.trim();
+    const type = document.getElementById('memberType').value;
+    
+    // Validasi nomor telepon
+    const teleponRegex = /^[0-9]{10,13}$/;
+    if (!teleponRegex.test(noTelp)) {
+        showAlert('Nomor telepon harus berisi 10-13 digit angka!', 'danger');
+        return;
+    }
+    
+    // Validasi email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showAlert('Format email tidak valid!', 'danger');
+        return;
+    }
+    
+    // Validasi PIN
+    if (pin.length !== 6 || !/^\d+$/.test(pin)) {
+        showAlert('PIN harus terdiri dari 6 digit angka!', 'danger');
+        return;
+    }
+    
+    // Cek duplikasi
+    const memberExist = members.some(member => 
+        member.email === email || 
+        member.noTelp === noTelp
+    );
+    
+    if (memberExist) {
+        showAlert('Email atau nomor telepon sudah terdaftar!', 'danger');
+        return;
+    }
+    
+    const newMember = {
+        id: generateMemberId(),
+        nama: nama,
+        noTelp: noTelp,
+        email: email,
+        pin: encryptPIN(pin),
+        poin: 0,
+        type: type,
+        tanggalDaftar: new Date().toLocaleDateString('id-ID'),
+        status: 'active',
+        pointHistory: [{
+            date: new Date().toISOString(),
+            amount: 0,
+            type: 'initial',
+            note: 'Pendaftaran member baru',
+            balance: 0
+        }]
+    };
+    
+    members.push(newMember);
+    saveMembers(members);
+    
+    showAlert('Pendaftaran berhasil!', 'success');
+    document.getElementById('memberForm').reset();
+    
+    refreshMemberList();
+    updateDashboardStats();
+    checkMemberLimit();
+}
+
+// Generate member ID
+function generateMemberId() {
+    const prefix = 'MEM';
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${prefix}${timestamp}${random}`;
+}
+
+// Encrypt PIN
+function encryptPIN(pin) {
+    return CryptoJS.AES.encrypt(pin, SECRET_KEY).toString();
+}
+
+// Decrypt PIN
+function decryptPIN(encryptedPin) {
+    try {
+        const bytes = CryptoJS.AES.decrypt(encryptedPin, SECRET_KEY);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.error('Error decrypting PIN:', error);
+        return '';
+    }
+}
+
+// Refresh member list
+function refreshMemberList() {
+    const memberList = document.getElementById('memberList');
+    memberList.innerHTML = '';
+    
+    const members = getMembers();
+    const searchTerm = document.getElementById('searchMember').value.toLowerCase();
+    
+    const filteredMembers = searchTerm 
+        ? members.filter(member => 
+            member.nama.toLowerCase().includes(searchTerm) ||
+            member.email.toLowerCase().includes(searchTerm) ||
+            member.id.toLowerCase().includes(searchTerm)
+        )
+        : members;
+    
+    if (filteredMembers.length === 0) {
+        memberList.innerHTML = `
+            <div class="alert alert-info">
+                ${searchTerm ? 'Tidak ada member yang sesuai dengan pencarian.' : 'Belum ada member yang terdaftar.'}
+            </div>
+        `;
+        return;
+    }
+    
+    filteredMembers.forEach(member => {
+        const memberCard = document.createElement('div');
+        memberCard.className = 'member-card';
+        
+        // Get badge based on member type
+        const typeBadge = getMemberTypeBadge(member.type);
+        
+        // Get status badge
+        const statusBadge = getStatusBadge(member.status);
+        
+        memberCard.innerHTML = `
+            <div class="member-header">
+                <div class="member-id">${member.id}</div>
+                <h3 class="member-name">${member.nama}</h3>
+                <div class="member-since">Terdaftar: ${member.tanggalDaftar}</div>
+            </div>
+            <div class="member-body">
+                <div class="member-info">
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">${member.email}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Telepon</span>
+                        <span class="info-value">${member.noTelp}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Tipe</span>
+                        <span class="info-value">${typeBadge}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status</span>
+                        <span class="info-value">${statusBadge}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Poin</span>
+                        <span class="info-value">${member.poin}</span>
+                    </div>
+                </div>
+                
+                <div class="qr-container">
+    <div id="qr-${member.id}"></div>
+    <div class="btn-group">
+        <button class="btn btn-outline" onclick="viewMemberDetail('${member.id}')">
+            <span>Detail</span>
+        </button>
+        <button class="btn btn-primary" onclick="downloadQR('${member.id}')">
+            <span>Download QR</span>
+        </button>
+        <!-- Add this new button for PIN QR -->
+        <button class="btn btn-warning" onclick="showPinQR('${member.id}')">
+            <span>QR PIN</span>
+        </button>
+    </div>
+</div>
+
+
+
+
+
+        `;
+        
+        memberList.appendChild(memberCard);
+        
+        // Generate QR code
+        createQRCode(member, document.getElementById(`qr-${member.id}`));
+    });
+}
+
+// Get member type badge
+function getMemberTypeBadge(type) {
+    switch (type) {
+        case 'standard':
+            return '<span class="badge">Standard</span>';
+        case 'silver':
+            return '<span class="badge" style="background: rgba(156, 163, 175, 0.1); color: #6b7280;">Silver</span>';
+        case 'gold':
+            return '<span class="badge" style="background: rgba(245, 158, 11, 0.1); color: #d97706;">Gold</span>';
+        case 'platinum':
+            return '<span class="badge" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">Platinum</span>';
+        default:
+            return '<span class="badge">Standard</span>';
+    }
+}
+
+// Get status badge
+function getStatusBadge(status) {
+    switch (status) {
+        case 'active':
+            return '<span class="badge badge-success">Aktif</span>';
+        case 'inactive':
+            return '<span class="badge badge-warning">Tidak Aktif</span>';
+        case 'suspended':
+            return '<span class="badge badge-danger">Ditangguhkan</span>';
+        default:
+            return '<span class="badge">Unknown</span>';
+    }
+}
+
+
+// Function to create and download a completely redesigned futuristic membership card
+function downloadQR(memberId) {
+    try {
+        const members = getMembers();
+        const member = members.find(m => m.id === memberId);
+        
+        if (!member) {
+            showAlert('Member tidak ditemukan!', 'danger');
+            return;
+        }
+        
+        // Ensure member object has all necessary properties to prevent errors
+        const safeMember = {
+            id: member.id || memberId,
+            nama: member.nama || "Member",
+            type: member.type || "standard"
+        };
+    
+        // Create a canvas element for the membership card
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set membership card dimensions (wide horizontal format)
+        const cardWidth = 1000;
+        const cardHeight = 500;
+        canvas.width = cardWidth;
+        canvas.height = cardHeight;
+        
+        // Set color theme based on member type
+        let colorTheme;
+        switch(safeMember.type) {
+            case 'platinum':
+                colorTheme = {
+                    primary: '#161A30',
+                    secondary: '#31304D',
+                    accent: '#B6EADA',
+                    highlight: '#4DB9EF'
+                };
+                break;
+            case 'gold':
+                colorTheme = {
+                    primary: '#1B1A17',
+                    secondary: '#470D21',
+                    accent: '#E6B325',
+                    highlight: '#FFCE45'
+                };
+                break;
+            case 'silver':
+                colorTheme = {
+                    primary: '#2B2B2B',
+                    secondary: '#4E4E50',
+                    accent: '#C5C5C5',
+                    highlight: '#E0E0E0'
+                };
+                break;
+            default: // standard
+                colorTheme = {
+                    primary: '#0A1931',
+                    secondary: '#185ADB',
+                    accent: '#A1EAFB',
+                    highlight: '#A1EAFB'
+                };
+        }
+        
+        // BACKGROUND: Create a futuristic tech effect background with improved gradients
+        // Create background gradient
+        const bgGradient = ctx.createLinearGradient(0, 0, cardWidth, cardHeight);
+        bgGradient.addColorStop(0, colorTheme.primary);
+        bgGradient.addColorStop(0.7, `${colorTheme.primary}F0`); // Slightly more transparent
+        bgGradient.addColorStop(1, `${colorTheme.primary}E5`); // Even more transparent
+        
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, cardWidth, cardHeight);
+        
+        // Add grid lines effect with fade
+        const gridGradient = ctx.createLinearGradient(0, 0, cardWidth, 0);
+        gridGradient.addColorStop(0, `${colorTheme.accent}30`); // 18% opacity
+        gridGradient.addColorStop(0.5, `${colorTheme.accent}15`); // 8% opacity
+        gridGradient.addColorStop(1, `${colorTheme.accent}05`); // 2% opacity
+        ctx.strokeStyle = gridGradient;
+        ctx.lineWidth = 1;
+        
+        // Horizontal grid lines
+        const gridSpacingY = 20;
+        for (let y = 0; y < cardHeight; y += gridSpacingY) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(cardWidth, y);
+            ctx.stroke();
+        }
+        
+        // Vertical grid lines with fading effect
+        const gridSpacingX = 30;
+        // Create vertical gradient that fades as it moves left
+        const vertGridGradient = ctx.createLinearGradient(cardWidth / 2, 0, cardWidth, 0);
+        vertGridGradient.addColorStop(0, `${colorTheme.accent}05`); // Near invisible
+        vertGridGradient.addColorStop(1, `${colorTheme.accent}20`); // More visible
+        
+        ctx.strokeStyle = vertGridGradient;
+        for (let x = cardWidth / 2; x < cardWidth; x += gridSpacingX) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, cardHeight);
+            ctx.stroke();
+        }
+        
+        // Create a tech circuit pattern on left side
+        ctx.strokeStyle = `${colorTheme.accent}40`; // 25% opacity
+        ctx.lineWidth = 2;
+        drawCircuitPattern(ctx, 50, 100, 400, 300, colorTheme.accent);
+        
+        // Add a glowing edge on top
+        const edgeGradient = ctx.createLinearGradient(0, 0, 0, 30);
+        edgeGradient.addColorStop(0, `${colorTheme.highlight}90`); // 90% opacity
+        edgeGradient.addColorStop(1, `${colorTheme.highlight}00`); // 0% opacity
+        ctx.fillStyle = edgeGradient;
+        ctx.fillRect(0, 0, cardWidth, 8);
+        
+        // Add a stylized shape for the right side background with smooth gradient transition
+        // Create gradient for panel transition
+        const panelGradient = ctx.createLinearGradient(cardWidth / 2 - 100, 0, cardWidth / 2 + 50, 0);
+        panelGradient.addColorStop(0, `${colorTheme.primary}E0`); // 88% opacity of primary
+        panelGradient.addColorStop(0.5, colorTheme.secondary);
+        panelGradient.addColorStop(1, colorTheme.secondary);
+        
+        ctx.fillStyle = panelGradient;
+        drawFuturisticPanel(ctx, cardWidth / 2 - 100, 0, cardWidth / 2 + 100, cardHeight);
+        
+        // CONTENT: QR Code Section
+        
+        // Get QR code
+        const qrCanvas = document.querySelector(`#qr-${memberId} canvas`);
+        let tempContainer = null;
+        
+        if (!qrCanvas) {
+            // If QR not found in the DOM, create a temporary one
+            tempContainer = document.createElement('div');
+            tempContainer.style.display = 'none';
+            document.body.appendChild(tempContainer);
+            
+            // Create temporary QR code
+            createFuturisticQR(safeMember, tempContainer, colorTheme);
+            
+            // Get the canvas from the temporary container
+            const tempQrCanvas = tempContainer.querySelector('canvas');
+            if (!tempQrCanvas) {
+                if (tempContainer) document.body.removeChild(tempContainer);
+                showAlert('QR code tidak dapat dihasilkan!', 'danger');
+                return;
+            }
+            
+            // Use the temporary canvas
+            qrCanvas = tempQrCanvas;
+        }
+        
+        // Calculate QR code position (right side)
+        const qrSize = 200;
+        const qrX = cardWidth - qrSize - 80;
+        const qrY = (cardHeight - qrSize) / 2;
+        
+        // Add enhanced QR code frame with tech style and gradient border
+        drawEnhancedTechFrame(ctx, qrX - 20, qrY - 20, qrSize + 40, qrSize + 40, colorTheme);
+        
+        // Add white background for QR with subtle gradient
+        const qrBgGradient = ctx.createRadialGradient(
+            qrX + qrSize/2, qrY + qrSize/2, 0,
+            qrX + qrSize/2, qrY + qrSize/2, qrSize
+        );
+        qrBgGradient.addColorStop(0, "#ffffff");
+        qrBgGradient.addColorStop(1, "#f5f5f5");
+        
+        ctx.fillStyle = qrBgGradient;
+        roundRect(ctx, qrX, qrY, qrSize, qrSize, 5);
+        ctx.fill();
+        
+        // Draw border around QR
+        const borderWidth = 4;
+        ctx.strokeStyle = colorTheme.highlight;
+        ctx.lineWidth = borderWidth;
+        roundRect(ctx, qrX - borderWidth/2, qrY - borderWidth/2, 
+                 qrSize + borderWidth, qrSize + borderWidth, 7);
+        ctx.stroke();
+        
+        // Draw the QR code
+        ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
+        
+        // Add scan indicator animation lines (just visual elements)
+        ctx.strokeStyle = colorTheme.highlight;
+        ctx.lineWidth = 2;
+        
+        // Top scan line
+        ctx.beginPath();
+        ctx.moveTo(qrX, qrY + 20);
+        ctx.lineTo(qrX + qrSize, qrY + 20);
+        ctx.stroke();
+        
+        // Bottom scan line
+        ctx.beginPath();
+        ctx.moveTo(qrX, qrY + qrSize - 20);
+        ctx.lineTo(qrX + qrSize, qrY + qrSize - 20);
+        ctx.stroke();
+        
+        // Add "SCAN" text
+        ctx.font = "bold 16px 'Orbitron', sans-serif";
+        ctx.fillStyle = colorTheme.highlight;
+        ctx.textAlign = "center";
+        ctx.fillText("SCAN", qrX + qrSize / 2, qrY + qrSize + 25);
+        
+        // MEMBER INFORMATION
+        
+        // Add member name with futuristic style
+        ctx.font = "bold 48px 'Orbitron', sans-serif";
+        ctx.fillStyle = colorTheme.highlight;
+        ctx.textAlign = "left";
+        
+        // Name background highlight
+        const nameY = 150;
+        const nameWidth = ctx.measureText(safeMember.nama).width;
+        
+        // Draw tech-style name background
+        drawTechNamePlate(ctx, 80, nameY - 40, nameWidth + 50, 60, colorTheme);
+        
+        // Draw name
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(safeMember.nama, 90, nameY);
+        
+        // Member ID with tech frame
+        ctx.font = "bold 24px 'Share Tech Mono', monospace";
+        
+        // Create tech frame for ID
+        const idY = nameY + 80;
+        const idText = safeMember.id;
+        const idWidth = ctx.measureText(idText).width + 60;
+        
+        drawTechIDPlate(ctx, 80, idY - 25, idWidth, 40, colorTheme);
+        
+        // ID Label
+        ctx.fillStyle = colorTheme.accent;
+        ctx.textAlign = "left";
+        ctx.fillText("ID:", 90, idY);
+        
+        // ID Value
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(idText, 130, idY);
+        
+        // Add member type indicator
+        const memberTypeLabel = safeMember.type.toUpperCase();
+        ctx.font = "bold 20px 'Orbitron', sans-serif";
+        
+        // Member type tech plate
+        const typeY = idY + 70;
+        const typeWidth = ctx.measureText(memberTypeLabel).width + 80;
+        
+        drawTechTypeBadge(ctx, 80, typeY - 25, typeWidth, 40, colorTheme);
+        
+        // Draw type text
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(memberTypeLabel, 90, typeY);
+        
+        // Add decorative elements - data visualization elements (just for aesthetics)
+        drawDataVisualizer(ctx, 80, cardHeight - 90, 350, 60, colorTheme);
+        
+        // Add company logo/indicator
+        drawTechLogo(ctx, cardWidth - 70, 70, 40, colorTheme);
+        
+        // Add timestamp with futuristic date display
+        const now = new Date();
+        const formattedDate = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+        
+        ctx.font = "16px 'Share Tech Mono', monospace";
+        ctx.fillStyle = colorTheme.accent;
+        ctx.textAlign = "right";
+        ctx.fillText(formattedDate, cardWidth - 40, cardHeight - 30);
+        
+        // Add validity indicator
+        drawValidityIndicator(ctx, cardWidth - 250, cardHeight - 40, 80, 20, colorTheme);
+        
+        // Clean up temporary container if it exists
+        if (tempContainer) {
+            setTimeout(() => {
+                document.body.removeChild(tempContainer);
+            }, 1000);
+        }
+        
+        // Convert canvas to image and download
+        const link = document.createElement('a');
+        link.download = `member_card_${safeMember.id}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        showAlert('Kartu member berhasil diunduh!', 'success');
+    } catch (error) {
+        console.error('Error generating membership card:', error);
+        showAlert('Terjadi kesalahan saat membuat kartu member. Silakan coba lagi.', 'danger');
+    }
+}
+
+// Create futuristic QR with custom colors
+function createFuturisticQR(member, container, colorTheme) {
+    // Include only essential data
+    const memberData = {
+        id: member.id,
+        nama: member.nama
+    };
+
+    // Create QR code
+    new QRCode(container, {
+        text: JSON.stringify(memberData),
+        width: 200,
+        height: 200,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H // Higher error correction
+    });
+}
+
+// Draw a tech circuit pattern for background
+function drawCircuitPattern(ctx, x, y, width, height, color) {
+    const points = [];
+    const lineCount = 8;
+    
+    // Generate random points for the circuit
+    for (let i = 0; i < lineCount; i++) {
+        const startX = x + Math.random() * width * 0.3;
+        const startY = y + (i * (height / lineCount));
+        points.push({x: startX, y: startY});
+        
+        // Add 2-5 segments per line
+        let currentX = startX;
+        let segmentCount = 2 + Math.floor(Math.random() * 4);
+        
+        for (let j = 0; j < segmentCount; j++) {
+            // Move horizontal or vertical
+            if (j % 2 === 0) {
+                currentX += (width / 3) * (0.5 + Math.random() * 0.5);
+            } else {
+                const offsetY = (height / lineCount) * (Math.random() - 0.5) * 1.5;
+                points.push({x: currentX, y: startY + offsetY});
+            }
+            points.push({x: currentX, y: startY});
+        }
+    }
+    
+    // Draw the circuits
+    for (let i = 0; i < points.length - 1; i++) {
+        ctx.beginPath();
+        ctx.moveTo(points[i].x, points[i].y);
+        ctx.lineTo(points[i+1].x, points[i+1].y);
+        
+        // Vary opacity slightly
+        const randomOpacity = 0.2 + Math.random() * 0.3;
+        ctx.strokeStyle = `${color}${Math.floor(randomOpacity * 100).toString(16).padStart(2, '0')}`;
+        
+        ctx.stroke();
+        
+        // Occasionally add a "node"
+        if (Math.random() > 0.7) {
+            ctx.beginPath();
+            ctx.arc(points[i].x, points[i].y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+    }
+}
+
+// Draw futuristic panel for the right side
+function drawFuturisticPanel(ctx, x, y, width, height) {
+    // Create polygon for futuristic panel shape
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 80, y);
+    ctx.lineTo(x + width, y + 80);
+    ctx.lineTo(x + width, y + height);
+    ctx.lineTo(x, y + height);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Add some tech lines on the panel
+    ctx.strokeStyle = '#ffffff10'; // Very subtle lines
+    ctx.lineWidth = 1;
+    
+    for (let i = 1; i < 10; i++) {
+        const lineY = y + (height / 10) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, lineY);
+        ctx.lineTo(x + width, lineY);
+        ctx.stroke();
+    }
+}
+
+// Draw an enhanced tech-style frame for the QR code with gradients
+function drawEnhancedTechFrame(ctx, x, y, width, height, colorTheme) {
+    // Main frame with gradient
+    const frameGradient = ctx.createLinearGradient(x, y, x + width, y + height);
+    frameGradient.addColorStop(0, colorTheme.secondary);
+    frameGradient.addColorStop(1, `${colorTheme.primary}`);
+    
+    ctx.fillStyle = frameGradient;
+    roundRect(ctx, x, y, width, height, 10);
+    ctx.fill();
+    
+    // Add subtle inner glow
+    const innerGlow = ctx.createRadialGradient(
+        x + width/2, y + height/2, Math.min(width, height) * 0.3,
+        x + width/2, y + height/2, Math.min(width, height) * 0.7
+    );
+    innerGlow.addColorStop(0, `${colorTheme.highlight}00`); // transparent
+    innerGlow.addColorStop(1, `${colorTheme.highlight}30`); // semi-transparent
+    
+    ctx.fillStyle = innerGlow;
+    roundRect(ctx, x, y, width, height, 10);
+    ctx.fill();
+    
+    // Corner accents with gradient
+    const cornerSize = 18;
+    
+    // Function to draw a gradient corner accent
+    function drawCornerAccent(startX, startY, isHorizontal, direction) {
+        const gradientX1 = startX;
+        const gradientY1 = startY;
+        let gradientX2, gradientY2;
+        
+        if (isHorizontal) {
+            gradientX2 = startX + (cornerSize * direction);
+            gradientY2 = startY;
+        } else {
+            gradientX2 = startX;
+            gradientY2 = startY + (cornerSize * direction);
+        }
+        
+        const gradient = ctx.createLinearGradient(gradientX1, gradientY1, gradientX2, gradientY2);
+        gradient.addColorStop(0, colorTheme.highlight);
+        gradient.addColorStop(1, `${colorTheme.highlight}00`); // transparent
+        
+        ctx.fillStyle = gradient;
+        
+        if (isHorizontal) {
+            ctx.fillRect(startX, startY, cornerSize * direction, 4);
+        } else {
+            ctx.fillRect(startX, startY, 4, cornerSize * direction);
+        }
+    }
+    
+    // Top-left corner
+    drawCornerAccent(x - 2, y - 2, true, 1); // horizontal, right
+    drawCornerAccent(x - 2, y - 2, false, 1); // vertical, down
+    
+    // Top-right corner
+    drawCornerAccent(x + width + 2, y - 2, true, -1); // horizontal, left
+    drawCornerAccent(x + width - 2, y - 2, false, 1); // vertical, down
+    
+    // Bottom-left corner
+    drawCornerAccent(x - 2, y + height + 2, true, 1); // horizontal, right
+    drawCornerAccent(x - 2, y + height + 2, false, -1); // vertical, up
+    
+    // Bottom-right corner
+    drawCornerAccent(x + width + 2, y + height + 2, true, -1); // horizontal, left
+    drawCornerAccent(x + width - 2, y + height + 2, false, -1); // vertical, up
+}
+
+// Draw tech-style name plate
+function drawTechNamePlate(ctx, x, y, width, height, colorTheme) {
+    // Background shape
+    ctx.fillStyle = `${colorTheme.secondary}95`;
+    
+    // Angled shape
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + width + 30, y);
+    ctx.lineTo(x + width, y + height);
+    ctx.lineTo(x - 30, y + height);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Top accent line
+    ctx.strokeStyle = colorTheme.highlight;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x - 15, y);
+    ctx.lineTo(x + width + 15, y);
+    ctx.stroke();
+}
+
+// Draw tech-style ID plate
+function drawTechIDPlate(ctx, x, y, width, height, colorTheme) {
+    ctx.fillStyle = `${colorTheme.primary}95`;
+    roundRect(ctx, x, y, width, height, 5);
+    ctx.fill();
+    
+    // Add tech accents
+    ctx.strokeStyle = colorTheme.accent;
+    ctx.lineWidth = 1;
+    
+    // Small decorative lines
+    ctx.beginPath();
+    ctx.moveTo(x, y + height / 2);
+    ctx.lineTo(x - 15, y + height / 2);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(x + width, y + height / 2);
+    ctx.lineTo(x + width + 15, y + height / 2);
+    ctx.stroke();
+}
+
+// Draw tech-style type badge
+function drawTechTypeBadge(ctx, x, y, width, height, colorTheme) {
+    // Draw main background
+    const gradient = ctx.createLinearGradient(x, y, x + width, y);
+    gradient.addColorStop(0, colorTheme.primary);
+    gradient.addColorStop(1, colorTheme.secondary);
+    
+    ctx.fillStyle = gradient;
+    roundRect(ctx, x, y, width, height, 5);
+    ctx.fill();
+    
+    // Add accent lines at each end
+    ctx.strokeStyle = colorTheme.accent;
+    ctx.lineWidth = 2;
+    
+    // Left accent
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y + height);
+    ctx.stroke();
+    
+    // Right accent
+    ctx.beginPath();
+    ctx.moveTo(x + width, y);
+    ctx.lineTo(x + width, y + height);
+    ctx.stroke();
+}
+
+// Draw data visualization element (decorative)
+function drawDataVisualizer(ctx, x, y, width, height, colorTheme) {
+    // Background
+    ctx.fillStyle = `${colorTheme.secondary}40`;
+    roundRect(ctx, x, y, width, height, 3);
+    ctx.fill();
+    
+    // Create random bar heights for visualization
+    const barCount = 20;
+    const barWidth = width / barCount;
+    
+    for (let i = 0; i < barCount; i++) {
+        const barHeight = Math.random() * height * 0.8;
+        ctx.fillStyle = i % 3 === 0 ? colorTheme.highlight : colorTheme.accent;
+        ctx.fillRect(
+            x + i * barWidth,
+            y + height - barHeight,
+            barWidth - 2,
+            barHeight
+        );
+    }
+}
+
+// Draw tech logo/icon
+function drawTechLogo(ctx, x, y, size, colorTheme) {
+    // Circle background
+    ctx.fillStyle = colorTheme.primary;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Inner circle
+    ctx.strokeStyle = colorTheme.highlight;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, size * 0.7, 0, Math.PI * 2);
+    ctx.stroke();
+    
+    // Inner icon - abstract design
+    ctx.fillStyle = colorTheme.highlight;
+    ctx.beginPath();
+    ctx.moveTo(x, y - size * 0.3);
+    ctx.lineTo(x + size * 0.3, y + size * 0.3);
+    ctx.lineTo(x - size * 0.3, y + size * 0.3);
+    ctx.closePath();
+    ctx.fill();
+}
+
+// Draw validity indicator
+function drawValidityIndicator(ctx, x, y, width, height, colorTheme) {
+    ctx.fillStyle = colorTheme.accent;
+    roundRect(ctx, x, y, width, height, height / 2);
+    ctx.fill();
+    
+    ctx.fillStyle = colorTheme.primary;
+    ctx.font = "bold 12px 'Share Tech Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("VALID", x + width / 2, y + height * 0.7);
+}
+
+// Helper function to draw rounded rectangle
+function roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
+
+// Function to create a minimalist QR code for the new design
+function createMinimalistQR(member, container) {
+    // Include only essential data
+    const memberData = {
+        id: member.id,
+        nama: member.nama
+    };
+
+    // Create QR code with new colors
+    new QRCode(container, {
+        text: JSON.stringify(memberData),
+        width: 300,
+        height: 300,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H // Higher error correction for better look
+    });
+}
+
+// Function to create a simpler QR code just for display in the UI
+function createQRCode(member, container) {
+    // Only include essential data to prevent overflow
+    const memberData = {
+        id: member.id,
+        nama: member.nama,
+        type: member.type,
+        status: member.status
+    };
+
+    // Create QR code
+    new QRCode(container, {
+        text: JSON.stringify(memberData),
+        width: 128,
+        height: 128,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+    });
+}
+
+// Filter members
+function filterMembers(searchTerm) {
+    refreshMemberList();
+}
+
+// View member detail
+function viewMemberDetail(memberId) {
+    const members = getMembers();
+    const member = members.find(m => m.id === memberId);
+    
+    if (!member) {
+        showAlert('Member tidak ditemukan!', 'danger');
+        return;
+    }
+    
+    selectedMemberId = memberId;
+    
+    const memberDetailContent = document.getElementById('memberDetailContent');
+    
+    // Get type badge
+    const typeBadge = getMemberTypeBadge(member.type);
+    
+    // Get status badge
+    const statusBadge = getStatusBadge(member.status);
+    
+    memberDetailContent.innerHTML = `
+        <div class="member-info">
+            <div class="info-item" style="grid-column: 1 / -1;">
+                <span class="info-label">ID Member</span>
+                <span class="info-value">${member.id}</span>
+            </div>
+            <div class="info-item" style="grid-column: 1 / -1;">
+                <span class="info-label">Nama Lengkap</span>
+                <span class="info-value">${member.nama}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">${member.email}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Telepon</span>
+                <span class="info-value">${member.noTelp}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tipe Member</span>
+                <span class="info-value">${typeBadge}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Status</span>
+                <span class="info-value">${statusBadge}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tanggal Daftar</span>
+                <span class="info-value">${member.tanggalDaftar}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Poin</span>
+                <span class="info-value">${member.poin}</span>
+            </div>
+        </div>
+        
+        <div style="margin-top: 1.5rem;">
+            <h4>Kartu Member</h4>
+            <div class="qr-container" style="margin-top: 1rem;">
+                <div id="detail-qr-${member.id}"></div>
+            </div>
+        </div>
+        
+       
+<div class="btn-group" style="margin-top: 1.5rem;">
+    <button class="btn btn-outline" onclick="viewPointHistory('${member.id}')">
+        <span>Riwayat Poin</span>
+    </button>
+    <button class="btn btn-warning" onclick="showPinQR('${member.id}')">
+        <span>QR PIN</span>
+    </button>
+    <button class="btn btn-danger" onclick="promptDeleteMember('${member.id}')">
+        <span>Hapus Member</span>
+    </button>
+</div>
+    `;
+    
+    // Generate QR code
+    createQRCode(member, document.getElementById(`detail-qr-${member.id}`));
+    
+    toggleModal('memberDetailModal');
+}
+
+// Toggle modal
+function toggleModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.toggle('active');
+}
+
+// Open edit member modal
+function openEditMemberModal(memberId) {
+    const members = getMembers();
+    const member = members.find(m => m.id === memberId);
+    
+    if (!member) {
+        showAlert('Member tidak ditemukan!', 'danger');
+        return;
+    }
+    
+    document.getElementById('editMemberId').value = member.id;
+    document.getElementById('editNamaMember').value = member.nama;
+    document.getElementById('editNoTelpMember').value = member.noTelp;
+    document.getElementById('editEmailMember').value = member.email;
+    document.getElementById('editMemberType').value = member.type;
+    document.getElementById('editMemberStatus').value = member.status;
+    
+    toggleModal('editMemberModal');
+}
+
+// Save edited member
+function saveEditMember() {
+    const memberId = document.getElementById('editMemberId').value;
+    const nama = document.getElementById('editNamaMember').value.trim();
+    const noTelp = document.getElementById('editNoTelpMember').value.trim();
+    const email = document.getElementById('editEmailMember').value.trim();
+    const type = document.getElementById('editMemberType').value;
+    const status = document.getElementById('editMemberStatus').value;
+    
+    // Validasi nomor telepon
+    const teleponRegex = /^[0-9]{10,13}$/;
+    if (!teleponRegex.test(noTelp)) {
+        showAlert('Nomor telepon harus berisi 10-13 digit angka!', 'danger');
+        return;
+    }
+    
+    // Validasi email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showAlert('Format email tidak valid!', 'danger');
+        return;
+    }
+    
+    const members = getMembers();
+    
+    // Cek duplikasi (kecuali diri sendiri)
+    const isDuplicate = members.some(member => 
+        member.id !== memberId && (
+            member.email === email || 
+            member.noTelp === noTelp
+        )
+    );
+    
+    if (isDuplicate) {
+        showAlert('Email atau nomor telepon sudah digunakan oleh member lain!', 'danger');
+        return;
+    }
+    
+    // Update member
+    const updatedMembers = members.map(member => {
+        if (member.id === memberId) {
+            return {
+                ...member,
+                nama,
+                noTelp,
+                email,
+                type,
+                status
+            };
+        }
+        return member;
+    });
+    
+    saveMembers(updatedMembers);
+    
+    showAlert('Data member berhasil diperbarui!', 'success');
+    toggleModal('editMemberModal');
+    refreshMemberList();
+    updateDashboardStats();
+}
+
+// Prompt delete member
+function promptDeleteMember(memberId) {
+    const members = getMembers();
+    const member = members.find(m => m.id === memberId);
+    
+    if (!member) {
+        showAlert('Member tidak ditemukan!', 'danger');
+        return;
+    }
+    
+    document.getElementById('confirmationContent').innerHTML = `
+        <p>Apakah Anda yakin ingin menghapus member <strong>${member.nama}</strong> (${member.id})?</p>
+        <p>Tindakan ini tidak dapat dibatalkan.</p>
+    `;
+    
+    document.getElementById('confirmActionBtn').onclick = function() {
+        deleteMember(memberId);
+    };
+    
+    toggleModal('memberDetailModal');
+    toggleModal('confirmationModal');
+}
+
+// Delete member
+function deleteMember(memberId) {
+    const members = getMembers();
+    const updatedMembers = members.filter(member => member.id !== memberId);
+    
+    saveMembers(updatedMembers);
+    
+    showAlert('Member berhasil dihapus!', 'success');
+    toggleModal('confirmationModal');
+    refreshMemberList();
+    updateDashboardStats();
+    checkMemberLimit();
+}
+
+// View point history
+function viewPointHistory(memberId) {
+    const members = getMembers();
+    const member = members.find(m => m.id === memberId);
+    
+    if (!member) {
+        showAlert('Member tidak ditemukan!', 'danger');
+        return;
+    }
+    
+    const pointHistory = member.pointHistory || [];
+    const pointHistoryContent = document.getElementById('pointHistoryContent');
+    
+    if (pointHistory.length === 0) {
+        pointHistoryContent.innerHTML = `
+            <div class="alert alert-info">
+                Belum ada riwayat poin untuk member ini.
+            </div>
+        `;
+    } else {
+        let historyHTML = `
+            <div style="margin-bottom: 1rem;">
+                <strong>Nama:</strong> ${member.nama} (${member.id})
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border-color);">Tanggal</th>
+                        <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border-color);">Jenis</th>
+                        <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border-color);">Jumlah</th>
+                        <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border-color);">Keterangan</th>
+                        <th style="text-align: right; padding: 0.5rem; border-bottom: 1px solid var(--border-color);">Saldo</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        pointHistory.forEach(point => {
+            const date = new Date(point.date).toLocaleDateString('id-ID');
+            const type = point.type === 'add' ? 'Tambah' : 
+                        point.type === 'redeem' ? 'Tukar' : 
+                        'Inisialisasi';
+            const amountColor = point.type === 'add' ? 'var(--success-color)' : 
+                                point.type === 'redeem' ? 'var(--danger-color)' : 
+                                'inherit';
+            const amount = point.type === 'add' ? `+${point.amount}` : 
+                            point.type === 'redeem' ? `-${point.amount}` : 
+                            point.amount;
+            
+            historyHTML += `
+                <tr>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-color);">${date}</td>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-color);">${type}</td>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-color); color: ${amountColor};">${amount}</td>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-color);">${point.note || '-'}</td>
+                    <td style="padding: 0.5rem; border-bottom: 1px solid var(--border-color); text-align: right;">${point.balance}</td>
+                </tr>
+            `;
+        });
+        
+        historyHTML += `
+                </tbody>
+            </table>
+        `;
+        
+        pointHistoryContent.innerHTML = historyHTML;
+    }
+    
+    toggleModal('memberDetailModal');
+    toggleModal('pointHistoryModal');
+}
+
+// Add points
+function addPoints() {
+    const memberId = document.getElementById('memberIdPoint').value.trim();
+    const pointsAmount = parseInt(document.getElementById('pointsAmount').value);
+    const pointsNote = document.getElementById('pointsNote').value.trim();
+    
+    if (!memberId) {
+        showAlert('Silakan masukkan ID Member!', 'danger');
+        return;
+    }
+    
+    if (!pointsAmount || pointsAmount <= 0) {
+        showAlert('Jumlah poin harus lebih dari 0!', 'danger');
+        return;
+    }
+    
+    const members = getMembers();
+    const memberIndex = members.findIndex(m => m.id === memberId);
+    
+    if (memberIndex === -1) {
+        showAlert('Member tidak ditemukan!', 'danger');
+        return;
+    }
+    
+    const member = members[memberIndex];
+    
+    if (member.status !== 'active') {
+        showAlert('Hanya member dengan status AKTIF yang dapat menerima poin!', 'danger');
+        return;
+    }
+    
+    // Update poin member
+    const newBalance = member.poin + pointsAmount;
+    members[memberIndex].poin = newBalance;
+    
+    // Tambahkan riwayat poin
+    if (!members[memberIndex].pointHistory) {
+        members[memberIndex].pointHistory = [];
+    }
+    
+    members[memberIndex].pointHistory.push({
+        date: new Date().toISOString(),
+        amount: pointsAmount,
+        type: 'add',
+        note: pointsNote || 'Penambahan poin',
+        balance: newBalance
+    });
+    
+    saveMembers(members);
+    
+    showAlert(`Berhasil menambahkan ${pointsAmount} poin kepada ${member.nama}!`, 'success');
+    document.getElementById('memberIdPoint').value = '';
+    document.getElementById('pointsAmount').value = '';
+    document.getElementById('pointsNote').value = '';
+    
+    refreshMemberList();
+    updateDashboardStats();
+}
+
+// Redeem points
+function redeemPoints() {
+    const memberId = document.getElementById('memberIdPoint').value.trim();
+    const pointsAmount = parseInt(document.getElementById('pointsAmount').value);
+    const pointsNote = document.getElementById('pointsNote').value.trim();
+    
+    if (!memberId) {
+        showAlert('Silakan masukkan ID Member!', 'danger');
+        return;
+    }
+    
+    if (!pointsAmount || pointsAmount <= 0) {
+        showAlert('Jumlah poin harus lebih dari 0!', 'danger');
+        return;
+    }
+    
+    const members = getMembers();
+    const memberIndex = members.findIndex(m => m.id === memberId);
+    
+    if (memberIndex === -1) {
+        showAlert('Member tidak ditemukan!', 'danger');
+        return;
+    }
+    
+    const member = members[memberIndex];
+    
+    if (member.status !== 'active') {
+        showAlert('Hanya member dengan status AKTIF yang dapat menukarkan poin!', 'danger');
+        return;
+    }
+    
+    if (member.poin < pointsAmount) {
+        showAlert('Poin member tidak mencukupi!', 'danger');
+        return;
+    }
+    
+    // Update poin member
+    const newBalance = member.poin - pointsAmount;
+    members[memberIndex].poin = newBalance;
+    
+ // Tambahkan riwayat poin
+    if (!members[memberIndex].pointHistory) {
+        members[memberIndex].pointHistory = [];
+    }
+    
+    members[memberIndex].pointHistory.push({
+        date: new Date().toISOString(),
+        amount: pointsAmount,
+        type: 'redeem',
+        note: pointsNote || 'Penukaran poin',
+        balance: newBalance
+    });
+    
+    saveMembers(members);
+    
+    showAlert(`Berhasil menukarkan ${pointsAmount} poin dari ${member.nama}!`, 'success');
+    document.getElementById('memberIdPoint').value = '';
+    document.getElementById('pointsAmount').value = '';
+    document.getElementById('pointsNote').value = '';
+    
+    refreshMemberList();
+    updateDashboardStats();
+}
+
+// Update dashboard statistics
+function updateDashboardStats() {
+    const members = getMembers();
+    
+    // Total members
+    document.getElementById('totalMembers').textContent = members.length;
+    
+    // Active members
+    const activeMembers = members.filter(member => member.status === 'active');
+    document.getElementById('activeMembersCount').textContent = activeMembers.length;
+    
+    // Total points
+    const totalPoints = members.reduce((sum, member) => sum + member.poin, 0);
+    document.getElementById('totalPoints').textContent = totalPoints;
+    
+    // Average points
+    const avgPoints = members.length > 0 ? Math.round(totalPoints / members.length) : 0;
+    document.getElementById('avgPoints').textContent = avgPoints;
+}
+
+// Export data to JSON file
+function exportData() {
+    const members = getMembers();
+    
+    if (members.length === 0) {
+        showAlert('Tidak ada data member untuk diekspor!', 'warning');
+        return;
+    }
+    
+    const dataStr = JSON.stringify(members, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileName = `member_data_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileName);
+    linkElement.click();
+    
+    showAlert('Data berhasil diekspor!', 'success');
+}
+
+// Prompt clear all data
+function promptClearData() {
+    document.getElementById('confirmationContent').innerHTML = `
+        <p>Apakah Anda yakin ingin menghapus <strong>semua data member</strong>?</p>
+        <p>Tindakan ini tidak dapat dibatalkan dan akan menghapus semua member beserta riwayat poin mereka.</p>
+    `;
+    
+    document.getElementById('confirmActionBtn').onclick = function() {
+        clearAllData();
+    };
+    
+    toggleModal('confirmationModal');
+}
+
+// Clear all data
+function clearAllData() {
+    localStorage.removeItem('members');
+    
+    showAlert('Semua data member berhasil dihapus!', 'success');
+    toggleModal('confirmationModal');
+    refreshMemberList();
+    updateDashboardStats();
+    checkMemberLimit();
+}
+
+// Function to download member data as Excel file in ZIP format
+// Function to download complete member data as ZIP with Excel and text files
+function downloadCompleteDataZip() {
+    const members = getMembers();
+    
+    if (members.length === 0) {
+        showAlert('Tidak ada data member untuk diunduh!', 'warning');
+        return;
+    }
+    
+    // Create date string for filenames
+    const date = new Date().toISOString().split('T')[0];
+    
+    // Create ZIP file
+    const zip = new JSZip();
+    
+    // 1. Create Excel file with basic member data (without point history)
+    const memberData = members.map(member => ({
+        ID: member.id,
+        Nama: member.nama || '',
+        Email: member.email || '',
+        'Nomor Telepon': member.noTelp || '',
+        'Tipe Member': member.type || 'standard',
+        Status: member.status || 'active',
+        Poin: member.poin || 0,
+        'Tanggal Daftar': member.tanggalDaftar || ''
+    }));
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(memberData);
+    XLSX.utils.book_append_sheet(wb, ws, "Member Data");
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    
+    // Add Excel file to ZIP
+    zip.file(`member_data_${date}.xlsx`, excelBuffer);
+    
+    // 2. Create detailed point history Excel file
+    const pointHistoryData = [];
+    members.forEach(member => {
+        if (member.pointHistory && member.pointHistory.length > 0) {
+            member.pointHistory.forEach(point => {
+                pointHistoryData.push({
+                    'ID Member': member.id,
+                    'Nama Member': member.nama || '',
+                    'Tanggal': new Date(point.date).toLocaleDateString('id-ID'),
+                    'Jenis Transaksi': point.type === 'add' ? 'Tambah' : 
+                                       point.type === 'redeem' ? 'Tukar' : 'Inisialisasi',
+                    'Jumlah Poin': point.amount,
+                    'Keterangan': point.note || '',
+                    'Saldo Poin': point.balance
+                });
+            });
+        }
+    });
+    
+    if (pointHistoryData.length > 0) {
+        const pointWb = XLSX.utils.book_new();
+        const pointWs = XLSX.utils.json_to_sheet(pointHistoryData);
+        XLSX.utils.book_append_sheet(pointWb, pointWs, "Riwayat Poin");
+        const pointExcelBuffer = XLSX.write(pointWb, { bookType: 'xlsx', type: 'array' });
+        
+        // Add point history Excel file to ZIP
+        zip.file(`riwayat_poin_${date}.xlsx`, pointExcelBuffer);
+    }
+    
+    // 3. Create README.txt with information
+    const readmeContent = `SISTEM REGISTRASI MEMBER PREMIUM
+Ekspor Data: ${new Date().toLocaleDateString('id-ID')}
+
+ISI FILE:
+1. member_data_${date}.xlsx
+   - File Excel berisi data dasar seluruh member
+   - Kolom: ID, Nama, Email, Nomor Telepon, Tipe Member, Status, Poin, Tanggal Daftar
+
+2. riwayat_poin_${date}.xlsx
+   - File Excel berisi riwayat detail transaksi poin semua member
+   - Kolom: ID Member, Nama Member, Tanggal, Jenis Transaksi, Jumlah Poin, Keterangan, Saldo Poin
+
+STATISTIK:
+- Total Member: ${members.length}
+- Total Member Aktif: ${members.filter(m => m.status === 'active').length}
+- Total Poin: ${members.reduce((sum, member) => sum + (member.poin || 0), 0)}
+- Tipe Member:
+  * Standard: ${members.filter(m => m.type === 'standard').length}
+  * Silver: ${members.filter(m => m.type === 'silver').length}
+  * Gold: ${members.filter(m => m.type === 'gold').length}
+  * Platinum: ${members.filter(m => m.type === 'platinum').length}
+
+Data ini dapat digunakan untuk cadangan atau analisis. Untuk mengimpor kembali data,
+silakan gunakan fitur "Import Data" di aplikasi.
+
+Copyright © Sistem Registrasi Member Premium ${new Date().getFullYear()}`;
+
+    // Add README.txt to ZIP
+    zip.file("README.txt", readmeContent);
+    
+    // Generate ZIP file and trigger download
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
+        // Create download link
+        const url = URL.createObjectURL(content);
+        const link = document.createElement('a');
+        
+        // Set link attributes
+        link.setAttribute('href', url);
+        link.setAttribute('download', `member_data_lengkap_${date}.zip`);
+        link.style.visibility = 'hidden';
+        
+        // Add to document, click to download, then remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showAlert('Data member lengkap berhasil diunduh!', 'success');
+    });
+}
+
+// Keep syncWithDatabase as alias for backward compatibility
+function syncWithDatabase() {
+    downloadCompleteDataZip();
+}
+
+
+// Fungsi untuk mengecek parameter URL saat halaman dimuat
+function checkSyncStatus() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const syncStatus = urlParams.get('sync');
+    
+    if (syncStatus === 'success') {
+        showAlert('Data berhasil disinkronisasi dengan database!', 'success');
+    } else if (syncStatus === 'error') {
+        const errorMsg = urlParams.get('message') || 'Terjadi kesalahan saat sinkronisasi!';
+        showAlert(errorMsg, 'danger');
+    }
+    
+    // Hapus parameter dari URL tanpa refresh
+    window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+// Panggil fungsi saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    // Kode lain yang sudah ada...
+    checkSyncStatus();
+});
+
+
+// Scan QR code function (untuk implementasi di masa depan)
+function scanQRCode() {
+    // Simulasi pembacaan QR Code
+    showAlert('Fitur scan QR code akan segera tersedia!', 'info');
+    
+    // Dalam implementasi nyata, Anda akan menggunakan library seperti jsQR atau Instascan
+    // untuk mengakses kamera dan memindai QR code
+}
+
+// Check for expired points (bisa dijalankan secara berkala)
+function checkExpiredPoints() {
+    const members = getMembers();
+    const currentDate = new Date();
+    let pointsExpired = false;
+    
+    // Periksa poin yang kedaluwarsa
+    members.forEach(member => {
+        if (!member.pointHistory) return;
+        
+        member.pointHistory.forEach(point => {
+            if (point.type === 'add') {
+                const pointDate = new Date(point.date);
+                const daysDiff = Math.floor((currentDate - pointDate) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff > POINT_EXPIRY_DAYS) {
+                    // Implementasi logika poin kedaluwarsa
+                    // (Ini hanya contoh sederhana, implementasi yang lebih kompleks diperlukan)
+                    pointsExpired = true;
+                }
+            }
+        });
+    });
+    
+    if (pointsExpired) {
+        showAlert('Beberapa poin telah kedaluwarsa!', 'warning');
+    }
+}
+
+// Initialize QR scanner
+function initQRScanner() {
+    // Implementasi ini akan menggunakan library eksternal untuk memindai QR code
+    // Ini hanya placeholder untuk pengembangan di masa depan
+}
+
+// Auto-save draft registration
+function autoSaveDraft() {
+    const nama = document.getElementById('namaMember').value.trim();
+    const noTelp = document.getElementById('noTelpMember').value.trim();
+    const email = document.getElementById('emailMember').value.trim();
+    const type = document.getElementById('memberType').value;
+    
+    if (nama || noTelp || email) {
+        const draftData = {
+            nama,
+            noTelp,
+            email,
+            type
+        };
+        
+        localStorage.setItem('memberFormDraft', JSON.stringify(draftData));
+    }
+}
+
+// Load draft registration
+function loadDraft() {
+    const draftData = JSON.parse(localStorage.getItem('memberFormDraft'));
+    
+    if (draftData) {
+        document.getElementById('namaMember').value = draftData.nama || '';
+        document.getElementById('noTelpMember').value = draftData.noTelp || '';
+        document.getElementById('emailMember').value = draftData.email || '';
+        document.getElementById('memberType').value = draftData.type || 'standard';
+    }
+}
+
+// Clear draft registration
+function clearDraft() {
+    localStorage.removeItem('memberFormDraft');
+}
+
+// Helper function to format date
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('id-ID', options);
+}
+
+// Add input event listeners for auto-save draft
+document.addEventListener('DOMContentLoaded', function() {
+    const formInputs = document.querySelectorAll('#memberForm input, #memberForm select');
+    formInputs.forEach(input => {
+        input.addEventListener('input', autoSaveDraft);
+    });
+    
+    // Load draft on page load
+    loadDraft();
+    
+    // Auto check for expired points once a day
+    setInterval(checkExpiredPoints, 24 * 60 * 60 * 1000);
+});
+</script>
+</body>
+</html>
