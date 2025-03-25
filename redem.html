@@ -872,7 +872,122 @@
                 font-size: 1.75rem;
             }
         }
-    </style>
+        
+        
+        
+        
+        .success-input {
+    border-color: var(--success-color) !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+    transition: all 0.3s ease;
+}
+
+.scan-success-message {
+    background-color: var(--success-light);
+    color: var(--success-color);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.scan-error-message {
+    background-color: #fee2e2;
+    color: var(--danger-color);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+}
+        
+   .processing-redemption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    text-align: center;
+}
+
+.processing-redemption i {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.redemption-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    text-align: center;
+    padding: 2rem;
+}
+
+.redemption-success i {
+    font-size: 4rem;
+    color: var(--success-color);
+    margin-bottom: 1rem;
+}
+
+.redemption-success h2 {
+    color: var(--success-color);
+    margin-bottom: 1rem;
+}
+
+.redemption-success button {
+    margin-top: 1.5rem;
+    min-width: 150px;
+} 
+
+
+.success-input {
+    border-color: var(--success-color) !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+    transition: all 0.3s ease;
+}
+
+.scan-success-message {
+    background-color: var(--success-light);
+    color: var(--success-color);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.scan-error-message {
+    background-color: #fee2e2;
+    color: var(--danger-color);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.auto-confirm-message {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+    font-weight: 500;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+</style>
 </head>
 <body>
     <div class="container">
@@ -1628,63 +1743,282 @@
         
         // Open QR code scanner
         function openQRScanner() {
-            const modal = document.getElementById('qrScannerModal');
-            modal.style.display = 'flex';
+    const modal = document.getElementById('qrScannerModal');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.classList.add('active');
+        modal.classList.add('show');
+    }, 10);
+    
+    // Update scanner container with instructions
+    const qrContainer = document.querySelector('.qr-scanner-container');
+    qrContainer.innerHTML = `
+        <div id="qr-reader"></div>
+        <p><i class="fas fa-info-circle"></i> Arahkan kamera ke QR code member</p>
+        <p><strong>Scan QR untuk memilih member dan mengisi PIN secara otomatis</strong></p>
+    `;
+    
+    html5QrcodeScanner = new Html5Qrcode("qr-reader");
+    html5QrcodeScanner.start(
+        { facingMode: "environment" }, 
+        {
+            fps: 10,
+            qrbox: 250
+        },
+        onScanSuccess
+    );
+}
+    
+    
+        
+       // Enhanced QR scan success handler with auto-redemption
+function onScanSuccess(decodedText, decodedResult) {
+    try {
+        // Parse the JSON data from QR code (contains both member ID and PIN)
+        const qrData = JSON.parse(decodedText);
+        const memberId = qrData.id;
+        const encryptedPin = qrData.pin;
+        
+        // Decrypt PIN from QR Code
+        const decryptedPin = decryptPIN(encryptedPin);
+        
+        // Set PIN in input field
+        document.getElementById('pinInput').value = decryptedPin;
+        
+        // Auto-select the member based on the QR code
+        const members = JSON.parse(localStorage.getItem('members')) || [];
+        const member = members.find(m => m.id === memberId);
+        
+        if (!member) {
+            // Show error if member not found
+            const errorEl = document.createElement('div');
+            errorEl.className = 'scan-error-message';
+            errorEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Member tidak ditemukan';
+            document.querySelector('.qr-scanner-container').appendChild(errorEl);
+            
+            // Close scanner after error message shown
             setTimeout(() => {
-                modal.classList.add('active');
-                modal.classList.add('show');
-            }, 10);
-            
-            html5QrcodeScanner = new Html5Qrcode("qr-reader");
-            html5QrcodeScanner.start(
-                { facingMode: "environment" }, 
-                {
-                    fps: 10,
-                    qrbox: 250
-                },
-                onScanSuccess
-            );
-        }
-        
-        // QR scan success handler
-        function onScanSuccess(decodedText, decodedResult) {
-            try {
-                // Decrypt PIN from QR Code
-                const decryptedPin = decryptPIN(decodedText);
-                
-                // Set PIN in input
-                document.getElementById('pinInput').value = decryptedPin;
-                
-                // Close scanner
                 closeQRScanner();
-            } catch (error) {
-                console.error("Error decrypting PIN:", error);
-                alert("QR PIN tidak valid");
-            }
+            }, 2000);
+            return;
         }
         
-        // Close QR scanner
-        function closeQRScanner() {
-            const modal = document.getElementById('qrScannerModal');
-            modal.classList.remove('active');
-            modal.classList.remove('show');
-            
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().then(() => {
-                    html5QrcodeScanner = null;
-                    setTimeout(() => {
-                        modal.style.display = 'none';
-                    }, 300);
-                }).catch(error => {
-                    console.error("Error stopping scanner", error);
-                    modal.style.display = 'none';
-                });
-            } else {
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                }, 300);
-            }
+        // Auto-select the member in the dropdown
+        selectedMemberId = member.id;
+        document.getElementById('memberSelectDisplay').textContent = member.nama;
+        document.getElementById('poinDimiliki').textContent = member.poin;
+        
+        // Update redemption confirmation if applicable
+        if (member.poin >= requiredPoin) {
+            document.getElementById('confirmPointsAmount').textContent = requiredPoin;
+            document.getElementById('redeemConfirmation').classList.add('show');
         }
+        
+        // Visual feedback for QR scanning success
+        const pinInput = document.getElementById('pinInput');
+        pinInput.classList.add('success-input');
+        
+        // Show scanning success message
+        const feedbackEl = document.createElement('div');
+        feedbackEl.className = 'scan-success-message';
+        feedbackEl.innerHTML = '<i class="fas fa-check-circle"></i> QR berhasil terbaca';
+        document.querySelector('.qr-scanner-container').appendChild(feedbackEl);
+        
+        // Close scanner
+        setTimeout(() => {
+            closeQRScanner();
+            
+            // Proceed with automatic redemption if points are sufficient
+            if (member.poin >= requiredPoin) {
+                // Show auto-redemption confirmation
+                const autoConfirmEl = document.createElement('div');
+                autoConfirmEl.className = 'auto-confirm-message';
+                autoConfirmEl.innerHTML = `
+                    <p><i class="fas fa-sync-alt fa-spin"></i> Memproses penukaran otomatis...</p>
+                `;
+                document.querySelector('.modal-body').appendChild(autoConfirmEl);
+                
+                // Process redemption after short delay
+                setTimeout(() => {
+                    konfirmasiRedeem();
+                }, 1500);
+            }
+        }, 1000);
+    } catch (error) {
+        console.error("Error processing QR code:", error);
+        
+        // Show error message
+        const errorEl = document.createElement('div');
+        errorEl.className = 'scan-error-message';
+        errorEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> QR tidak valid';
+        document.querySelector('.qr-scanner-container').appendChild(errorEl);
+        
+        // Close scanner after error message shown
+        setTimeout(() => {
+            closeQRScanner();
+        }, 2000);
+    }
+}
+
+  
+  
+  
+ function verifyPINAndRedeem(pin) {
+    if (!selectedMemberId || !pin) {
+        alert('Silakan pilih member dan masukkan PIN');
+        return;
+    }
+
+    const members = JSON.parse(localStorage.getItem('members')) || [];
+    const memberIndex = members.findIndex(m => m.id === selectedMemberId);
+
+    if (memberIndex === -1) {
+        alert('Member tidak ditemukan');
+        return;
+    }
+
+    // Decrypt the stored PIN to compare with input
+    const storedPin = members[memberIndex].pin;
+    let isValidPin = false;
+    
+    try {
+        const decryptedPin = decryptPIN(storedPin);
+        isValidPin = (pin === decryptedPin);
+    } catch (error) {
+        // Fallback for direct comparison if decryption fails
+        isValidPin = (pin === storedPin);
+    }
+    
+    if (!isValidPin) {
+        alert('PIN tidak valid');
+        return;
+    }
+
+    if (members[memberIndex].poin < requiredPoin) {
+        alert('Poin tidak mencukupi');
+        return;
+    }
+
+    // Show loading state in the modal
+    const redeemModalContent = document.querySelector('#redeemModal .modal-content');
+    const originalContent = redeemModalContent.innerHTML;
+    redeemModalContent.innerHTML = `
+        <div class="processing-redemption">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Memproses penukaran...</p>
+        </div>
+    `;
+
+    // Process the redemption after short delay (for better UX)
+    setTimeout(() => {
+        // Process the redemption
+        const barang = JSON.parse(localStorage.getItem('barang')) || [];
+        const barangIndex = barang.findIndex(b => b.kode === selectedBarangKode);
+
+        if (barangIndex === -1 || barang[barangIndex].stok <= 0) {
+            alert('Barang tidak tersedia');
+            redeemModalContent.innerHTML = originalContent; // Restore original content
+            return;
+        }
+
+        // Update item stock
+        barang[barangIndex].stok--;
+        localStorage.setItem('barang', JSON.stringify(barang));
+
+        // Get item name for the record
+        const barangName = barang[barangIndex].nama;
+        
+        // Update member points
+        const oldPoin = members[memberIndex].poin;
+        members[memberIndex].poin -= requiredPoin;
+        
+        // Add point transaction to member's history
+        if (!members[memberIndex].pointHistory) {
+            members[memberIndex].pointHistory = [];
+        }
+        
+        // Add point redemption record to member's history
+        members[memberIndex].pointHistory.push({
+            date: new Date().toISOString(),
+            amount: requiredPoin,
+            type: 'redeem',
+            note: `Penukaran barang: ${barangName}`,
+            balance: members[memberIndex].poin
+        });
+        
+        // Save updated member data
+        localStorage.setItem('members', JSON.stringify(members));
+
+        // Add to global redemption history
+        const riwayatRedeem = JSON.parse(localStorage.getItem('riwayatRedeem')) || [];
+        const riwayat = {
+            id: Date.now().toString(),
+            tanggal: new Date().toISOString(),
+            memberId: members[memberIndex].id,
+            memberNama: members[memberIndex].nama,
+            barangKode: selectedBarangKode,
+            barangNama: barang[barangIndex].nama,
+            poinDigunakan: requiredPoin,
+            poinSebelumnya: oldPoin,
+            poinSetelahnya: members[memberIndex].poin
+        };
+        
+        riwayatRedeem.push(riwayat);
+        localStorage.setItem('riwayatRedeem', JSON.stringify(riwayatRedeem));
+
+        // Show success message
+        redeemModalContent.innerHTML = `
+            <div class="redemption-success">
+                <i class="fas fa-check-circle"></i>
+                <h2>Penukaran Berhasil!</h2>
+                <p>Anda telah menukarkan <strong>${requiredPoin}</strong> poin untuk <strong>${barang[barangIndex].nama}</strong>.</p>
+                <p>Sisa poin: <strong>${members[memberIndex].poin}</strong></p>
+                <button class="btn btn-success" onclick="hideModal(); loadBarang(); updateStats();">
+                    <i class="fas fa-check"></i> OK
+                </button>
+            </div>
+        `;
+        
+        // Update the dashboard
+        loadBarang();
+        updateStats();
+        
+        // Hide modal after a timeout
+        setTimeout(() => {
+            hideModal();
+        }, 5000);
+    }, 1000);
+} 
+  
+  
+  
+      // Close QR scanner
+        function closeQRScanner() {
+    const modal = document.getElementById('qrScannerModal');
+    modal.classList.remove('active');
+    modal.classList.remove('show');
+    
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.stop().then(() => {
+            html5QrcodeScanner = null;
+            
+            // Remove any feedback messages
+            const messages = document.querySelectorAll('.scan-success-message, .scan-error-message');
+            messages.forEach(msg => msg.remove());
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }).catch(error => {
+            console.error("Error stopping scanner", error);
+            modal.style.display = 'none';
+        });
+    } else {
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+}
         
         // Decrypt PIN from QR code
         function decryptPIN(encryptedPin) {
