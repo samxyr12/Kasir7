@@ -1604,6 +1604,7 @@ function convertNominalToNumber(nominalString) {
 }
 
 
+// Fungsi simpan transaksi yang memastikan poin dan waktu lengkap disimpan dengan benar
 function simpanTransaksi(metode, total, kembalian, idTransaksi, keranjang, memberId = null, poin = 0, nominal = 0) {
     // Get existing transaction data
     let transaksi = [];
@@ -1633,12 +1634,20 @@ function simpanTransaksi(metode, total, kembalian, idTransaksi, keranjang, membe
         transaksiMetode = [];
     }
 
-    // Current timestamp formatted
+    // Current timestamp formatted with complete date and time
     const now = new Date();
+    
+    // Format tanggal dengan jam lengkap (YYYY-MM-DD HH:MM:SS)
     const tanggal = `${now.getFullYear()}-${
         String(now.getMonth() + 1).padStart(2, '0')
     }-${
         String(now.getDate()).padStart(2, '0')
+    } ${
+        String(now.getHours()).padStart(2, '0')
+    }:${
+        String(now.getMinutes()).padStart(2, '0')
+    }:${
+        String(now.getSeconds()).padStart(2, '0')
     }`;
     
     // Prepare new transaction entries
@@ -1658,10 +1667,10 @@ function simpanTransaksi(metode, total, kembalian, idTransaksi, keranjang, membe
             metode: metode,
             diskon: item.potongan || 0,
             persenDiskon: item.potongan || 0,
-            tanggal: tanggal,
+            tanggal: tanggal, // Tanggal dengan format lengkap termasuk jam
             memberId: memberId,
             poin: poin, // Include the points in each transaction entry
-            timestamp: now.getTime() // Add timestamp for sorting
+            timestamp: now.getTime() // Add timestamp for sorting and filtering
         };
         
         newTransaksiEntries.push(transactionEntry);
@@ -1679,7 +1688,7 @@ function simpanTransaksi(metode, total, kembalian, idTransaksi, keranjang, membe
         const methodKey = `transaksi_${metode}`;
         localStorage.setItem(methodKey, JSON.stringify(transaksiMetode));
         
-        console.log(`Transaction ${idTransaksi} saved successfully with ${poin} points`);
+        console.log(`Transaction ${idTransaksi} saved successfully with ${poin} points at ${tanggal}`);
         return true;
     } catch (error) {
         console.error("Error saving transaction:", error);
@@ -1701,8 +1710,6 @@ function simpanTransaksi(metode, total, kembalian, idTransaksi, keranjang, membe
         }
     }
 }
-
-
 function formatRupiah(angka) {
     return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -1710,7 +1717,7 @@ function formatRupiah(angka) {
 function cetakStruk(idTransaksi) {
     // Konstanta untuk format struk
     const LEBAR_STRUK = 42; // lebar struk dalam karakter
-    const NAMA_TOKO = 'TOKO SERBAGUNA';
+    const NAMA_TOKO = 'FXID STORE';
     const ALAMAT_TOKO = 'Jl. Merdeka No. 88, Kota';
 
     // Fungsi bantuan untuk format Rupiah
@@ -3925,3 +3932,1641 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(fontAwesomeLink);
     }
 }); 
+
+
+
+
+// Fungsi untuk menampilkan popup cetak ulang struk
+function cetakUlangStruk() {
+    // Verifikasi PIN terlebih dahulu
+    Swal.fire({
+        title: 'Masukkan PIN',
+        input: 'password',
+        inputPlaceholder: 'Masukkan PIN Anda',
+        inputAttributes: {
+            autocapitalize: 'off',
+            autocorrect: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Verifikasi',
+        cancelButtonText: 'Batal',
+        showLoaderOnConfirm: true,
+        preConfirm: (pin) => {
+            if (!pin) {
+                Swal.showValidationMessage('PIN harus diisi');
+                return false;
+            }
+            
+            // Verifikasi PIN (ganti '451' dengan PIN yang sesuai atau gunakan sistem PIN yang lebih aman)
+            if (pin !== '451') {
+                Swal.showValidationMessage('PIN tidak valid');
+                return false;
+            }
+            
+            return true;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            tampilkanPopupCetakUlang();
+        }
+    });
+}
+
+
+// Fungsi untuk menampilkan popup dialog cetak ulang
+function tampilkanPopupCetakUlang() {
+    // Dapatkan tanggal hari ini dalam format YYYY-MM-DD
+    const today = new Date();
+    const formattedToday = formatDate(today);
+    
+    // Dapatkan tanggal 30 hari yang lalu sebagai default awal periode
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    const formattedThirtyDaysAgo = formatDate(thirtyDaysAgo);
+    
+    // Siapkan HTML untuk popup
+    const popupHTML = `
+        <div class="reprint-container">
+            <div class="date-filter-section">
+                <div class="date-range">
+                    <div class="date-input-group">
+                        <label for="startDate">Tanggal Mulai</label>
+                        <input type="date" id="startDate" value="${formattedThirtyDaysAgo}" class="date-input">
+                    </div>
+                    <div class="date-input-group">
+                        <label for="endDate">Tanggal Selesai</label>
+                        <input type="date" id="endDate" value="${formattedToday}" class="date-input">
+                    </div>
+                    <button id="filterBtn" class="filter-btn">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+                <div class="quick-filters">
+                    <button class="quick-filter-btn" data-days="7">7 Hari</button>
+                    <button class="quick-filter-btn" data-days="14">14 Hari</button>
+                    <button class="quick-filter-btn" data-days="30">30 Hari</button>
+                    <button class="quick-filter-btn" data-days="90">90 Hari</button>
+                </div>
+            </div>
+            
+            <div class="transaction-section">
+                <div class="transaction-header">
+                    <div class="header-item">
+                        <input type="checkbox" id="selectAll" class="select-checkbox">
+                        <label for="selectAll">Pilih Semua</label>
+                    </div>
+                    <div class="search-container">
+                        <input type="text" id="searchTransaction" placeholder="Cari ID transaksi..." class="search-input">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+                
+                <div class="transaction-list-container">
+                    <div id="transactionList" class="transaction-list">
+                        <div class="loading-indicator">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Memuat daftar transaksi...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="printSelectedBtn" class="print-btn" disabled>
+                    <i class="fas fa-print"></i> Cetak Struk Terpilih
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Tampilkan popup dengan SweetAlert2
+    Swal.fire({
+        title: 'Cetak Ulang Struk',
+        html: popupHTML,
+        width: '850px',
+        showConfirmButton: false,
+        showCloseButton: true,
+        customClass: {
+            container: 'reprint-popup-container',
+            popup: 'reprint-popup',
+            title: 'reprint-title'
+        },
+        didOpen: (popup) => {
+            // Inisialisasi komponen dalam popup
+            initializeReprintPopup(popup);
+        }
+    });
+    
+    // Tambahkan CSS untuk popup
+    addReprintStyles();
+}
+
+// Fungsi untuk menginisialisasi komponen dalam popup cetak ulang
+function initializeReprintPopup(popup) {
+    const filterBtn = popup.querySelector('#filterBtn');
+    const quickFilterBtns = popup.querySelectorAll('.quick-filter-btn');
+    const selectAllCheckbox = popup.querySelector('#selectAll');
+    const printSelectedBtn = popup.querySelector('#printSelectedBtn');
+    const searchInput = popup.querySelector('#searchTransaction');
+    
+    // Event listener untuk tombol filter
+    filterBtn.addEventListener('click', () => {
+        const startDate = popup.querySelector('#startDate').value;
+        const endDate = popup.querySelector('#endDate').value;
+        loadTransactions(startDate, endDate);
+    });
+    
+    // Event listener untuk tombol filter cepat (7 hari, 14 hari, dst)
+    quickFilterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const days = parseInt(btn.dataset.days);
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(endDate.getDate() - days);
+            
+            popup.querySelector('#startDate').value = formatDate(startDate);
+            popup.querySelector('#endDate').value = formatDate(endDate);
+            
+            loadTransactions(formatDate(startDate), formatDate(endDate));
+            
+            // Update tampilan tombol aktif
+            quickFilterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+    
+    // Event listener untuk checkbox "Pilih Semua"
+    selectAllCheckbox.addEventListener('change', () => {
+        const checkboxes = popup.querySelectorAll('.transaction-item input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+        
+        // Update status tombol cetak
+        updatePrintButtonStatus();
+    });
+    
+    // Event listener untuk tombol "Cetak Struk Terpilih"
+    printSelectedBtn.addEventListener('click', () => {
+        const selectedTransactions = getSelectedTransactions();
+        if (selectedTransactions.length > 0) {
+            cetakStrukTerpilih(selectedTransactions);
+        }
+    });
+    
+    // Event listener untuk pencarian transaksi
+    searchInput.addEventListener('input', () => {
+        filterTransactions(searchInput.value);
+    });
+    
+    // Fungsi untuk memperbarui status tombol cetak
+    function updatePrintButtonStatus() {
+        const checkboxes = popup.querySelectorAll('.transaction-item input[type="checkbox"]:checked');
+        printSelectedBtn.disabled = checkboxes.length === 0;
+    }
+    
+    // Helper untuk mendapatkan transaksi yang dipilih
+    function getSelectedTransactions() {
+        const selectedItems = popup.querySelectorAll('.transaction-item input[type="checkbox"]:checked');
+        return Array.from(selectedItems).map(item => item.value);
+    }
+    
+    // Load transaksi berdasarkan filter default (30 hari terakhir)
+    const startDate = popup.querySelector('#startDate').value;
+    const endDate = popup.querySelector('#endDate').value;
+    loadTransactions(startDate, endDate);
+    
+    // Tandai tombol 30 hari sebagai aktif secara default
+    popup.querySelector('.quick-filter-btn[data-days="30"]').classList.add('active');
+    
+    // Event delegasi untuk transaction list
+    const transactionList = popup.querySelector('#transactionList');
+    transactionList.addEventListener('change', (e) => {
+        if (e.target.type === 'checkbox') {
+            updatePrintButtonStatus();
+            
+            // Update "Pilih Semua" jika semua/tidak semua checkbox dipilih
+            const allCheckboxes = popup.querySelectorAll('.transaction-item input[type="checkbox"]');
+            const checkedCheckboxes = popup.querySelectorAll('.transaction-item input[type="checkbox"]:checked');
+            
+            selectAllCheckbox.checked = allCheckboxes.length === checkedCheckboxes.length;
+        }
+    });
+}
+
+// Fungsi untuk memuat daftar transaksi berdasarkan rentang tanggal
+function loadTransactions(startDate, endDate) {
+    const transactionList = document.getElementById('transactionList');
+    
+    // Tampilkan indikator loading
+    transactionList.innerHTML = `
+        <div class="loading-indicator">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Memuat daftar transaksi...</p>
+        </div>
+    `;
+    
+    // Ambil data transaksi dari localStorage
+    setTimeout(() => {
+        let transaksi = [];
+        try {
+            transaksi = JSON.parse(localStorage.getItem('transaksi')) || [];
+        } catch (error) {
+            console.error('Error loading transactions:', error);
+            transaksi = [];
+        }
+        
+        // Filter transaksi berdasarkan rentang tanggal
+        const filteredTransactions = filterTransactionsByDateRange(transaksi, startDate, endDate);
+        
+        // Kelompokkan transaksi berdasarkan ID
+        const groupedTransactions = groupTransactionsById(filteredTransactions);
+        
+        // Tampilkan daftar transaksi
+        displayTransactions(groupedTransactions);
+    }, 500); // Simulasikan loading dengan timeout
+}
+
+// Fungsi untuk filter transaksi berdasarkan rentang tanggal
+function filterTransactionsByDateRange(transactions, startDate, endDate) {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    
+    return transactions.filter(transaction => {
+        const transactionDate = new Date(transaction.tanggal);
+        return transactionDate >= start && transactionDate <= end;
+    });
+}
+
+// Fungsi untuk mengelompokkan transaksi berdasarkan ID
+function groupTransactionsById(transactions) {
+    const groupedTransactions = {};
+    
+    transactions.forEach(transaction => {
+        if (!groupedTransactions[transaction.id]) {
+            groupedTransactions[transaction.id] = {
+                id: transaction.id,
+                tanggal: transaction.tanggal,
+                metode: transaction.metode,
+                total: 0,
+                items: [],
+                timestamp: transaction.timestamp || Date.parse(transaction.tanggal),
+                memberId: transaction.memberId
+            };
+        }
+        
+        groupedTransactions[transaction.id].items.push({
+            namaBarang: transaction.namaBarang,
+            jumlah: transaction.jumlah,
+            total: transaction.total
+        });
+        
+        groupedTransactions[transaction.id].total += transaction.total;
+    });
+    
+    // Konversi objek ke array dan urutkan berdasarkan waktu (terbaru dulu)
+    return Object.values(groupedTransactions).sort((a, b) => b.timestamp - a.timestamp);
+}
+
+// Fungsi untuk menampilkan daftar transaksi
+function displayTransactions(transactions) {
+    const transactionList = document.getElementById('transactionList');
+    
+    if (transactions.length === 0) {
+        transactionList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <p>Tidak ada transaksi dalam rentang tanggal yang dipilih</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    transactions.forEach(transaction => {
+        // Format tanggal transaksi
+        const transactionDate = new Date(transaction.tanggal);
+        const formattedDate = transactionDate.toLocaleDateString('id-ID', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        const formattedTime = transactionDate.toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Format total harga
+        const formattedTotal = formatRupiah(transaction.total);
+        
+        // Dapatkan informasi member jika ada
+        let memberInfo = '';
+        if (transaction.memberId) {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const member = members.find(m => m.id === transaction.memberId);
+            if (member) {
+                memberInfo = `
+                    <div class="transaction-member">
+                        <i class="fas fa-user-tag"></i>
+                        <span>${member.nama}</span>
+                    </div>
+                `;
+            }
+        }
+        
+        // Metode pembayaran dengan fix untuk undefined
+        const metode = transaction.metode || 'tidak diketahui';
+        const metodeIcon = metode === 'cash' ? 'fa-money-bill-wave' : 
+                          (metode === 'qris' ? 'fa-qrcode' : 'fa-receipt');
+        
+        // Jumlah item dalam transaksi
+        const itemCount = transaction.items.length;
+        
+        html += `
+            <div class="transaction-item" data-id="${transaction.id}">
+                <div class="transaction-checkbox">
+                    <input type="checkbox" id="trans_${transaction.id}" class="select-checkbox" value="${transaction.id}">
+                    <label for="trans_${transaction.id}"></label>
+                </div>
+                <div class="transaction-info" onclick="toggleTransactionDetails('${transaction.id}')">
+                    <div class="transaction-main">
+                        <div class="transaction-id-date">
+                            <div class="transaction-id">${transaction.id}</div>
+                            <div class="transaction-date">${formattedDate} ${formattedTime}</div>
+                        </div>
+                        <div class="transaction-meta">
+                            <div class="transaction-method ${metode}">
+                                <i class="fas ${metodeIcon}"></i>
+                                <span>${metode.toUpperCase()}</span>
+                            </div>
+                            ${memberInfo}
+                            <div class="transaction-items-count">
+                                <i class="fas fa-shopping-basket"></i>
+                                <span>${itemCount} item</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="transaction-total">
+                        <div class="total-label">Total</div>
+                        <div class="total-amount">${formattedTotal}</div>
+                    </div>
+                </div>
+                <div class="transaction-details" id="details_${transaction.id}" style="display: none;">
+                    <div class="details-header">
+                        <h4>Detail Transaksi</h4>
+                    </div>
+                    <div class="items-list">
+                        ${generateItemsList(transaction.items)}
+                    </div>
+                    <div class="details-actions">
+                        <button class="action-btn preview-btn" onclick="previewStruk('${transaction.id}')">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                        <button class="action-btn print-single-btn" onclick="cetakSingleStruk('${transaction.id}')">
+                            <i class="fas fa-print"></i> Cetak
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    transactionList.innerHTML = html;
+}
+
+// Fungsi untuk menghasilkan daftar item dalam transaksi
+function generateItemsList(items) {
+    let html = '<ul class="items-list-ul">';
+    
+    items.forEach(item => {
+        html += `
+            <li class="item-entry">
+                <div class="item-name">${item.namaBarang}</div>
+                <div class="item-quantity">x${item.jumlah}</div>
+                <div class="item-total">${formatRupiah(item.total)}</div>
+            </li>
+        `;
+    });
+    
+    html += '</ul>';
+    return html;
+}
+
+// Fungsi untuk toggle detail transaksi
+function toggleTransactionDetails(transactionId) {
+    const detailsElement = document.getElementById(`details_${transactionId}`);
+    
+    // Tutup semua detail transaksi lainnya
+    const allDetails = document.querySelectorAll('.transaction-details');
+    allDetails.forEach(detail => {
+        if (detail.id !== `details_${transactionId}`) {
+            detail.style.display = 'none';
+        }
+    });
+    
+    // Toggle tampilan detail transaksi yang dipilih
+    if (detailsElement) {
+        detailsElement.style.display = detailsElement.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// Fungsi untuk filter transaksi berdasarkan pencarian
+function filterTransactions(searchTerm) {
+    const transactionItems = document.querySelectorAll('.transaction-item');
+    const searchLower = searchTerm.toLowerCase();
+    
+    transactionItems.forEach(item => {
+        const transactionId = item.dataset.id.toLowerCase();
+        const shouldShow = transactionId.includes(searchLower);
+        item.style.display = shouldShow ? 'flex' : 'none';
+    });
+}
+
+function cetakStrukTerpilih(transactionIds) {
+    if (transactionIds.length === 0) return;
+    
+    // Jika hanya satu transaksi, gunakan fungsi cetak langsung
+    if (transactionIds.length === 1) {
+        cetakStruk(transactionIds[0], true);
+        return;
+    }
+    
+    // Jika banyak transaksi, konfirmasi dulu
+    Swal.fire({
+        title: 'Cetak Struk',
+        text: `Anda akan mencetak ${transactionIds.length} struk. Lanjutkan?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Cetak',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#3085d6',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Cetak struk menggunakan fungsi cetakBatchStruk
+            cetakBatchStruk(transactionIds);
+        }
+    });
+}
+// Fungsi untuk mencetak batch struk
+function cetakBatchStruk(transactionIds) {
+    let index = 0;
+    
+    // Tampilkan dialog progres
+    Swal.fire({
+        title: 'Memproses Pencetakan',
+        html: `Mencetak struk <b>1</b> dari <b>${transactionIds.length}</b>`,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+            Swal.showLoading();
+            processBatch();
+        }
+    });
+    
+    // Fungsi rekursif untuk memproses batch
+    function processBatch() {
+        if (index >= transactionIds.length) {
+            // Selesai, tutup dialog
+            Swal.fire({
+                title: 'Selesai',
+                text: `${transactionIds.length} struk telah dicetak`,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        
+        // Update dialog progres
+        Swal.update({
+            html: `Mencetak struk <b>${index + 1}</b> dari <b>${transactionIds.length}</b>`
+        });
+        
+        // Cetak struk saat ini menggunakan fungsi cetakStruk
+        cetakStruk(transactionIds[index], true);
+        
+        // Lanjut ke struk berikutnya setelah delay
+        index++;
+        setTimeout(processBatch, 1500);
+    }
+}
+
+// Fungsi untuk mencetak struk tunggal dalam mode batch (tanpa dialog tambahan)
+function cetakSingleStrukSilent(transactionId) {
+    return new Promise((resolve) => {
+        // Menggunakan fungsi cetakStruk yang sudah ada
+        cetakStruk(transactionId, true);
+        
+        // Resolve promise setelah memberikan waktu untuk cetakStruk selesai
+        setTimeout(resolve, 1000);
+    });
+}
+
+// Fungsi untuk mencetak struk tunggal
+function cetakSingleStruk(transactionId) {
+    // Menggunakan fungsi cetakStruk yang sudah ada dengan parameter isReprint=true
+    cetakStruk(transactionId, true);
+}
+// Fungsi untuk preview struk
+// Fungsi preview struk yang ditingkatkan
+function previewStruk(transactionId, withPrintOption = true) {
+    // Dapatkan transaksi dari localStorage
+    let transaksi = [];
+    try {
+        transaksi = JSON.parse(localStorage.getItem('transaksi')) || [];
+    } catch (error) {
+        console.error('Error parsing transaksi:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Terjadi kesalahan saat memuat data transaksi',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    // Filter transaksi berdasarkan ID
+    const transaksiTerpilih = transaksi.filter(item => item.id === transactionId);
+    
+    if (transaksiTerpilih.length === 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Transaksi Tidak Ditemukan',
+            text: `Tidak dapat menemukan transaksi dengan ID: ${transactionId}`,
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    // Kelompokkan item berdasarkan kode barang
+    const uniqueItems = new Map();
+    let totalTransaksi = 0;
+    
+    transaksiTerpilih.forEach(item => {
+        try {
+            const key = item.kodeBarang || `item-${Math.random().toString(36).substring(2, 9)}`;
+            if (uniqueItems.has(key)) {
+                const existingItem = uniqueItems.get(key);
+                existingItem.jumlah += (item.jumlah || 0);
+                existingItem.total += (item.total || 0);
+            } else {
+                uniqueItems.set(key, {
+                    namaBarang: item.namaBarang || 'Item tidak bernama',
+                    jumlah: item.jumlah || 0,
+                    total: item.total || 0
+                });
+            }
+            totalTransaksi += (item.total || 0);
+        } catch (error) {
+            console.error('Error processing item:', error, item);
+        }
+    });
+
+    // Konversi uniqueItems Map ke array untuk render
+    const items = Array.from(uniqueItems.values());
+    
+    // Dapatkan informasi metode pembayaran
+    const metode = (transaksiTerpilih[0].metode || 'tidak diketahui').toUpperCase();
+    
+    // Dapatkan informasi member jika ada
+    let memberInfo = 'Non-Member';
+    let memberPoin = 0;
+    
+    if (transaksiTerpilih[0].memberId) {
+        try {
+            const members = JSON.parse(localStorage.getItem('members')) || [];
+            const member = members.find(m => m.id === transaksiTerpilih[0].memberId);
+            
+            if (member) {
+                memberInfo = `${member.nama} (ID: ${member.id})`;
+                memberPoin = transaksiTerpilih[0].poin || 0;
+            }
+        } catch (error) {
+            console.error('Error processing member info:', error);
+        }
+    }
+    
+    // Format tanggal transaksi untuk display
+    let tanggalTransaksi = 'Tidak tersedia';
+    try {
+        if (transaksiTerpilih[0].tanggal) {
+            tanggalTransaksi = new Date(transaksiTerpilih[0].tanggal).toLocaleString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    } catch (error) {
+        console.error('Error formatting date:', error);
+    }
+    
+    // Siapkan HTML untuk preview dengan tampilan yang lebih baik
+    const previewHTML = `
+    <div class="preview-container">
+        <div class="preview-header">
+            <div class="preview-logo">
+                <i class="fas fa-store"></i>
+                <h3>FXID STORE</h3>
+            </div>
+            <div class="preview-transaction-info">
+                <div class="info-item">
+                    <span class="info-label">ID Transaksi:</span>
+                    <span class="info-value">${transactionId}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tanggal:</span>
+                    <span class="info-value">${tanggalTransaksi}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Metode Pembayaran:</span>
+                    <span class="info-value method-badge ${metode.toLowerCase()}">${metode}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Member:</span>
+                    <span class="info-value">${memberInfo}</span>
+                </div>
+                ${memberPoin > 0 ? `
+                <div class="info-item">
+                    <span class="info-label">Poin Didapat:</span>
+                    <span class="info-value points">+${memberPoin} poin</span>
+                </div>` : ''}
+            </div>
+        </div>
+        
+        <div class="preview-items">
+            <h4>Detail Belanja</h4>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 55%">Item</th>
+                        <th style="width: 15%">Qty</th>
+                        <th style="width: 30%">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${items.map(item => `
+                    <tr>
+                        <td>${item.namaBarang}</td>
+                        <td class="text-center">${item.jumlah}</td>
+                        <td class="text-right">${formatRupiah(item.total)}</td>
+                    </tr>
+                    `).join('')}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="text-right"><strong>Total:</strong></td>
+                        <td class="text-right total-price">${formatRupiah(totalTransaksi)}</td>
+                    </tr>
+                    ${transaksiTerpilih[0].kembalian ? `
+                    <tr>
+                        <td colspan="2" class="text-right">Nominal:</td>
+                        <td class="text-right">${formatRupiah(transaksiTerpilih[0].nominal || totalTransaksi)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="text-right">Kembalian:</td>
+                        <td class="text-right">${formatRupiah(transaksiTerpilih[0].kembalian || 0)}</td>
+                    </tr>` : ''}
+                </tfoot>
+            </table>
+        </div>
+        
+        <div class="preview-footer">
+            <p>Terima kasih telah berbelanja di FXID STORE</p>
+            <p class="reprint-note">* Ini adalah tampilan preview untuk cetak ulang struk</p>
+        </div>
+    </div>
+    
+    <style>
+        .preview-container {
+            max-width: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        
+        .preview-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        
+        .preview-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .preview-logo i {
+            font-size: 2rem;
+            color: #3b82f6;
+            margin-bottom: 8px;
+        }
+        
+        .preview-logo h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .preview-transaction-info {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .info-item {
+            display: flex;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .info-label {
+            width: 45%;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            width: 55%;
+            font-weight: 600;
+            color: #334155;
+        }
+        
+        .method-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .method-badge.cash {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .method-badge.qris {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .method-badge.tidak {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .points {
+            color: #d97706;
+            font-weight: 600;
+        }
+        
+        .preview-items {
+            margin-bottom: 20px;
+        }
+        
+        .preview-items h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: #334155;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .items-table th {
+            text-align: left;
+            padding: 8px;
+            background-color: #f1f5f9;
+            color: #64748b;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .items-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .items-table tfoot tr td {
+            padding-top: 12px;
+            border-top: 1px solid #cbd5e1;
+            border-bottom: none;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .total-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e40af;
+        }
+        
+        .preview-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        .preview-footer p {
+            margin: 5px 0;
+        }
+        
+        .reprint-note {
+            font-style: italic;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+    </style>
+    `;
+    
+    // Tampilkan dialog preview yang ditingkatkan
+    Swal.fire({
+        title: 'Preview Struk',
+        html: previewHTML,
+        width: '600px',
+        showCancelButton: false,
+        showDenyButton: withPrintOption,
+        confirmButtonText: 'Tutup',
+        denyButtonText: '<i class="fas fa-print"></i> Cetak Struk',
+        customClass: {
+            popup: 'struk-preview-popup',
+            content: 'struk-preview-swal-content',
+            confirmButton: 'btn-close',
+            denyButton: 'btn-print'
+        }
+    }).then((result) => {
+        if (result.isDenied && withPrintOption) {
+            // Jika user memilih untuk mencetak
+            cetakStruk(transactionId, true);
+        }
+    });
+    
+    // Tambahkan CSS tambahan untuk tombol
+    const style = document.createElement('style');
+    style.textContent = `
+        .btn-print {
+            background-color: #2563eb !important;
+            color: white !important;
+        }
+        
+        .btn-close {
+            background-color: #e2e8f0 !important;
+            color: #475569 !important;
+        }
+        
+        .struk-preview-popup {
+            max-width: 600px !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Fungsi untuk menghasilkan konten struk berdasarkan ID transaksi
+function generateStrukContent(transactionId) {
+    // Konstanta untuk format struk
+    const LEBAR_STRUK = 42; // lebar struk dalam karakter
+    const NAMA_TOKO = 'FXID STORE';
+    const ALAMAT_TOKO = 'Jl. Merdeka No. 88, Kota';
+    
+    // Fungsi untuk membuat garis pemisah
+    function garisPemisah(karakter = '-') {
+        return karakter.repeat(LEBAR_STRUK);
+    }
+    
+    // Fungsi untuk memusatkan teks
+    function pusatkanTeks(teks, lebar = LEBAR_STRUK) {
+        const sisaSpasi = lebar - teks.length;
+        const spasiBagiriKiri = Math.floor(sisaSpasi / 2);
+        const spasiBagianKanan = sisaSpasi - spasiBagiriKiri;
+        return ' '.repeat(spasiBagiriKiri) + teks + ' '.repeat(spasiBagianKanan);
+    }
+    
+    // Fungsi untuk membuat baris dengan rata kanan-kiri
+    function barisRataKananKiri(kiri, kanan, lebar = LEBAR_STRUK) {
+        const sisaSpasi = lebar - (kiri.length + kanan.length);
+        return kiri + ' '.repeat(sisaSpasi) + kanan;
+    }
+    
+    // Fungsi untuk memotong teks agar sesuai lebar
+    function potongTeks(teks, panjang) {
+        return teks.length > panjang 
+            ? teks.substring(0, panjang - 3) + '...' 
+            : teks.padEnd(panjang);
+    }
+    
+    // Ambil data transaksi dari localStorage
+    let transaksi = JSON.parse(localStorage.getItem('transaksi')) || [];
+    const transaksiTerpilih = transaksi.filter(item => item.id === transactionId);
+    
+    if (transaksiTerpilih.length === 0) {
+        return `Transaksi dengan ID ${transactionId} tidak ditemukan.`;
+    }
+    
+    // Kelompokkan item berdasarkan kode barang untuk menghindari duplikasi
+    const uniqueItems = new Map();
+    let totalTransaksi = 0;
+    
+    transaksiTerpilih.forEach(item => {
+        const key = item.kodeBarang;
+        if (uniqueItems.has(key)) {
+            const existingItem = uniqueItems.get(key);
+            existingItem.jumlah += item.jumlah;
+            existingItem.total += item.total;
+        } else {
+            uniqueItems.set(key, {
+                namaBarang: item.namaBarang,
+                jumlah: item.jumlah,
+                total: item.total
+            });
+        }
+        totalTransaksi += item.total;
+    });
+    
+    // Mulai membuat konten struk
+    let struk = [];
+    
+    // Header Toko
+    struk.push(pusatkanTeks(NAMA_TOKO));
+    struk.push(pusatkanTeks(ALAMAT_TOKO));
+    struk.push(garisPemisah('='));
+    
+    // Informasi Transaksi
+    const waktuTransaksi = new Date(transaksiTerpilih[0].tanggal).toLocaleString('id-ID', {
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit'
+    });
+    
+    struk.push(barisRataKananKiri('ID Transaksi:', transactionId));
+    struk.push(barisRataKananKiri('Tanggal:', waktuTransaksi));
+    
+    // Tambahkan informasi Member jika ada
+    if (transaksiTerpilih[0].memberId) {
+        const members = JSON.parse(localStorage.getItem('members')) || [];
+        const member = members.find(m => m.id === transaksiTerpilih[0].memberId);
+        
+        if (member) {
+            struk.push(barisRataKananKiri('Member:', member.nama));
+            struk.push(barisRataKananKiri('ID Member:', member.id));
+        }
+    }
+    
+    // Tambahkan teks "CETAK ULANG" untuk menandai ini adalah struk cetak ulang
+    struk.push(garisPemisah('-'));
+    struk.push(pusatkanTeks('*** CETAK ULANG ***'));
+    struk.push(garisPemisah('='));
+    
+    // Header Kolom
+    struk.push(
+        potongTeks('Nama Barang', 20).padEnd(20) + 
+        potongTeks('Qty', 6).padEnd(6) + 
+        potongTeks('Harga', 16)
+    );
+    struk.push(garisPemisah());
+    
+    // Item Transaksi
+    uniqueItems.forEach((item) => {
+        const namaBarang = potongTeks(item.namaBarang, 20);
+        const qty = potongTeks(item.jumlah.toString(), 6);
+        const harga = potongTeks(formatRupiah(item.total), 16);
+        
+        struk.push(
+            namaBarang.padEnd(20) + 
+            qty.padEnd(6) + 
+            harga
+        );
+    });
+    
+    // Footer Transaksi
+    struk.push(garisPemisah());
+    struk.push(barisRataKananKiri('Total:', formatRupiah(totalTransaksi)));
+    struk.push(barisRataKananKiri('Metode Bayar:', transaksiTerpilih[0].metode.toUpperCase()));
+    struk.push(barisRataKananKiri('Nominal:', formatRupiah(transaksiTerpilih[0].nominal || totalTransaksi)));
+    struk.push(barisRataKananKiri('Kembalian:', formatRupiah(transaksiTerpilih[0].kembalian || 0)));
+    
+    // Tambahkan informasi poin jika transaksi menggunakan member
+    if (transaksiTerpilih[0].memberId && transaksiTerpilih[0].poin > 0) {
+        struk.push(garisPemisah('-'));
+        struk.push(barisRataKananKiri('Poin Didapat:', `+${transaksiTerpilih[0].poin} poin`));
+        
+        // Cari total poin member saat ini
+        const members = JSON.parse(localStorage.getItem('members')) || [];
+        const member = members.find(m => m.id === transaksiTerpilih[0].memberId);
+        if (member) {
+            struk.push(barisRataKananKiri('Total Poin Member:', `${member.poin} poin`));
+        }
+    }
+    
+    struk.push(garisPemisah('='));
+    
+    // Penutup
+    struk.push(pusatkanTeks('Terima Kasih'));
+    struk.push(pusatkanTeks('Barang yang sudah dibeli'));
+    struk.push(pusatkanTeks('tidak dapat dikembalikan'));
+    struk.push('');
+    struk.push(pusatkanTeks('*** CETAK ULANG ***'));
+    
+    // Gabungkan array menjadi teks
+    return struk.join('\n');
+}
+
+// Fungsi untuk helper format tanggal
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
+
+// Fungsi untuk menambahkan CSS untuk tampilan popup cetak ulang
+function addReprintStyles() {
+    // Hapus style yang mungkin sudah ada sebelumnya untuk menghindari duplikasi
+    const existingStyle = document.getElementById('reprint-styles');
+    if (existingStyle) {
+        existingStyle.remove();
+    }
+    
+    // Buat elemen style baru
+    const style = document.createElement('style');
+    style.id = 'reprint-styles';
+    style.textContent = `
+        .reprint-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 100%;
+            color: #333;
+        }
+        
+        .date-filter-section {
+            margin-bottom: 20px;
+            background-color: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .date-range {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .date-input-group {
+            flex: 1;
+        }
+        
+        .date-input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        
+        .date-input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .date-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        
+        .filter-btn {
+            padding: 10px 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .filter-btn:hover {
+            background-color: #2563eb;
+        }
+        
+        .quick-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background-color: white;
+            color: #4b5563;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-filter-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .quick-filter-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .transaction-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .header-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .select-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 12px 10px 35px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+        
+        .transaction-list-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .transaction-list {
+            padding: 10px;
+        }
+        
+        .transaction-item {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        
+        .transaction-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .transaction-info {
+            display: flex;
+            padding: 15px;
+            cursor: pointer;
+            background-color: #f9fafb;
+        }
+        
+        .transaction-checkbox {
+            padding: 15px 15px 0 15px;
+        }
+        
+        .transaction-main {
+            flex: 1;
+        }
+        
+        .transaction-id-date {
+            margin-bottom: 8px;
+        }
+        
+        .transaction-id {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 4px;
+        }
+        
+        .transaction-date {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .transaction-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .transaction-method {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .transaction-method.cash {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .transaction-method.qris {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .transaction-member, .transaction-items-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .transaction-total {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 15px;
+            min-width: 150px;
+            text-align: right;
+        }
+        
+        .total-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .total-amount {
+            font-weight: 600;
+            color: #111827;
+            font-size: 16px;
+        }
+        
+        .transaction-details {
+            padding: 15px;
+            border-top: 1px dashed #e5e7eb;
+            background-color: white;
+        }
+        
+        .details-header {
+            margin-bottom: 10px;
+        }
+        
+        .details-header h4 {
+            font-size: 14px;
+            color: #4b5563;
+            margin: 0;
+        }
+        
+        .items-list-ul {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+        }
+        
+        .item-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .item-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .item-name {
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        .item-quantity {
+            width: 50px;
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .item-total {
+            width: 100px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .details-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .action-btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .preview-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+        
+        .preview-btn:hover {
+            background-color: #e5e7eb;
+        }
+        
+        .print-single-btn {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .print-single-btn:hover {
+            background-color: #2563eb;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .print-btn {
+            padding: 12px 20px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .print-btn:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .print-btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .loading-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            color: #6b7280;
+        }
+        
+        .loading-indicator i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+        
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+        
+        /* Styles untuk preview struk */
+        .struk-preview-container {
+            max-height: 60vh;
+            overflow-y: auto;
+            margin: 0 auto;
+            background-color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .struk-preview-content {
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* Sweetalert customization */
+        .struk-preview-popup {
+            max-width: 90vw !important;
+        }
+        
+        .struk-preview-swal-content {
+            max-width: 100% !important;
+        }
+        
+        /* Scrollbar styling */
+        .transaction-list-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .transaction-list-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .transaction-list-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        .transaction-list-container::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .date-range {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .transaction-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .search-container {
+                width: 100%;
+            }
+            
+            .transaction-info {
+                flex-direction: column;
+            }
+            
+            .transaction-total {
+                text-align: left;
+                padding: 10px 15px;
+                min-width: auto;
+            }
+        }
+    `;
+    
+    document.head.appendChild(style);
+}
+
+// Integrasi dengan UI
+document.addEventListener('DOMContentLoaded', function() {
+    // Tambahkan tombol cetak ulang struk ke menu atau toolbar
+    const toolbar = document.querySelector('.toolbar') || document.querySelector('.actions-container');
+    
+    if (toolbar) {
+        const cetakUlangButton = document.createElement('button');
+        cetakUlangButton.className = 'action-button reprint-button';
+        cetakUlangButton.innerHTML = '<i class="fas fa-history"></i> Cetak Ulang Struk';
+        cetakUlangButton.onclick = cetakUlangStruk;
+        
+        toolbar.appendChild(cetakUlangButton);
+    } else {
+        // Alternatif jika tidak menemukan toolbar, tambahkan ke elemen lain yang sesuai
+        const container = document.querySelector('.main-content') || document.body;
+        
+        if (container) {
+            const cetakUlangButton = document.createElement('button');
+            cetakUlangButton.className = 'floating-action-button';
+            cetakUlangButton.innerHTML = '<i class="fas fa-history"></i>';
+            cetakUlangButton.title = 'Cetak Ulang Struk';
+            cetakUlangButton.onclick = cetakUlangStruk;
+            
+            // Styling untuk tombol floating
+            cetakUlangButton.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background-color: #3b82f6;
+                color: white;
+                border: none;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                cursor: pointer;
+                z-index: 1000;
+                transition: all 0.3s ease;
+            `;
+            
+            // Hover effect
+            cetakUlangButton.onmouseover = function() {
+                this.style.transform = 'scale(1.1)';
+            };
+            
+            cetakUlangButton.onmouseout = function() {
+                this.style.transform = 'scale(1)';
+            };
+            
+            container.appendChild(cetakUlangButton);
+        }
+    }
+});
+
+// Fungsi utilitas untuk memformat Rupiah
+function formatRupiah(angka) {
+    // Helper untuk memastikan angka valid
+    if (isNaN(angka) || angka === null || angka === undefined) {
+        angka = 0;
+    }
+    
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(angka);
+}
