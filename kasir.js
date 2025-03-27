@@ -1629,26 +1629,13 @@ function simpanTransaksi(metode, total, kembalian, idTransaksi, keranjang, membe
         if (!Array.isArray(transaksiMetode)) transaksiMetode = [];
     } catch (error) {
         console.error("Error retrieving transaction data:", error);
-        // Initialize as empty arrays if there was an error
         transaksi = [];
         transaksiMetode = [];
     }
 
-    // Current timestamp formatted with complete date and time
+    // Ambil tanggal saja tanpa waktu (YYYY-MM-DD)
     const now = new Date();
-    
-    // Format tanggal dengan jam lengkap (YYYY-MM-DD HH:MM:SS)
-    const tanggal = `${now.getFullYear()}-${
-        String(now.getMonth() + 1).padStart(2, '0')
-    }-${
-        String(now.getDate()).padStart(2, '0')
-    } ${
-        String(now.getHours()).padStart(2, '0')
-    }:${
-        String(now.getMinutes()).padStart(2, '0')
-    }:${
-        String(now.getSeconds()).padStart(2, '0')
-    }`;
+    const tanggal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     
     // Prepare new transaction entries
     const newTransaksiEntries = [];
@@ -1660,17 +1647,16 @@ function simpanTransaksi(metode, total, kembalian, idTransaksi, keranjang, membe
             kodeBarang: item.kode,
             namaBarang: item.nama,
             jumlah: item.jumlah,
-            harga: item.harga || item.hargaJual, // Handle different property names
+            harga: item.harga || item.hargaJual,
             total: item.total,
             nominal: nominal, // Amount paid
             kembalian: kembalian,
             metode: metode,
             diskon: item.potongan || 0,
             persenDiskon: item.potongan || 0,
-            tanggal: tanggal, // Tanggal dengan format lengkap termasuk jam
+            tanggal: tanggal, // Tanggal hanya sampai YYYY-MM-DD
             memberId: memberId,
-            poin: poin, // Include the points in each transaction entry
-            timestamp: now.getTime() // Add timestamp for sorting and filtering
+            poin: poin // Include the points in each transaction entry
         };
         
         newTransaksiEntries.push(transactionEntry);
@@ -1688,14 +1674,13 @@ function simpanTransaksi(metode, total, kembalian, idTransaksi, keranjang, membe
         const methodKey = `transaksi_${metode}`;
         localStorage.setItem(methodKey, JSON.stringify(transaksiMetode));
         
-        console.log(`Transaction ${idTransaksi} saved successfully with ${poin} points at ${tanggal}`);
+        console.log(`Transaction ${idTransaksi} saved successfully with ${poin} points on ${tanggal}`);
         return true;
     } catch (error) {
         console.error("Error saving transaction:", error);
         
         // Try saving with fewer items if it fails (localStorage might be full)
         try {
-            // Keep only the most recent 100 transactions
             const recentTransaksi = transaksi.slice(-100);
             const recentTransaksiMetode = transaksiMetode.slice(-50);
             
@@ -1710,6 +1695,7 @@ function simpanTransaksi(metode, total, kembalian, idTransaksi, keranjang, membe
         }
     }
 }
+
 function formatRupiah(angka) {
     return 'Rp. ' + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
