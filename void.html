@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html>
+<head>
+   
+    <title>Laporan Void</title>
+    <link rel="stylesheet" href="void.css">
+    <link rel="stylesheet" href="global.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --accent-color: #2980b9;
+            --warning-color: #e74c3c;
+            --success-color: #2ecc71;
+            --text-color: #333;
+            --bg-light: #f9f9f9;
+            --bg-dark: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-light);
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu {
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .menu li a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .menu li a:hover {
+            background-color: var(--accent-color);
+        }
+
+        #laporanVoid {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: var(--primary-color);
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 6px;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-item label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .filter-item input, .filter-item select {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: flex-start;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        button.primary:hover {
+            background-color: var(--accent-color);
+        }
+
+        button.secondary {
+            background-color: #f2f2f2;
+            color: var(--text-color);
+        }
+
+        button.secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        button.danger {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        button.danger:hover {
+            background-color: #c0392b;
+        }
+
+        button.success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        button.success:hover {
+            background-color: #27ae60;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+
+        .pagination button {
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .chart-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* CSS untuk spinner */
+        .spinner {
+            display: none;
+            border: 8px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 8px solid var(--primary-color);
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10001;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+        }
+
+        @media screen and (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .filter-item {
+                min-width: 100%;
+            }
+            
+            .action-buttons {
+                justify-content: center;
+            }
+        }
+
+        /* Efek toast notification */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1001;
+            right: 15px;
+            bottom: 30px;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.5s linear;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .toast.success {
+            background-color: var(--success-color);
+        }
+
+        .toast.error {
+            background-color: var(--warning-color);
+        }
+
+        /* Untuk modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10002;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 70%;
+            max-width: 600px;
+            position: relative;
+            animation: modalOpen 0.3s;
+        }
+
+        @keyframes modalOpen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: var(--warning-color);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="spinner" class="spinner"></div>
+    <div id="overlay" class="overlay"></div>
+    <div id="toast" class="toast"></div>
+
+    <header class="header">
+        <input class="menu-btn" type="checkbox" id="menu-btn" />
+        <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
+        <ul class="menu">
+            <li><a href="kasir.html">KASIR</a></li>
+            <li><a href="laporan.html">LAPORAN</a></li>
+            <li><a href="void.html">VOID</a></li>
+            <li><a href="setoran.html">SETORAN</a></li>
+            <li><a href="akun.html">AKUN</a></li>
+            <li><a href="retur.html">RETUR</a></li>
+        </ul>
+    </header>
+
+    <div id="laporanVoid">
+        <h2>Laporan Void</h2>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard">
+            <div class="stat-card">
+                <h3>Total Void</h3>
+                <div id="totalVoid" class="value">0</div>
+                <div>Transaksi</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Nilai Void</h3>
+                <div id="totalNilaiVoid" class="value">Rp0</div>
+                <div>Nominal</div>
+            </div>
+            <div class="stat-card">
+                <h3>Barang Terbanyak di-Void</h3>
+                <div id="topVoidItem" class="value">-</div>
+                <div>Item</div>
+            </div>
+            <div class="stat-card">
+                <h3>Bulan Ini</h3>
+                <div id="monthlyVoid" class="value">0</div>
+                <div>Void</div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filters">
+            <div class="filter-item">
+                <label for="dateStart">Tanggal Mulai:</label>
+                <input type="date" id="dateStart" name="dateStart">
+            </div>
+            <div class="filter-item">
+                <label for="dateEnd">Tanggal Akhir:</label>
+                <input type="date" id="dateEnd" name="dateEnd">
+            </div>
+            <div class="filter-item">
+                <label for="itemFilter">Nama Barang:</label>
+                <input type="text" id="itemFilter" placeholder="Cari nama barang...">
+            </div>
+            <div class="filter-item">
+                <label for="sortBy">Urutkan:</label>
+                <select id="sortBy">
+                    <option value="date-new">Tanggal (Terbaru)</option>
+                    <option value="date-old">Tanggal (Terlama)</option>
+                    <option value="name-asc">Nama Barang (A-Z)</option>
+                    <option value="name-desc">Nama Barang (Z-A)</option>
+                    <option value="price-high">Harga (Tertinggi)</option>
+                    <option value="price-low">Harga (Terendah)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button onclick="applyFilters()" class="primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                </svg>
+                Filter
+            </button>
+            <button onclick="resetFilters()" class="secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/>
+                    <path d="M17 12H3"/>
+                    <path d="m22 12-3-3"/>
+                    <path d="m22 12-3 3"/>
+                </svg>
+                Reset
+            </button>
+            <button onclick="exportToExcel()" class="success">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <path d="M12 18v-6"/>
+                    <path d="m9 15 3 3 3-3"/>
+                </svg>
+                Unduh Excel
+            </button>
+            <button onclick="exportToPDF()" class="success">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                Unduh PDF
+            </button>
+            <button onclick="printReport()" class="secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9V2h12v7"/>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                    <path d="M6 14h12v8H6z"/>
+                </svg>
+                Cetak
+            </button>
+            <button onclick="openVoidDetailModal()" class="primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="16"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                Detail
+            </button>
+        </div>
+
+        <!-- Table Container with Pagination -->
+        <div class="table-container">
+            <table id="tabelVoid">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Kode Void</th>
+                        <th>Nama Barang</th>
+                        <th>Jumlah</th>
+                        <th>Harga</th>
+                        <th>Total</th>
+                        <th>Tanggal</th>
+                        <th>Alasan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelVoidBody">
+                    <!-- Data akan diisi oleh JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination">
+            <!-- Pagination buttons will be added here -->
+        </div>
+
+        <!-- Chart Container -->
+        <div class="chart-container">
+            <h3>Tren Void per Bulan</h3>
+            <canvas id="voidChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeVoidDetailModal()">&times;</span>
+            <div class="modal-header">
+                <h3>Detail Laporan Void</h3>
+            </div>
+            <div id="modalContent">
+                <!-- Detail content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeVoidDetailModal()" class="secondary">Tutup</button>
+            </div>
+        </div>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        // Data pagination
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let filteredData = [];
+        let sortConfig = 'date-new';
+        
+        // Check login status
+        function checkLogin() {
+            const loggedIn = localStorage.getItem('loggedIn');
+            const username = localStorage.getItem('username');
+
+            if (loggedIn !== 'true') {
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Fungsi logout
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('username');
+            localStorage.setItem('loginAttempts', JSON.stringify({})); 
+            window.location.href = 'login.html';
+        }
+
+        // Set tanggal default untuk filter
+        function setDefaultDates() {
+            const today = new Date();
+            
+            // Atur tanggal awal ke tanggal pertama bulan ini
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            document.getElementById('dateStart').valueAsDate = firstDay;
+            
+            // Atur tanggal akhir ke tanggal hari ini
+            document.getElementById('dateEnd').valueAsDate = today;
+        }
+
+        // Load data void reports dan update dashboard
+        function loadVoidReports() {
+            const voids = JSON.parse(localStorage.getItem('voids')) || [];
+            filteredData = [...voids]; // Salin data asli ke filter data
+            
+            updateDashboard(voids);
+            renderTable();
+            setupPagination();
+            renderVoidChart(voids);
+        }
+
+        // Update dashboard metrics
+        function updateDashboard(data) {
+            // Total void transactions
+            document.getElementById('totalVoid').textContent = data.length;
+            
+            // Total void value
+            const totalValue = data.reduce((sum, item) => sum + parseFloat(item.total || 0), 0);
+            document.getElementById('totalNilaiVoid').textContent = formatRupiah(totalValue);
+            
+            // Most voided item
+            const itemCounts = {};
+            data.forEach(item => {
+                itemCounts[item.namaBarang] = (itemCounts[item.namaBarang] || 0) + 1;
+            });
+            
+            let mostVoidedItem = '-';
+            let maxCount = 0;
+            
+            for (const [item, count] of Object.entries(itemCounts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    mostVoidedItem = item;
+                }
+            }
+            
+            document.getElementById('topVoidItem').textContent = mostVoidedItem;
+            
+            // This month's voids
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            
+            const thisMonthVoids = data.filter(item => {
+                const itemDate = new Date(item.tanggal);
+                return itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear;
+            });
+            
+            document.getElementById('monthlyVoid').textContent = thisMonthVoids.length;
+        }
+
+        // Apply filters and sort
+        function applyFilters() {
+            showSpinner();
+            setTimeout(() => {
+                const dateStart = document.getElementById('dateStart').value;
+                const dateEnd = document.getElementById('dateEnd').value;
+                const itemFilter = document.getElementById('itemFilter').value.toLowerCase();
+                sortConfig = document.getElementById('sortBy').value;
+                
+                // Get original data
+                const voids = JSON.parse(localStorage.getItem('voids')) || [];
+                
+                // Apply filters
+                filteredData = voids.filter(item => {
+                    const itemDate = new Date(item.tanggal);
+                    const startDate = dateStart ? new Date(dateStart) : null;
+                    const endDate = dateEnd ? new Date(dateEnd) : null;
+                    
+                    // Check date range
+                    if (startDate && itemDate < startDate) return false;
+                    if (endDate) {
+                        // Set endDate to end of day
+                        endDate.setHours(23, 59, 59, 999);
+                        if (itemDate > endDate) return false;
+                    }
+                    
+                    // Check item name
+                    if (itemFilter && !item.namaBarang.toLowerCase().includes(itemFilter)) return false;
+                    
+                    return true;
+                });
+                
+                // Apply sorting
+                sortData();
+                
+                // Reset to first page
+                currentPage = 1;
+                
+                // Update the table and pagination
+                renderTable();
+                setupPagination();
+                
+                // Show toast notification
+                showToast(`${filteredData.length} data ditemukan`, 'success');
+                
+                hideSpinner();
+            }, 500);
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('itemFilter').value = '';
+            setDefaultDates();
+            document.getElementById('sortBy').value = 'date-new';
+            sortConfig = 'date-new';
+            
+            // Reset to original data
+            const voids = JSON.parse(localStorage.getItem('voids')) || [];
+            filteredData = [...voids];
+            
+            // Reset to first page
+            currentPage = 1;
+            
+            // Update the table and pagination
+            renderTable();
+            setupPagination();
+            
+            showToast('Filter telah direset', 'success');
+        }
+
+        // Sort data based on selected option
+        function sortData() {
+            switch(sortConfig) {
+                case 'date-new':
+                    filteredData.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                    break;
+                case 'date-old':
+                    filteredData.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+                    break;
+                case 'name-asc':
+                    filteredData.sort((a, b) => a.namaBarang.localeCompare(b.namaBarang));
+                    break;
+                case 'name-desc':
+                    filteredData.sort((a, b) => b.namaBarang.localeCompare(a.namaBarang));
+                    break;
+                case 'price-high':
+                    filteredData.sort((a, b) => parseFloat(b.harga) - parseFloat(a.harga));
+                    break;
+                case 'price-low':
+                    filteredData.sort((a, b) => parseFloat(a.harga) - parseFloat(b.harga));
+                    break;
+            }
+        }
+
+        // Render table with current page data
+        function renderTable() {
+            const tabelVoidBody = document.getElementById('tabelVoidBody');
+            tabelVoidBody.innerHTML = '';
+            
+            // Calculate the slice of data for the current page
+            const startIdx = (currentPage - 1) * rowsPerPage;
+            const endIdx = startIdx + rowsPerPage;
+            const pageData = filteredData.slice(startIdx, endIdx);
+            
+            if (pageData.length === 0) {
+                const row = tabelVoidBody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 9;
+                cell.style.textAlign = 'center';
+                cell.innerHTML = 'Tidak ada data yang ditemukan';
+                return;
+            }
+            
+            pageData.forEach((report, index) => {
+                const row = tabelVoidBody.insertRow();
+                
+                row.insertCell(0).innerText = startIdx + index + 1; // Row number
+                row.insertCell(1).innerText = report.kodeVoid || '-';
+                row.insertCell(2).innerText = report.namaBarang || '-';
+                row.insertCell(3).innerText = report.jumlah || '0';
+                row.insertCell(4).innerText = formatRupiah(report.harga) || 'Rp0';
+                row.insertCell(5).innerText = formatRupiah(report.total) || 'Rp0';
+                row.insertCell(6).innerText = formatDate(report.tanggal) || '-';
+                row.insertCell(7).innerText = report.alasan || 'Tidak ada alasan';
+                
+                // Action buttons cell
+                const actionsCell = row.insertCell(8);
+                actionsCell.innerHTML = `
+                    <button onclick="viewDetail('${report.kodeVoid}')" class="primary" style="padding: 5px 10px; font-size: 12px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                `;
+            });
+        }
+
+        // Setup pagination
+        function setupPagination() {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            // Don't show pagination if no data or only one page
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.innerText = '←';
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                    updatePaginationButtons();
+                }
+            };
+            pagination.appendChild(prevBtn);
+            
+            // Page number buttons
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            // Adjust start page if we're near the end
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            // Continuation of setupPagination function
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.innerText = i;
+                pageBtn.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+                    updatePaginationButtons();
+                };
+                
+                if (i === currentPage) {
+                    pageBtn.classList.add('active');
+                }
+                
+                pagination.appendChild(pageBtn);
+            }
+            
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.innerText = '→';
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                    updatePaginationButtons();
+                }
+            };
+            pagination.appendChild(nextBtn);
+        }
+
+        // Update pagination button states
+        function updatePaginationButtons() {
+            const buttons = document.querySelectorAll('.pagination button');
+            
+            buttons.forEach((button, index) => {
+                // Skip first (prev) and last (next) buttons
+                if (index === 0 || index === buttons.length - 1) return;
+                
+                const pageNum = parseInt(button.innerText);
+                if (pageNum === currentPage) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            
+            try {
+                return new Date(dateString).toLocaleDateString('id-ID', options);
+            } catch (error) {
+                return dateString;
+            }
+        }
+
+        // Format currency
+        function formatRupiah(angka) {
+            if (angka === undefined || angka === null) return 'Rp0';
+            
+            const numberString = angka.toString().replace(/[^,\d]/g, '');
+            const split = numberString.split(',');
+            const sisa = split[0].length % 3;
+            let rupiah = split[0].substr(0, sisa);
+            const ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                const separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] !== undefined ? rupiah + ',' + split[1] : rupiah;
+            return 'Rp' + rupiah;
+        }
+
+        // Show spinner during processing
+        function showSpinner() {
+            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Disable scrolling
+        }
+
+        // Hide spinner after processing
+        function hideSpinner() {
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Enable scrolling
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast'; // Reset classes
+            
+            // Add type class
+            toast.classList.add(type);
+            
+            // Show the toast
+            toast.classList.add('show');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+     function exportToExcel() {
+    showSpinner();
+    setTimeout(() => {
+        try {
+            // Prepare data for export
+            const headers = [
+                'No',
+                'Kode Void',
+                'Nama Barang',
+                'Jumlah',
+                'Harga',
+                'Total',
+                'Tanggal',
+                'Alasan'
+            ];
+            
+            const dataForExport = filteredData.map((item, index) => [
+                index + 1,
+                item.kodeVoid || '-',
+                item.namaBarang || '-',
+                item.jumlah || '0',
+                parseFloat(item.harga || 0),
+                parseFloat(item.total || 0),
+                formatDate(item.tanggal),
+                item.alasan || 'Tidak ada alasan'
+            ]);
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...dataForExport]);
+            
+            // Format currency columns (harga, total)
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let C = 4; C <= 5; ++C) {
+                for (let R = 1; R <= range.e.r; ++R) {
+                    const cell = XLSX.utils.encode_cell({r: R, c: C});
+                    if (!ws[cell]) continue;
+                    ws[cell].z = 'Rp#,##0';
+                    ws[cell].t = 'n';
+                }
+            }
+            
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 5 },  // No
+                { wch: 15 }, // Kode Void
+                { wch: 30 }, // Nama Barang
+                { wch: 10 }, // Jumlah
+                { wch: 15 }, // Harga
+                { wch: 15 }, // Total
+                { wch: 25 }, // Tanggal
+                { wch: 30 }  // Alasan
+            ];
+            
+            // Get current date for filename
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+            
+            // Create workbook and add the worksheet
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Void");
+            
+            // Generate Excel file as binary data
+            const excelData = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+            
+            // Convert binary string to array buffer
+            const buffer = new ArrayBuffer(excelData.length);
+            const view = new Uint8Array(buffer);
+            for (let i = 0; i < excelData.length; i++) {
+                view[i] = excelData.charCodeAt(i) & 0xFF;
+            }
+            
+            // Create blob from array buffer
+            const excelBlob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+            // Create ZIP file with JSZip
+            const zip = new JSZip();
+            
+            // Add Excel file to ZIP
+            const excelFileName = `Laporan_Void_${dateStr}.xlsx`;
+            zip.file(excelFileName, excelBlob);
+            
+            // Generate ZIP file
+            zip.generateAsync({ type: 'blob' }).then(function(zipBlob) {
+                // Create download link
+                const zipFileName = `Laporan_Void_${dateStr}.zip`;
+                const url = URL.createObjectURL(zipBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = zipFileName;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                setTimeout(function() {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 0);
+                
+                showToast('Laporan berhasil diunduh sebagai ZIP', 'success');
+            }).catch(function(error) {
+                console.error('ZIP creation error:', error);
+                showToast('Gagal membuat file ZIP', 'error');
+            });
+        } catch (error) {
+            console.error('Export error:', error);
+            showToast('Gagal mengunduh laporan', 'error');
+        }
+        
+        hideSpinner();
+    }, 800);
+}
+
+        // Export to PDF function
+        function exportToPDF() {
+            showSpinner();
+            setTimeout(() => {
+                try {
+                    // Get company info (this could be fetched from settings)
+                    const companyName = localStorage.getItem('companyName') || 'Nama Toko';
+                    const companyAddress = localStorage.getItem('companyAddress') || 'Alamat Toko';
+                    
+                    // Create PDF document
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('landscape');
+                    
+                    // Add header
+                    doc.setFontSize(18);
+                    doc.text(companyName, 14, 15);
+                    doc.setFontSize(10);
+                    doc.text(companyAddress, 14, 20);
+                    
+                    doc.setFontSize(14);
+                    doc.text('Laporan Void', 14, 30);
+                    
+                    // Add date range if filters are applied
+                    const dateStart = document.getElementById('dateStart').value;
+                    const dateEnd = document.getElementById('dateEnd').value;
+                    
+                    if (dateStart && dateEnd) {
+                        doc.setFontSize(10);
+                        doc.text(`Periode: ${formatDate(dateStart)} - ${formatDate(dateEnd)}`, 14, 35);
+                    }
+                    
+                    // Prepare table data
+                    const tableColumn = [
+                        'No', 
+                        'Kode Void', 
+                        'Nama Barang', 
+                        'Jumlah', 
+                        'Harga', 
+                        'Total', 
+                        'Tanggal', 
+                        'Alasan'
+                    ];
+                    
+                    const tableRows = filteredData.map((item, index) => [
+                        index + 1,
+                        item.kodeVoid || '-',
+                        item.namaBarang || '-',
+                        item.jumlah || '0',
+                        formatRupiah(item.harga),
+                        formatRupiah(item.total),
+                        formatDate(item.tanggal),
+                        item.alasan || 'Tidak ada alasan'
+                    ]);
+                    
+                    // Generate table
+                    doc.autoTable({
+                        head: [tableColumn],
+                        body: tableRows,
+                        startY: 40,
+                        styles: {
+                            fontSize: 8,
+                            cellPadding: 2,
+                            lineWidth: 0.1,
+                        },
+                        headStyles: {
+                            fillColor: [52, 152, 219], // primary-color
+                            textColor: 255,
+                            fontStyle: 'bold',
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 10 },      // No
+                            1: { cellWidth: 25 },     // Kode Void
+                            2: { cellWidth: 50 },     // Nama Barang
+                            3: { cellWidth: 15 },     // Jumlah
+                            4: { cellWidth: 25 },     // Harga
+                            5: { cellWidth: 25 },     // Total
+                            6: { cellWidth: 35 },     // Tanggal
+                            7: { cellWidth: 45 }      // Alasan
+                        },
+                    });
+                    
+                    // Add summary
+                    const finalY = doc.lastAutoTable.finalY || 40;
+                    
+                    doc.setFontSize(10);
+                    doc.text(`Total Void: ${filteredData.length} transaksi`, 14, finalY + 10);
+                    
+                    const totalValue = filteredData.reduce((sum, item) => sum + parseFloat(item.total || 0), 0);
+                    doc.text(`Total Nilai Void: ${formatRupiah(totalValue)}`, 14, finalY + 15);
+                    
+                    // Add footer with date time and page number
+                    const pageCount = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        doc.setPage(i);
+                        
+                        // Footer
+                        const now = new Date();
+                        const footerStr = `Dicetak pada: ${now.toLocaleString('id-ID')}`;
+                        const pageStr = `Halaman ${i} dari ${pageCount}`;
+                        
+                        doc.setFontSize(8);
+                        doc.text(footerStr, 14, doc.internal.pageSize.height - 10);
+                        doc.text(pageStr, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+                    }
+                    
+                    // Get current date for filename
+                    const now = new Date();
+                    const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+                    
+                    // Generate filename
+                    const fileName = `Laporan_Void_${dateStr}.pdf`;
+                    
+                    // Save PDF
+                    doc.save(fileName);
+                    
+                    showToast('PDF berhasil diunduh', 'success');
+                } catch (error) {
+                    console.error('PDF export error:', error);
+                    showToast('Gagal mengunduh PDF', 'error');
+                }
+                
+                hideSpinner();
+            }, 800);
+        }
+
+        // Print report function
+        function printReport() {
+            showSpinner();
+            
+            setTimeout(() => {
+                try {
+                    // Create a printable version
+                    const printContent = document.createElement('div');
+                    printContent.innerHTML = `
+                        <style>
+                            body {
+                                font-family: 'Segoe UI', Tahoma, sans-serif;
+                                margin: 0;
+                                padding: 20px;
+                            }
+                            h2 {
+                                text-align: center;
+                                margin-bottom: 20px;
+                            }
+                            table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin-bottom: 20px;
+                            }
+                            th, td {
+                                border: 1px solid #ddd;
+                                padding: 8px;
+                                text-align: left;
+                            }
+                            th {
+                                background-color: #f2f2f2;
+                            }
+                            .summary {
+                                margin-top: 20px;
+                            }
+                            .footer {
+                                margin-top: 30px;
+                                font-size: 0.8em;
+                                color: #666;
+                                text-align: right;
+                            }
+                            @media print {
+                                button { 
+                                    display: none; 
+                                }
+                            }
+                        </style>
+                        <div>
+                            <h2>Laporan Void</h2>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Kode Void</th>
+                                        <th>Nama Barang</th>
+                                        <th>Jumlah</th>
+                                        <th>Harga</th>
+                                        <th>Total</th>
+                                        <th>Tanggal</th>
+                                        <th>Alasan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${filteredData.map((item, index) => `
+                                        <tr>
+                                            <td>${index + 1}</td>
+                                            <td>${item.kodeVoid || '-'}</td>
+                                            <td>${item.namaBarang || '-'}</td>
+                                            <td>${item.jumlah || '0'}</td>
+                                            <td>${formatRupiah(item.harga)}</td>
+                                            <td>${formatRupiah(item.total)}</td>
+                                            <td>${formatDate(item.tanggal)}</td>
+                                            <td>${item.alasan || 'Tidak ada alasan'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                            
+                            <div class="summary">
+                                <p>Total Void: ${filteredData.length} transaksi</p>
+                                <p>Total Nilai Void: ${formatRupiah(filteredData.reduce((sum, item) => sum + parseFloat(item.total || 0), 0))}</p>
+                            </div>
+                            
+                            <div class="footer">
+                                <p>Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Create a new window for printing
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(printContent.innerHTML);
+                    printWindow.document.close();
+                    
+                    // Wait for resources to load
+                    printWindow.onload = function() {
+                        printWindow.print();
+                        //printWindow.close();
+                    };
+                    
+                    showToast('Membuka jendela cetak', 'success');
+                } catch (error) {
+                    console.error('Print error:', error);
+                    showToast('Gagal mencetak laporan', 'error');
+                }
+                
+                hideSpinner();
+            }, 800);
+        }
+
+        // View detail function
+        // Fixed viewDetail function to handle users.find error
+function viewDetail(kodeVoid) {
+    showSpinner();
+    
+    setTimeout(() => {
+        try {
+            const voids = JSON.parse(localStorage.getItem('voids')) || [];
+            const voidItem = voids.find(item => item.kodeVoid === kodeVoid);
+            
+            if (!voidItem) {
+                showToast('Data void tidak ditemukan', 'error');
+                hideSpinner();
+                return;
+            }
+            
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: 150px auto; gap: 10px; margin-bottom: 15px;">
+                        <div><strong>Kode Void:</strong></div>
+                        <div>${voidItem.kodeVoid || '-'}</div>
+                        
+                        <div><strong>Nama Barang:</strong></div>
+                        <div>${voidItem.namaBarang || '-'}</div>
+                        
+                        <div><strong>Jumlah:</strong></div>
+                        <div>${voidItem.jumlah || '0'}</div>
+                        
+                        <div><strong>Harga:</strong></div>
+                        <div>${formatRupiah(voidItem.harga)}</div>
+                        
+                        <div><strong>Total:</strong></div>
+                        <div>${formatRupiah(voidItem.total)}</div>
+                        
+                        <div><strong>Tanggal:</strong></div>
+                        <div>${formatDate(voidItem.tanggal)}</div>
+                        
+                        <div><strong>Kasir:</strong></div>
+                        <div>${voidItem.kasir || '-'}</div>
+                    </div>
+                    
+                    <div>
+                        <strong>Alasan Void:</strong>
+                        <p style="padding: 10px; background-color: #f9f9f9; border-radius: 4px; margin-top: 5px;">
+                            ${voidItem.alasan || 'Tidak ada alasan yang diberikan'}
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            // Show modal
+            document.getElementById('detailModal').style.display = 'block';
+        } catch (error) {
+            console.error('Error showing detail:', error);
+            showToast('Gagal menampilkan detail: ' + error.message, 'error');
+        }
+        
+        hideSpinner();
+    }, 500);
+}
+
+        // Close detail modal
+        function closeVoidDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // Open void detail modal (summary)
+        function openVoidDetailModal() {
+            showSpinner();
+            
+            setTimeout(() => {
+                try {
+                    // Group by month
+                    const monthlyData = {};
+                    
+                    filteredData.forEach(item => {
+                        const date = new Date(item.tanggal);
+                        const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                        
+                        if (!monthlyData[monthKey]) {
+                            monthlyData[monthKey] = {
+                                count: 0,
+                                total: 0,
+                                items: {}
+                            };
+                        }
+                        
+                        monthlyData[monthKey].count++;
+                        monthlyData[monthKey].total += parseFloat(item.total || 0);
+                        
+                        // Count by item
+                        if (!monthlyData[monthKey].items[item.namaBarang]) {
+                            monthlyData[monthKey].items[item.namaBarang] = {
+                                count: 0,
+                                total: 0
+                            };
+                        }
+                        
+                        monthlyData[monthKey].items[item.namaBarang].count++;
+                        monthlyData[monthKey].items[item.namaBarang].total += parseFloat(item.total || 0);
+                    });
+                    
+                    // Create summary table
+                    let summaryHtml = `
+                        <h4>Ringkasan Bulanan</h4>
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Bulan</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Jumlah Void</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Total Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    // Sort monthly data by date
+                    const sortedMonths = Object.keys(monthlyData).sort().reverse();
+                    
+                    if (sortedMonths.length === 0) {
+                        summaryHtml += `
+                            <tr>
+                                <td colspan="3" style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                                    Tidak ada data
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        sortedMonths.forEach(month => {
+                            const data = monthlyData[month];
+                            const [year, monthNum] = month.split('-');
+                            const monthName = new Date(year, parseInt(monthNum) - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                            
+                            summaryHtml += `
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${monthName}</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${data.count} transaksi</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${formatRupiah(data.total)}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    
+                    summaryHtml += `
+                            </tbody>
+                        </table>
+                    `;
+                    
+                    // Create top voided items
+                    const itemCounts = {};
+                    filteredData.forEach(item => {
+                        if (!itemCounts[item.namaBarang]) {
+                            itemCounts[item.namaBarang] = {
+                                count: 0,
+                                total: 0
+                            };
+                        }
+                        
+                        itemCounts[item.namaBarang].count++;
+                        itemCounts[item.namaBarang].total += parseFloat(item.total || 0);
+                    });
+                    
+                    // Sort by count
+                    const sortedItems = Object.entries(itemCounts)
+                        .sort((a, b) => b[1].count - a[1].count)
+                        .slice(0, 5); // Top 5
+                    
+                    summaryHtml += `
+                        <h4>Barang Terbanyak di-Void</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Nama Barang</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Jumlah Void</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Total Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    if (sortedItems.length === 0) {
+                        summaryHtml += `
+                            <tr>
+                                <td colspan="3" style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                                    Tidak ada data
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        sortedItems.forEach(([itemName, data]) => {
+                            summaryHtml += `
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${itemName}</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${data.count} kali</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${formatRupiah(data.total)}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    
+                    summaryHtml += `
+                            </tbody>
+                        </table>
+                    `;
+                    
+                    // Set modal content
+                    const modalContent = document.getElementById('modalContent');
+                    modalContent.innerHTML = summaryHtml;
+                    
+                    // Show modal
+                    document.getElementById('detailModal').style.display = 'block';
+                } catch (error) {
+                    console.error('Error showing summary:', error);
+                    showToast('Gagal menampilkan ringkasan', 'error');
+                }
+                
+                hideSpinner();
+            }, 500);
+        }
+
+        // Render chart
+        function renderVoidChart(data) {
+            // Group by month
+            const monthlyData = {};
+            
+            data.forEach(item => {
+                try {
+                    const date = new Date(item.tanggal);
+                    const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                    
+                    if (!monthlyData[monthKey]) {
+                        monthlyData[monthKey] = {
+                            count: 0,
+                            total: 0
+                        };
+                    }
+                    
+                    monthlyData[monthKey].count++;
+                    monthlyData[monthKey].total += parseFloat(item.total || 0);
+                } catch (error) {
+                    console.error('Error processing date:', item.tanggal, error);
+                }
+            });
+            
+            // Sort by date
+            const sortedMonths = Object.keys(monthlyData).sort();
+            
+            // Format for chart labels
+            const months = sortedMonths.map(month => {
+                const [year, monthNum] = month.split('-');
+                return new Date(year, parseInt(monthNum) - 1, 1).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+            });
+            
+            // Prepare counts and amounts for datasets
+            const voidCounts = sortedMonths.map(month => monthlyData[month].count);
+            const voidAmounts = sortedMonths.map(month => monthlyData[month].total);
+            
+            // Get chart canvas
+            const ctx = document.getElementById('voidChart').getContext('2d');
+            
+            // Create chart
+            if (window.voidChartInstance) {
+                window.voidChartInstance.destroy();
+            }
+            
+            window.voidChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Jumlah Void',
+                            data: voidCounts,
+                            backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Total Nilai (Rp)',
+                            data: voidAmounts,
+                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 1,
+                            type: 'line',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Tren Void per Bulan'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.label === 'Total Nilai (Rp)') {
+                                        return `${context.dataset.label}: ${formatRupiah(context.raw)}`;
+                                    }
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Bulan'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Jumlah Void'
+                            },
+                            beginAtZero: true
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Total Nilai (Rp)'
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            // Continuation of renderVoidChart function (last part of the chart options)
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp' + value.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize data when document is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check login
+            checkLogin();
+            
+            // Set default dates
+            setDefaultDates();
+            
+            // Load data
+            loadVoidReports();
+            
+            // Setup event listeners for filter inputs
+            document.getElementById('dateStart').addEventListener('change', () => {
+                // Update dateEnd min attribute to prevent selecting dates before dateStart
+                const dateStart = document.getElementById('dateStart').value;
+                if (dateStart) {
+                    document.getElementById('dateEnd').min = dateStart;
+                }
+            });
+            
+            document.getElementById('dateEnd').addEventListener('change', () => {
+                // Update dateStart max attribute to prevent selecting dates after dateEnd
+                const dateEnd = document.getElementById('dateEnd').value;
+                if (dateEnd) {
+                    document.getElementById('dateStart').max = dateEnd;
+                }
+            });
+            
+            // Add event listener for itemFilter - real-time search as you type
+            document.getElementById('itemFilter').addEventListener('input', debounce(() => {
+                applyFilters();
+            }, 500));
+            
+            // Add event listener for sortBy
+            document.getElementById('sortBy').addEventListener('change', () => {
+                applyFilters();
+            });
+            
+            // Close modal when clicking outside of it
+            window.onclick = function(event) {
+                const modal = document.getElementById('detailModal');
+                if (event.target === modal) {
+                    closeVoidDetailModal();
+                }
+            };
+        });
+
+        // Debounce function to prevent too many filter calls
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(context, args);
+                }, wait);
+            };
+        }
+
+        // Initialize sample data if needed (for development/testing only)
+        function initializeSampleData() {
+            // Check if sample data already exists
+            if (localStorage.getItem('voids') !== null) {
+                return;
+            }
+            
+            // Sample data for testing
+            const sampleVoids = [
+                {
+                    kodeVoid: 'V-001',
+                    namaBarang: 'Beras Premium',
+                    jumlah: 2,
+                    harga: 15000,
+                    total: 30000,
+                    tanggal: '2023-03-15T10:30:00',
+                    kasir: 'admin',
+                    alasan: 'Barang rusak'
+                },
+                {
+                    kodeVoid: 'V-002',
+                    namaBarang: 'Minyak Goreng',
+                    jumlah: 1,
+                    harga: 25000,
+                    total: 25000,
+                    tanggal: '2023-03-20T14:15:00',
+                    kasir: 'admin',
+                    alasan: 'Pelanggan membatalkan'
+                },
+                {
+                    kodeVoid: 'V-003',
+                    namaBarang: 'Gula Pasir',
+                    jumlah: 3,
+                    harga: 12000,
+                    total: 36000,
+                    tanggal: '2023-04-05T09:45:00',
+                    kasir: 'admin',
+                    alasan: 'Kesalahan input'
+                },
+                {
+                    kodeVoid: 'V-004',
+                    namaBarang: 'Telur Ayam',
+                    jumlah: 5,
+                    harga: 2000,
+                    total: 10000,
+                    tanggal: '2023-04-15T11:20:00',
+                    kasir: 'kasir1',
+                    alasan: 'Barang rusak'
+                },
+                {
+                    kodeVoid: 'V-005',
+                    namaBarang: 'Susu UHT',
+                    jumlah: 2,
+                    harga: 18000,
+                    total: 36000,
+                    tanggal: '2023-05-02T13:10:00',
+                    kasir: 'kasir1',
+                    alasan: 'Kesalahan harga'
+                },
+                {
+                    kodeVoid: 'V-006',
+                    namaBarang: 'Beras Premium',
+                    jumlah: 1,
+                    harga: 15000,
+                    total: 15000,
+                    tanggal: '2023-05-10T16:30:00',
+                    kasir: 'admin',
+                    alasan: 'Pelanggan membatalkan'
+                },
+                {
+                    kodeVoid: 'V-007',
+                    namaBarang: 'Mie Instan',
+                    jumlah: 10,
+                    harga: 3000,
+                    total: 30000,
+                    tanggal: '2023-06-05T08:45:00',
+                    kasir: 'kasir1',
+                    alasan: 'Kesalahan input'
+                },
+                {
+                    kodeVoid: 'V-008',
+                    namaBarang: 'Kopi Sachet',
+                    jumlah: 5,
+                    harga: 2500,
+                    total: 12500,
+                    tanggal: '2023-06-15T10:00:00',
+                    kasir: 'admin',
+                    alasan: 'Barang kadaluarsa'
+                },
+                {
+                    kodeVoid: 'V-009',
+                    namaBarang: 'Sabun Mandi',
+                    jumlah: 3,
+                    harga: 5000,
+                    total: 15000,
+                    tanggal: '2023-07-10T14:20:00',
+                    kasir: 'kasir1',
+                    alasan: 'Kesalahan harga'
+                },
+                {
+                    kodeVoid: 'V-010',
+                    namaBarang: 'Minyak Goreng',
+                    jumlah: 2,
+                    harga: 25000,
+                    total: 50000,
+                    tanggal: '2023-07-20T15:15:00',
+                    kasir: 'admin',
+                    alasan: 'Pelanggan membatalkan'
+                },
+                {
+                    kodeVoid: 'V-011',
+                    namaBarang: 'Gula Pasir',
+                    jumlah: 2,
+                    harga: 12000,
+                    total: 24000,
+                    tanggal: '2023-08-01T09:30:00',
+                    kasir: 'kasir1',
+                    alasan: 'Kesalahan input'
+                },
+                {
+                    kodeVoid: 'V-012',
+                    namaBarang: 'Beras Premium',
+                    jumlah: 3,
+                    harga: 15000,
+                    total: 45000,
+                    tanggal: '2023-08-15T11:45:00',
+                    kasir: 'admin',
+                    alasan: 'Barang rusak'
+                },
+                {
+                    kodeVoid: 'V-013',
+                    namaBarang: 'Tepung Terigu',
+                    jumlah: 1,
+                    harga: 10000,
+                    total: 10000,
+                    tanggal: '2023-09-05T13:15:00',
+                    kasir: 'kasir1',
+                    alasan: 'Kesalahan harga'
+                },
+                {
+                    kodeVoid: 'V-014',
+                    namaBarang: 'Mie Instan',
+                    jumlah: 5,
+                    harga: 3000,
+                    total: 15000,
+                    tanggal: '2023-09-20T16:00:00',
+                    kasir: 'admin',
+                    alasan: 'Pelanggan membatalkan'
+                },
+                {
+                    kodeVoid: 'V-015',
+                    namaBarang: 'Telur Ayam',
+                    jumlah: 10,
+                    harga: 2000,
+                    total: 20000,
+                    tanggal: '2023-10-10T10:20:00',
+                    kasir: 'kasir1',
+                    alasan: 'Kesalahan input'
+                },
+            ];
+            
+            localStorage.setItem('voids', JSON.stringify(sampleVoids));
+            
+            // Sample user data
+            const sampleUsers = [
+                {
+                    username: 'admin',
+                    password: 'admin123', // Should be hashed in production
+                    name: 'Administrator',
+                    role: 'admin'
+                },
+                {
+                    username: 'kasir1',
+                    password: 'kasir123', // Should be hashed in production
+                    name: 'Kasir Satu',
+                    role: 'kasir'
+                }
+            ];
+            
+            localStorage.setItem('users', JSON.stringify(sampleUsers));
+            
+            // Set shop information
+            localStorage.setItem('companyName', 'Toko Sejahtera');
+            localStorage.setItem('companyAddress', 'Jl. Raya No. 123, Jakarta');
+        }
+
+        // Uncomment this to initialize sample data for testing
+        // initializeSampleData();
+    </script>
+</body>
+</html>
