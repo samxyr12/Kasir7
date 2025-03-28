@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Management System</title>
+    <link rel="stylesheet" href="akun.css">
+    <link rel="stylesheet" href="pop.css">
+    <link rel="stylesheet" href="global.css">
+    
+    <!-- Added Font Awesome for better icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Added modern styles -->
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #3c4e94;
+            --background-color: #f5f7ff;
+            --card-background: #ffffff;
+            --danger-color: #f44336;
+            --success-color: #4CAF50;
+            --warning-color: #ff9800;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header .menu {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header .menu li {
+            margin: 0 15px;
+        }
+
+        .header .menu a {
+            color: #000000;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .header .menu a:hover {
+            background-color: var(--secondary-color);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #388e3c;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+        }
+
+        .btn-warning:hover {
+            background-color: #f57c00;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .account-status-safe {
+            color: var(--success-color);
+        }
+
+        .account-status-unsafe {
+            color: var(--danger-color);
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background-color: var(--card-background);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .username-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 10px;
+        }
+
+        .username-item {
+            padding: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .username-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            justify-content: center;
+            align-items: center;
+            border-radius: var(--border-radius);
+        }
+
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .tab.active {
+            background-color: white;
+            border-color: #ddd;
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 15px;
+            color: #777;
+        }
+
+        .search-wrapper input {
+            padding-left: 40px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 1001;
+            transform: translateX(110%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .error {
+            background-color: var(--danger-color);
+        }
+
+        .success {
+            background-color: var(--success-color);
+        }
+
+        @media (max-width: 768px) {
+            .header .menu {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .header .menu li {
+                margin: 5px 0;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        
+        
+        
+        
+        .file-input-wrapper {
+        margin: 20px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+    
+    .file-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .visible-file-input {
+        display: block !important;
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: white;
+    }
+    
+    .file-hint {
+        display: block;
+        margin-top: 5px;
+        color: #666;
+    }
+    
+    .button-container {
+        margin-top: 15px;
+    }
+    
+    .upload-button {
+        padding: 10px 20px;
+        background-color: #4a6cf7;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .upload-button:hover {
+        background-color: #3a5ce0;
+    }
+    
+    .upload-message {
+        margin-top: 15px;
+        font-weight: bold;
+    }
+    
+    /* Make sure popup displays properly */
+    .popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .popup-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+    }
+    
+    /* Fix for popup visibility */
+    #uploadPopup.show {
+        display: flex !important;
+    }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <input class="menu-btn" type="checkbox" id="menu-btn" />
+        <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
+        <ul class="menu">
+            <li><a href="kasir.html"><i class="fas fa-cash-register"></i> KASIR</a></li>
+            <li><a href="laporan.html"><i class="fas fa-chart-line"></i> LAPORAN</a></li>
+            <li><a href="void.html"><i class="fas fa-ban"></i> VOID</a></li>
+            <li><a href="setoran.html"><i class="fas fa-money-bill-wave"></i> SETORAN</a></li>
+            <li><a href="akun.html" class="active"><i class="fas fa-user-cog"></i> AKUN</a></li>
+            <li><a href="retur.html"><i class="fas fa-undo"></i> RETUR</a></li>
+        </ul>
+    </header> 
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('create-tab')"><i class="fas fa-user-plus"></i> Create Account</div>
+            <div class="tab" onclick="switchTab('manage-tab')"><i class="fas fa-users-cog"></i> Manage Accounts</div>
+            <div class="tab" onclick="switchTab('activity-tab')"><i class="fas fa-history"></i> Activity Log</div>
+        </div>
+
+        <div id="create-tab" class="tab-content active">
+            <div class="card">
+                <h2><i class="fas fa-user-plus"></i> Create New Account</h2>
+                <div class="form-group">
+                    <label for="newUsername">Username</label>
+                    <input type="text" id="newUsername" placeholder="Enter username" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Password</label>
+                    <input type="password" id="newPassword" placeholder="Enter password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPin">PIN (Optional)</label>
+                    <input type="password" id="newPin" placeholder="PIN will default to 451 if not provided" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="kodeToko">Store Code</label>
+                    <input type="text" id="kodeToko" placeholder="Enter store code" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">User Role</label>
+                    <select id="role">
+                        <option value="user">Regular User</option>
+                        <option value="admin">Administrator</option>
+                        <option value="manager">Manager</option>
+                    </select>
+                </div>
+                <button class="btn-success" onclick="createAccount()"><i class="fas fa-save"></i> Create Account</button>
+            </div>
+        </div>
+
+        <div id="manage-tab" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-users-cog"></i> Manage Accounts</h2>
+                <div class="action-buttons">
+                    <button onclick="openUploadPopup()"><i class="fas fa-file-upload"></i> Bulk Upload</button>
+                    <button onclick="openDownloadPopup()"><i class="fas fa-file-download"></i> Export Accounts</button>
+                    <button class="btn-danger" onclick="openPopup()"><i class="fas fa-trash-alt"></i> Delete Accounts</button>
+                </div>
+
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search by username, store code, or role" oninput="searchAccounts()">
+                </div>
+
+                <table id="accountTable">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Password</th>
+                            <th>Store Code</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountListDisplay"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="activity-tab" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-history"></i> Activity Log</h2>
+                <div id="laporanList">
+                    <div class="search-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchLogInput" placeholder="Search logs by username or action" oninput="searchLogs()">
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Username</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="laporanListDisplay"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account Popup -->
+    <div id="deleteConfirmation" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <h2><i class="fas fa-trash-alt"></i> Delete Accounts</h2>
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchDeleteInput" placeholder="Search username..." onkeyup="filterUsernames()">
+            </div>
+            <div id="usernameList" class="username-list"></div>
+            <button onclick="addToDeleteList()"><i class="fas fa-plus"></i> Add to Delete List</button>
+            <h3>Accounts to be deleted:</h3>
+            <ul id="deleteList" class="username-list"></ul>
+            <button class="btn-danger" onclick="confirmDelete()"><i class="fas fa-trash-alt"></i> Delete Selected Accounts</button>
+        </div>
+    </div>
+
+ <!-- Upload Accounts Popup with Visible File Input -->
+<div id="uploadPopup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closeUploadPopup()">&times;</span>
+        <h2><i class="fas fa-file-upload"></i> Upload Account List</h2>
+        
+        <p>Upload an Excel file (.xlsx) containing account information.</p>
+        <p><strong>Required columns:</strong> Username, Password</p>
+        <p><strong>Optional columns:</strong> PIN, KodeToko, Role</p>
+        
+        <!-- Clearly visible file input -->
+        <div class="file-input-wrapper">
+            <label for="uploadFile" class="file-label">Select Excel File:</label>
+            <input type="file" id="uploadFile" accept=".xlsx" class="visible-file-input">
+            <small class="file-hint">Click to choose a .xlsx file</small>
+        </div>
+        
+        <div class="button-container">
+            <button onclick="uploadAccounts()" class="upload-button"><i class="fas fa-upload"></i> Upload</button>
+        </div>
+        
+        <div id="uploadMessage" class="upload-message"></div>
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+</div>
+
+    <!-- Duplicate Username Confirmation -->
+    <div id="duplicatePopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeDuplicatePopup()">&times;</span>
+            <h2><i class="fas fa-exclamation-triangle"></i> Duplicate Usernames</h2>
+            <p id="duplicateMessage"></p>
+            <div class="button-container">
+                <button onclick="handleDuplicate(true)"><i class="fas fa-check"></i> Yes, continue</button>
+                <button class="btn-danger" onclick="handleDuplicate(false)"><i class="fas fa-times"></i> No, cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Accounts Popup -->
+    <div id="downloadPopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeDownloadPopup()">&times;</span>
+            <h2><i class="fas fa-file-download"></i> Download Account List</h2>
+            <p>Please enter your PIN to download the account list.</p>
+            <input type="password" id="downloadPinInput" placeholder="Enter PIN">
+            <button onclick="verifyDownloadPin()"><i class="fas fa-download"></i> Download</button>
+            <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Change PIN Popup -->
+    <div id="changePinPopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeChangePinPopup()">&times;</span>
+            <h2><i class="fas fa-key"></i> Change PIN</h2>
+            <p id="changePinMessage">You must change the default PIN (451) before changing your password.</p>
+            <div class="form-group">
+                <label for="oldPin">Current PIN</label>
+                <input type="password" id="oldPin" placeholder="Enter current PIN">
+            </div>
+            <div class="form-group">
+                <label for="newPinInput">New PIN</label>
+                <input type="password" id="newPinInput" placeholder="Enter new PIN">
+            </div>
+            <button onclick="changePin()"><i class="fas fa-save"></i> Change PIN</button>
+        </div>
+    </div>
+
+    <!-- PIN Verification Popup -->
+    <div id="pinPopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePinPopup()">&times;</span>
+            <h2><i class="fas fa-shield-alt"></i> Verify PIN</h2>
+            <p>Please enter your PIN to continue.</p>
+            <input type="password" id="pinInput" placeholder="Enter PIN">
+            <button onclick="verifyPin()"><i class="fas fa-check-circle"></i> Verify</button>
+        </div>
+    </div>
+
+    <!-- OTP Verification Popup -->
+    <div id="otpPopup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeOtpPopup()">&times;</span>
+            <h2><i class="fas fa-mobile-alt"></i> OTP Verification</h2>
+            <p id="otpMessage"></p>
+            <div class="form-group">
+                <label for="otpInput">Enter the OTP code</label>
+                <input type="text" id="otpInput" placeholder="Enter 6-digit OTP">
+            </div>
+            <button onclick="verifyOtp()"><i class="fas fa-check-circle"></i> Verify OTP</button>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationPopup" class="notification">
+        <p id="notificationMessage"></p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Constants
+        
+        const DEFAULT_PIN = '451';
+        let otpStore = {};
+        let currentUsername = '';
+        let accountsToDelete = [];
+        let accountsToUpload = [];
+
+        // Initialize on page load
+        window.onload = function() {
+            applyDefaultPins();
+            displayAccounts();
+            displayLaporan();
+        };
+
+        // Tab switching functionality
+        function switchTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Activate selected tab and content
+            document.getElementById(tabId).classList.add('active');
+            const selectedTab = document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`);
+            selectedTab.classList.add('active');
+        }
+
+        // Account functions
+        function createAccount() {
+            const newUsername = document.getElementById('newUsername').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const newPin = document.getElementById('newPin').value || DEFAULT_PIN;
+            const kodeToko = document.getElementById('kodeToko').value;
+            const role = document.getElementById('role').value;
+
+            if (!newUsername || !newPassword || !confirmPassword || !kodeToko) {
+                showNotification('All required fields must be filled out.', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showNotification('Password and confirmation do not match.', 'error');
+                return;
+            }
+
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            
+            if (accounts.some(account => account.username === newUsername)) {
+                showNotification('Username already exists. Please use a different username.', 'error');
+                return;
+            }
+
+            // Encrypt password and save account with PIN, store code and role
+            const encryptedPassword = CryptoJS.AES.encrypt(newPassword, 'secret key 123').toString();
+            accounts.push({ 
+                username: newUsername, 
+                password: encryptedPassword, 
+                pin: newPin, 
+                kodeToko: kodeToko,
+                role: role,
+                createdAt: new Date().toISOString()
+            });
+            
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            
+            // Log the action
+            logActivity(newUsername, 'Account Created', `New ${role} account created for store ${kodeToko}`);
+            
+            showNotification('Account created successfully!', 'success');
+            displayAccounts();
+
+            // Clear the input fields
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('newPin').value = '';
+            document.getElementById('kodeToko').value = '';
+            document.getElementById('role').value = 'user';
+        }
+
+        function displayAccounts() {
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            let accountListDisplay = document.getElementById('accountListDisplay');
+            accountListDisplay.innerHTML = '';
+
+            const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            // Special admin function
+            if (searchInput === 'fxid') {
+                openPopup();
+                return;
+            }
+
+            accounts.forEach(account => {
+                // Check if account matches search criteria
+                if (
+                    account.username.toLowerCase().includes(searchInput) || 
+                    (account.kodeToko && account.kodeToko.toLowerCase().includes(searchInput)) ||
+                    (account.role && account.role.toLowerCase().includes(searchInput))
+                ) {
+                    let row = document.createElement('tr');
+                    
+                    // Mark accounts with default PIN as unsafe
+                    const isUnsafe = account.pin === DEFAULT_PIN;
+                    if (isUnsafe) {
+                        row.classList.add('unsafe-account');
+                    }
+
+                    // Username cell
+                    let usernameCell = document.createElement('td');
+                    usernameCell.textContent = account.username;
+                    row.appendChild(usernameCell);
+
+                    // Password cell (masked)
+                    let passwordCell = document.createElement('td');
+                    passwordCell.textContent = '••••••••';
+                    row.appendChild(passwordCell);
+
+                    // Store code cell
+                    let kodeTokoCell = document.createElement('td');
+                    kodeTokoCell.textContent = account.kodeToko || 'N/A';
+                    row.appendChild(kodeTokoCell);
+
+                    // Role cell
+                    let roleCell = document.createElement('td');
+                    roleCell.textContent = account.role || 'user';
+                    row.appendChild(roleCell);
+
+                    // Status cell
+                    let statusCell = document.createElement('td');
+                    if (isUnsafe) {
+                        statusCell.innerHTML = '<span class="account-status-unsafe"><i class="fas fa-exclamation-triangle"></i> Unsafe</span>';
+                    } else {
+                        statusCell.innerHTML = '<span class="account-status-safe"><i class="fas fa-check-circle"></i> Secure</span>';
+                    }
+                    row.appendChild(statusCell);
+
+                    // Action cell
+                    let actionCell = document.createElement('td');
+                    actionCell.innerHTML = `
+                        <button class="table-button" onclick="promptPin('${account.username}')"><i class="fas fa-key"></i> Change Password</button>
+                        ${isUnsafe ? `<button class="table-button btn-warning" onclick="promptChangePin('${account.username}')"><i class="fas fa-shield-alt"></i> Update PIN</button>` : ''}
+                    `;
+                    row.appendChild(actionCell);
+
+                    accountListDisplay.appendChild(row);
+                }
+            });
+        }
+
+        function searchAccounts() {
+            displayAccounts();
+        }
+
+        function searchLogs() {
+            const searchTerm = document.getElementById('searchLogInput').value.trim().toLowerCase();
+            displayLaporan(searchTerm);
+        }
+
+        function displayLaporan(searchTerm = '') {
+            let laporan = JSON.parse(localStorage.getItem('laporan')) || [];
+            let laporanListDisplay = document.getElementById('laporanListDisplay');
+            laporanListDisplay.innerHTML = '';
+
+            // Reverse order (newest first)
+            laporan.reverse();
+
+            // Get recent logs (limit to 50)
+            let filteredLogs = laporan;
+            
+            // Apply search filter if provided
+            if (searchTerm) {
+                filteredLogs = laporan.filter(log => 
+                    (log.username && log.username.toLowerCase().includes(searchTerm)) || 
+                    (log.action && log.action.toLowerCase().includes(searchTerm)) ||
+                    (log.details && log.details.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            const recentLogs = filteredLogs.slice(0, 50);
+
+            recentLogs.forEach(entry => {
+                let row = document.createElement('tr');
+                
+                let timeCell = document.createElement('td');
+                timeCell.textContent = entry.waktu || new Date(entry.timestamp || Date.now()).toLocaleString();
+                row.appendChild(timeCell);
+                
+                let usernameCell = document.createElement('td');
+                usernameCell.textContent = entry.username || 'System';
+                row.appendChild(usernameCell);
+                
+                let actionCell = document.createElement('td');
+                actionCell.textContent = entry.action || 'Unknown Action';
+                row.appendChild(actionCell);
+                
+                let detailsCell = document.createElement('td');
+                detailsCell.textContent = entry.details || '-';
+                row.appendChild(detailsCell);
+                
+                laporanListDisplay.appendChild(row);
+            });
+        }
+
+        // PIN Management Functions
+        function applyDefaultPins() {
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+
+            let updated = false;
+            accounts.forEach(account => {
+                if (!account.pin) {
+                    account.pin = DEFAULT_PIN;
+                    updated = true;
+                }
+                
+                // Add roles if missing
+                if (!account.role) {
+                    account.role = 'user';
+                    updated = true;
+                }
+                
+                // Add creation timestamp if missing
+                if (!account.createdAt) {
+                    account.createdAt = new Date().toISOString();
+                    updated = true;
+                }
+            });
+
+            if (updated) {
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+            }
+        }
+
+        function promptPin(username) {
+            currentUsername = username;
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            let account = accounts.find(account => account.username === username);
+            
+            if (account.pin === DEFAULT_PIN) {
+                showNotification('You must change the default PIN before changing your password.', 'warning');
+                promptChangePin(username);
+            } else {
+                document.getElementById('pinPopup').style.display = 'block';
+            }
+        }
+
+        function promptChangePin(username) {
+            currentUsername = username;
+            document.getElementById('changePinPopup').style.display = 'block';
+        }
+
+        // Continue from where the previous code left off
+
+function changePin() {
+    const oldPin = document.getElementById('oldPin').value;
+    const newPin = document.getElementById('newPinInput').value;
+    
+    if (!newPin) {
+        showNotification('New PIN cannot be empty.', 'error');
+        return;
+    }
+    
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+    let account = accounts.find(account => account.username === currentUsername);
+
+    if (oldPin === account.pin) {
+        account.pin = newPin;
+        localStorage.setItem('accounts', JSON.stringify(accounts));
+        
+        // Log the activity
+        logActivity(currentUsername, 'PIN Changed', 'User PIN was updated');
+        
+        showNotification('PIN successfully changed!', 'success');
+        closeChangePinPopup();
+        displayAccounts();
+    } else {
+        showNotification('Current PIN is incorrect.', 'error');
+    }
+}
+
+function closeChangePinPopup() {
+    document.getElementById('changePinPopup').style.display = 'none';
+}
+
+function closePinPopup() {
+    document.getElementById('pinPopup').style.display = 'none';
+}
+
+function verifyPin() {
+    const pin = document.getElementById('pinInput').value;
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+    let account = accounts.find(account => account.username === currentUsername);
+
+    if (pin === account.pin) {
+        const otp = generateOTP();
+        otpStore[currentUsername] = {
+            otp,
+            expiry: Date.now() + 5 * 60 * 1000 // OTP valid for 5 minutes
+        };
+
+        // Show OTP and try to copy to clipboard
+        try {
+            navigator.clipboard.writeText(otp).then(() => {
+                document.getElementById('otpMessage').textContent = `OTP for ${currentUsername} is: ${otp} (copied to clipboard)`;
+                document.getElementById('otpPopup').style.display = 'block';
+                closePinPopup();
+            }).catch(() => {
+                document.getElementById('otpMessage').textContent = `OTP for ${currentUsername} is: ${otp}`;
+                document.getElementById('otpPopup').style.display = 'block';
+                closePinPopup();
+            });
+        } catch (err) {
+            document.getElementById('otpMessage').textContent = `OTP for ${currentUsername} is: ${otp}`;
+            document.getElementById('otpPopup').style.display = 'block';
+            closePinPopup();
+        }
+    } else {
+        showNotification('Incorrect PIN.', 'error');
+    }
+}
+
+function closeOtpPopup() {
+    document.getElementById('otpPopup').style.display = 'none';
+}
+
+function verifyOtp() {
+    const otpInput = document.getElementById('otpInput').value;
+    const storedOtp = otpStore[currentUsername];
+    
+    if (storedOtp && Date.now() < storedOtp.expiry && otpInput === storedOtp.otp) {
+        closeOtpPopup();
+        showChangePasswordPopup();
+    } else {
+        showNotification('Invalid or expired OTP.', 'error');
+    }
+}
+
+function showChangePasswordPopup() {
+    const newPassword = prompt('Enter new password:');
+    if (newPassword) {
+        updatePassword(currentUsername, newPassword);
+    }
+}
+
+function updatePassword(username, newPassword) {
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+    let accountIndex = accounts.findIndex(account => account.username === username);
+
+    if (accountIndex !== -1) {
+        const encryptedPassword = CryptoJS.AES.encrypt(newPassword, 'secret key 123').toString();
+        accounts[accountIndex].password = encryptedPassword;
+        localStorage.setItem('accounts', JSON.stringify(accounts));
+        
+        // Log the activity
+        logActivity(username, 'Password Changed', 'User password was updated');
+        
+        showNotification('Password successfully changed!', 'success');
+
+        // Reset OTP
+        delete otpStore[username];
+        displayAccounts();
+
+        // Clear inputs
+        document.getElementById('pinInput').value = '';
+        document.getElementById('otpInput').value = '';
+    } else {
+        showNotification('Username not found.', 'error');
+    }
+}
+
+// OTP Functions
+function generateOTP() {
+    return Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)).join(''); // Generate 6-digit OTP
+}
+
+// Upload & Download Functions
+function openUploadPopup() {
+        const popup = document.getElementById('uploadPopup');
+        popup.style.display = 'flex';
+        // Also add a class for extra assurance
+        popup.classList.add('show');
+    }
+    
+    function closeUploadPopup() {
+        const popup = document.getElementById('uploadPopup');
+        popup.style.display = 'none';
+        popup.classList.remove('show');
+    }
+    
+function uploadAccounts() {
+    const fileInput = document.getElementById('uploadFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        showNotification('Please select a file to upload.', 'error');
+        return;
+    }
+
+    // Show loading animation
+    document.getElementById('loadingOverlay').style.display = 'flex';
+
+    setTimeout(() => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const accounts = XLSX.utils.sheet_to_json(worksheet);
+
+            accountsToUpload = accounts;
+            processUpload(); // Process upload and check for duplicates
+        };
+
+        reader.readAsArrayBuffer(file);
+    }, 1000);
+}
+
+function processUpload() {
+    let storedAccounts = JSON.parse(localStorage.getItem('accounts')) || [];
+    let duplicateAccounts = [];
+
+    accountsToUpload.forEach(account => {
+        if (account.Username && account.Password) {
+            const existingAccount = storedAccounts.find(acc => acc.username === account.Username);
+            if (existingAccount) {
+                duplicateAccounts.push(account.Username);
+            }
+        }
+    });
+
+    document.getElementById('loadingOverlay').style.display = 'none';
+    
+    if (duplicateAccounts.length > 0) {
+        let message = `The following usernames already exist: ${duplicateAccounts.join(', ')}. The system will modify these usernames. Do you want to continue?`;
+        document.getElementById('duplicateMessage').textContent = message;
+        document.getElementById('duplicatePopup').style.display = 'flex';
+    } else {
+        completeUpload(storedAccounts);
+    }
+}
+
+function completeUpload(storedAccounts) {
+    accountsToUpload.forEach(account => {
+        if (account.Username && account.Password) {
+            const username = account.Username;
+            const encryptedPassword = CryptoJS.AES.encrypt(account.Password, 'secret key 123').toString();
+            const pin = account.PIN || DEFAULT_PIN;
+            const kodeToko = account.KodeToko || '';
+            const role = account.Role || 'user';
+            
+            storedAccounts.push({ 
+                username: username, 
+                password: encryptedPassword, 
+                pin: pin,
+                kodeToko: kodeToko,
+                role: role,
+                createdAt: new Date().toISOString()
+            });
+        }
+    });
+
+    localStorage.setItem('accounts', JSON.stringify(storedAccounts));
+    
+    // Log activity
+    logActivity('System', 'Bulk Upload', `${accountsToUpload.length} accounts were imported`);
+    
+    showNotification(`Successfully uploaded ${accountsToUpload.length} accounts.`, 'success');
+    closeUploadPopup();
+    displayAccounts();
+}
+
+function closeDuplicatePopup() {
+    document.getElementById('duplicatePopup').style.display = 'none';
+}
+
+function handleDuplicate(continueUpload) {
+    if (continueUpload) {
+        let storedAccounts = JSON.parse(localStorage.getItem('accounts')) || [];
+
+        accountsToUpload.forEach(account => {
+            if (account.Username && account.Password) {
+                let username = account.Username;
+                let counter = 1;
+                
+                // Add numerical suffix to duplicate usernames
+                while (storedAccounts.some(acc => acc.username === username)) {
+                    username = `${account.Username}${counter}`;
+                    counter++;
+                }
+                
+                const encryptedPassword = CryptoJS.AES.encrypt(account.Password, 'secret key 123').toString();
+                const pin = account.PIN || DEFAULT_PIN;
+                const kodeToko = account.KodeToko || '';
+                const role = account.Role || 'user';
+                
+                storedAccounts.push({ 
+                    username: username, 
+                    password: encryptedPassword, 
+                    pin: pin,
+                    kodeToko: kodeToko,
+                    role: role,
+                    createdAt: new Date().toISOString()
+                });
+            }
+        });
+
+        localStorage.setItem('accounts', JSON.stringify(storedAccounts));
+        
+        // Log activity
+        logActivity('System', 'Bulk Upload', `${accountsToUpload.length} accounts were imported with username modifications`);
+        
+        showNotification(`Successfully uploaded ${accountsToUpload.length} accounts with modified usernames.`, 'success');
+        closeDuplicatePopup();
+        displayAccounts();
+    } else {
+        showNotification('Upload canceled.', 'warning');
+        closeDuplicatePopup();
+    }
+}
+
+function openDownloadPopup() {
+    document.getElementById('downloadPopup').style.display = 'flex';
+}
+
+function closeDownloadPopup() {
+    document.getElementById('downloadPopup').style.display = 'none';
+}
+
+function verifyDownloadPin() {
+    const pin = document.getElementById('downloadPinInput').value;
+    if (pin === PIN) {
+        document.getElementById('loadingSpinner').style.display = 'block';
+        setTimeout(() => {
+            downloadAccounts();
+            document.getElementById('loadingSpinner').style.display = 'none';
+            closeDownloadPopup();
+        }, 1000);
+    } else {
+        showNotification('Incorrect PIN.', 'error');
+    }
+}
+
+// PIN Configuration
+const PIN = '451661'; // Fixed PIN for download
+
+function openDownloadPopup() {
+    document.getElementById('downloadPopup').style.display = 'flex';
+}
+
+function closeDownloadPopup() {
+    document.getElementById('downloadPopup').style.display = 'none';
+    document.getElementById('downloadPinInput').value = '';
+}
+
+function verifyDownloadPin() {
+    const pin = document.getElementById('downloadPinInput').value;
+    if (pin === PIN) {
+        document.getElementById('loadingSpinner').style.display = 'block';
+        setTimeout(() => {
+            downloadAccountsAsZip();
+            document.getElementById('loadingSpinner').style.display = 'none';
+            closeDownloadPopup();
+        }, 1000);
+    } else {
+        showNotification('Incorrect PIN.', 'error');
+    }
+}
+
+function downloadAccountsAsZip() {
+    // Show loading indicator
+    showNotification('Preparing download...', 'primary');
+    
+    // Get accounts data
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+    
+    // Format data with desired properties
+    const formattedData = accounts.map(account => ({
+        Username: account.username,
+        Password: CryptoJS.AES.decrypt(account.password, 'secret key 123').toString(CryptoJS.enc.Utf8),
+        PIN: account.pin || '',
+        KodeToko: account.kodeToko || '',
+        Role: account.role || 'user',
+        CreatedAt: account.createdAt || new Date().toISOString()
+    }));
+
+    // Create worksheet from data
+    const ws = XLSX.utils.json_to_sheet(formattedData);
+
+    // Auto-size columns
+    const wscols = [
+        { wch: 20 }, // Width for Username
+        { wch: 20 }, // Width for Password
+        { wch: 10 }, // Width for PIN
+        { wch: 15 }, // Width for KodeToko
+        { wch: 12 }, // Width for Role
+        { wch: 20 }  // Width for CreatedAt
+    ];
+    ws['!cols'] = wscols;
+
+    // Add header style
+    const headerStyle = {
+        font: { bold: true },
+        alignment: { horizontal: 'center', vertical: 'center' },
+        fill: { fgColor: { rgb: 'FFFF00' } }, // Yellow background color
+        border: {
+            top: { style: 'thin', color: { rgb: '000000' } },
+            bottom: { style: 'thin', color: { rgb: '000000' } },
+            left: { style: 'thin', color: { rgb: '000000' } },
+            right: { style: 'thin', color: { rgb: '000000' } }
+        }
+    };
+
+    // Apply auto filters
+    ws['!ref'] = XLSX.utils.encode_range({
+        s: { c: 0, r: 0 },
+        e: { c: 5, r: formattedData.length }
+    });
+    ws['!autofilter'] = { ref: ws['!ref'] };
+
+    // Apply header styles
+    const headerRange = XLSX.utils.decode_range(ws['!ref']);
+    for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
+        const cellRef = XLSX.utils.encode_cell({ r: 0, c: C });
+        if (!ws[cellRef]) continue;
+        ws[cellRef].s = headerStyle;
+    }
+
+    // Add alternating row shading
+    for (let R = 1; R <= formattedData.length; R++) {
+        for (let C = 0; C <= 5; C++) {
+            const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+            if (ws[cellRef]) {
+                ws[cellRef].s = {
+                    fill: { fgColor: { rgb: R % 2 === 0 ? 'F7F7F7' : 'FFFFFF' } },
+                    border: {
+                        top: { style: 'thin', color: { rgb: '000000' } },
+                        bottom: { style: 'thin', color: { rgb: '000000' } },
+                        left: { style: 'thin', color: { rgb: '000000' } },
+                        right: { style: 'thin', color: { rgb: '000000' } }
+                    }
+                };
+            }
+        }
+    }
+
+    // Create new workbook and append worksheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Accounts');
+
+    // Convert workbook to binary
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+
+    // Function to convert string to array buffer
+    function s2ab(s) {
+        const buf = new ArrayBuffer(s.length);
+        const view = new Uint8Array(buf);
+        for (let i = 0; i < s.length; i++) {
+            view[i] = s.charCodeAt(i) & 0xFF;
+        }
+        return buf;
+    }
+
+    // Create a timestamp for the filename
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+    
+    const excelFilename = `account_list_${timestamp}.xlsx`;
+    const zipFilename = `account_list_${timestamp}.zip`;
+    
+    // Create the Excel file blob
+    const excelBlob = new Blob([s2ab(wbout)], { type: 'application/octet-stream' });
+    
+    // Using JSZip to create a zip file
+    loadJSZip().then(JSZip => {
+        const zip = new JSZip();
+        
+        // Add the Excel file to the zip
+        zip.file(excelFilename, excelBlob);
+        
+        // Add a readme text file with instructions
+        zip.file("README.txt", "ACCOUNT LIST EXPORT\n\n" +
+            "This ZIP file contains an Excel spreadsheet with account information.\n" +
+            "Date exported: " + new Date().toLocaleString() + "\n\n" +
+            "CONFIDENTIAL: This file contains sensitive information. Please handle securely.");
+        
+        // Generate the zip file
+        zip.generateAsync({ type: 'blob' })
+            .then(function(content) {
+                // Create download link and trigger download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = zipFilename;
+                link.click();
+                
+                // Log the activity
+                logActivity('System', 'Account Export', `Account list was exported to ZIP file: ${zipFilename}`);
+                
+                // Show success notification
+                showNotification('Account list downloaded successfully.', 'success');
+            });
+    }).catch(error => {
+        console.error('Error creating ZIP file:', error);
+        showNotification('Failed to create ZIP file. Please try again.', 'error');
+    });
+}
+
+// Helper function to dynamically load JSZip if not already loaded
+function loadJSZip() {
+    return new Promise((resolve, reject) => {
+        if (window.JSZip) {
+            resolve(window.JSZip);
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        script.onload = () => resolve(window.JSZip);
+        script.onerror = () => reject(new Error('Failed to load JSZip'));
+        document.head.appendChild(script);
+    });
+}
+
+// Update your download popup HTML to reflect ZIP download
+// Add this to your HTML, replacing the existing download popup
+const downloadPopupHTML = `
+<div id="downloadPopup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closeDownloadPopup()">&times;</span>
+        <h2><i class="fas fa-file-download"></i> Download Account List as ZIP</h2>
+        <p>Please enter your PIN to download the account list in a ZIP file.</p>
+        <div class="form-group">
+            <label for="downloadPinInput">PIN</label>
+            <input type="password" id="downloadPinInput" placeholder="Enter PIN">
+        </div>
+        <button onclick="verifyDownloadPin()"><i class="fas fa-download"></i> Download ZIP</button>
+        <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
+    </div>
+</div>
+`;
+
+// You can add this code to insert the updated popup HTML
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the existing downloadPopup element and replace it
+    const existingPopup = document.getElementById('downloadPopup');
+    if (existingPopup) {
+        existingPopup.outerHTML = downloadPopupHTML;
+    }
+});
+
+// Delete Account Functions
+function openPopup() {
+    document.getElementById('deleteConfirmation').style.display = 'flex';
+    displayUsernames(); // Display username list when popup opens
+}
+
+function closePopup() {
+    document.getElementById('deleteConfirmation').style.display = 'none';
+}
+
+function displayUsernames() {
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+    let usernameList = document.getElementById('usernameList');
+    usernameList.innerHTML = '';
+
+    accounts.forEach(account => {
+        let div = document.createElement('div');
+        div.classList.add('username-item');
+        div.innerHTML = `
+            <input type="checkbox" id="${account.username}" value="${account.username}" />
+            <label for="${account.username}">${account.username} ${account.role ? `(${account.role})` : ''} ${account.kodeToko ? `- ${account.kodeToko}` : ''}</label>
+        `;
+        usernameList.appendChild(div);
+    });
+}
+
+function filterUsernames() {
+    let filter = document.getElementById('searchDeleteInput').value.toLowerCase();
+    let items = document.querySelectorAll('#usernameList .username-item');
+
+    items.forEach(item => {
+        let label = item.querySelector('label').textContent.toLowerCase();
+        if (label.includes(filter)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+function addToDeleteList() {
+    let checkedItems = document.querySelectorAll('#usernameList input[type="checkbox"]:checked');
+    let deleteList = document.getElementById('deleteList');
+
+    // Clear the list first
+    accountsToDelete = [];
+    deleteList.innerHTML = '';
+
+    checkedItems.forEach(item => {
+        let username = item.value;
+        if (!accountsToDelete.includes(username)) {
+            accountsToDelete.push(username);
+            let li = document.createElement('li');
+            li.textContent = username;
+            li.innerHTML = `
+                ${username} 
+                <button class="btn-danger" style="padding: 2px 5px; margin-left: 5px;" 
+                onclick="removeFromDeleteList('${username}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            deleteList.appendChild(li);
+        }
+    });
+}
+
+function removeFromDeleteList(username) {
+    accountsToDelete = accountsToDelete.filter(name => name !== username);
+    let deleteList = document.getElementById('deleteList');
+    deleteList.innerHTML = '';
+    
+    accountsToDelete.forEach(name => {
+        let li = document.createElement('li');
+        li.innerHTML = `
+            ${name} 
+            <button class="btn-danger" style="padding: 2px 5px; margin-left: 5px;" 
+            onclick="removeFromDeleteList('${name}')">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        deleteList.appendChild(li);
+    });
+}
+
+function confirmDelete() {
+    if (accountsToDelete.length === 0) {
+        showNotification('No accounts selected for deletion.', 'warning');
+        return;
+    }
+
+    if (confirm(`Are you sure you want to delete ${accountsToDelete.length} account(s)?`)) {
+        let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+        
+        // Get details of accounts to be deleted for logging
+        const deletedAccountsDetails = accountsToDelete.map(username => {
+            const account = accounts.find(a => a.username === username);
+            return `${username} (${account.role || 'user'}, Store: ${account.kodeToko || 'N/A'})`;
+        }).join(', ');
+        
+        // Filter out accounts to be deleted
+        accounts = accounts.filter(account => !accountsToDelete.includes(account.username));
+        
+        localStorage.setItem('accounts', JSON.stringify(accounts));
+        
+        // Log the deletion activity
+        logActivity('System', 'Accounts Deleted', `Deleted accounts: ${deletedAccountsDetails}`);
+        
+        showNotification(`Successfully deleted ${accountsToDelete.length} account(s).`, 'success');
+        
+        // Clear the delete list and close popup
+        accountsToDelete = [];
+        document.getElementById('deleteList').innerHTML = '';
+        closePopup();
+        displayAccounts();
+    }
+}
+
+// Notification Functions
+function showNotification(message, type = 'primary') {
+    const notification = document.getElementById('notificationPopup');
+    const messageElement = document.getElementById('notificationMessage');
+    
+    // Remove all existing classes
+    notification.className = 'notification';
+    
+    // Add appropriate type class
+    if (type === 'error') {
+        notification.classList.add('error');
+    } else if (type === 'success') {
+        notification.classList.add('success');
+    } else if (type === 'warning') {
+        notification.classList.add('warning');
+    }
+    
+    messageElement.textContent = message;
+    notification.classList.add('show');
+    
+    // Hide notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+// Activity Logging
+function logActivity(username, action, details = '') {
+    let logs = JSON.parse(localStorage.getItem('laporan')) || [];
+    
+    logs.push({
+        timestamp: Date.now(),
+        waktu: new Date().toLocaleString(),
+        username: username,
+        action: action,
+        details: details
+    });
+    
+    // Keep only the latest 500 logs to prevent storage issues
+    if (logs.length > 500) {
+        logs = logs.slice(-500);
+    }
+    
+    localStorage.setItem('laporan', JSON.stringify(logs));
+    displayLaporan();
+}
+
+// Initialize event listeners on DOM content loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Make sure popups are hidden when page loads
+    const popups = document.querySelectorAll('.popup');
+    popups.forEach(popup => {
+        popup.style.display = 'none';
+    });
+    
+    // Setup the tab system
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabId = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+            switchTab(tabId);
+        });
+    });
+    
+    // Enforce PIN visibility
+    const pinInputs = document.querySelectorAll('input[type="password"]');
+    pinInputs.forEach(input => {
+        if (input.id.includes('Pin') || input.id.includes('PIN')) {
+            input.maxLength = 6;
+        }
+    });
+});
+
+
+
+// Add these variables to your existing JavaScript
+const ADMIN_PIN = '451'; // PIN for accessing protected tabs
+let authenticatedForTabs = false; // Track if user is authenticated for protected tabs
+
+// Modified tab switching function that requires PIN for certain tabs
+function switchTab(tabId) {
+    // If trying to access protected tabs and not authenticated
+    if ((tabId === 'manage-tab' || tabId === 'activity-tab') && !authenticatedForTabs) {
+        showTabAuthPopup(tabId);
+        return;
+    }
+    
+    // Otherwise proceed with normal tab switching
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    document.getElementById(tabId).classList.add('active');
+    const selectedTab = document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`);
+    selectedTab.classList.add('active');
+}
+
+// Show authentication popup for protected tabs
+function showTabAuthPopup(tabIdToOpen) {
+    const popup = document.createElement('div');
+    popup.className = 'popup';
+    popup.style.display = 'flex';
+    popup.id = 'tabAuthPopup';
+    
+    popup.innerHTML = `
+        <div class="popup-content">
+            <span class="close" onclick="closeTabAuthPopup()">&times;</span>
+            <h2><i class="fas fa-lock"></i> Authentication Required</h2>
+            <p>Please enter the administrative PIN to access this section.</p>
+            <div class="form-group">
+                <label for="tabAuthPin">Admin PIN</label>
+                <input type="password" id="tabAuthPin" placeholder="Enter PIN">
+            </div>
+            <button onclick="verifyTabAuth('${tabIdToOpen}')"><i class="fas fa-key"></i> Authenticate</button>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+}
+
+// Close the tab authentication popup
+function closeTabAuthPopup() {
+    const popup = document.getElementById('tabAuthPopup');
+    if (popup) {
+        document.body.removeChild(popup);
+    }
+}
+
+// Verify the PIN for tab authentication
+function verifyTabAuth(tabIdToOpen) {
+    const pin = document.getElementById('tabAuthPin').value;
+    
+    if (pin === ADMIN_PIN) {
+        authenticatedForTabs = true;
+        closeTabAuthPopup();
+        
+        // Now proceed with tab switching
+        switchTab(tabIdToOpen);
+        
+        // Log the authentication activity
+        logActivity('Admin', 'Access Granted', `Authenticated for administrative functions`);
+        
+        showNotification('Authentication successful. You now have access to administrative functions.', 'success');
+    } else {
+        showNotification('Incorrect PIN. Access denied.', 'error');
+    }
+}
+
+// Add logout function to clear authentication
+function logoutAdmin() {
+    if (authenticatedForTabs) {
+        authenticatedForTabs = false;
+        switchTab('create-tab'); // Switch back to the unrestricted tab
+        showNotification('You have been logged out from administrative functions.', 'success');
+    }
+}
+
+// Add a visual indicator for when a user is authenticated
+function updateAuthIndicator() {
+    const indicator = document.getElementById('authIndicator');
+    
+    if (!indicator) {
+        // Create the indicator if it doesn't exist
+        const headerElement = document.querySelector('.header');
+        const authIndicator = document.createElement('div');
+        authIndicator.id = 'authIndicator';
+        authIndicator.className = 'auth-indicator';
+        authIndicator.innerHTML = `
+            <span class="auth-status">
+                <i class="fas fa-user-shield"></i> Admin: ${authenticatedForTabs ? 'Active' : 'Inactive'}
+            </span>
+            ${authenticatedForTabs ? '<button onclick="logoutAdmin()" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>' : ''}
+        `;
+        headerElement.appendChild(authIndicator);
+    } else {
+        // Update the existing indicator
+        indicator.innerHTML = `
+            <span class="auth-status">
+                <i class="fas fa-user-shield"></i> Admin: ${authenticatedForTabs ? 'Active' : 'Inactive'}
+            </span>
+            ${authenticatedForTabs ? '<button onclick="logoutAdmin()" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>' : ''}
+        `;
+    }
+}
+
+// Check authentication status periodically
+setInterval(updateAuthIndicator, 1000);
+
+// Add these CSS styles for the authentication indicator
+const authStyles = `
+.auth-indicator {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 14px;
+    z-index: 1010;
+}
+
+.auth-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+}
+
+.auth-status i {
+    font-size: 14px;
+}
+
+.logout-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+    .auth-indicator {
+        top: 5px;
+        right: 60px;
+        font-size: 12px;
+    }
+    
+    .auth-status, .logout-btn {
+        padding: 3px 8px;
+    }
+}
+`;
+
+// Add the CSS styles to the document
+document.addEventListener('DOMContentLoaded', function() {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = authStyles;
+    document.head.appendChild(styleElement);
+    
+    // Initialize the auth indicator
+    updateAuthIndicator();
+    
+    // Modify the tab elements to use the new switchTab function
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        // We don't need to change anything here if the onclick is already set correctly
+        // Just make sure your HTML uses onclick="switchTab('tab-id')" format
+    });
+});
+
+// Modify your existing window.onload function to include our initialization
+const originalOnLoad = window.onload;
+window.onload = function() {
+    // Call the original onload function if it exists
+    if (typeof originalOnLoad === 'function') {
+        originalOnLoad();
+    }
+    
+    // Add our initializations
+    updateAuthIndicator();
+    
+    // Lock the protected tabs initially
+    const manageTab = document.querySelector('.tab[onclick="switchTab(\'manage-tab\')"]');
+    if (manageTab) {
+        manageTab.innerHTML += ' <i class="fas fa-lock"></i>';
+    }
+    
+    const activityTab = document.querySelector('.tab[onclick="switchTab(\'activity-tab\')"]');
+    if (activityTab) {
+        activityTab.innerHTML += ' <i class="fas fa-lock"></i>';
+    }
+};
+
+
+</script>
+</body>
+</html>
