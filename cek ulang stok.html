@@ -1,0 +1,4136 @@
+ <!DOCTYPE html>
+<html lang="id">
+<head>
+    
+    <title>Stok Opname</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.css">
+    <style>
+    /* Palette dan Variables */
+:root {
+    --primary-color: #4a6cf7;
+    --secondary-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --light-color: #f5f5f5;
+    --dark-color: #333;
+    --border-color: #ddd;
+    --bg-color: #f0f2f5;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --header-bg: #f8f9fa;
+}
+
+/* Base Styles */
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* Header dan Judul */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+h1, h2, h3 {
+    color: var(--dark-color);
+    margin: 0;
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+h3 {
+    font-size: 18px;
+}
+
+/* Form dan Filter */
+.filter-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    background-color: var(--header-bg);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+    font-size: 14px;
+}
+
+select, input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    transition: border 0.3s;
+}
+
+select:focus, input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.1);
+}
+
+/* Buttons */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+th, td {
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: var(--header-bg);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f0f7ff;
+}
+
+.category-header {
+    background-color: #e0f0ff;
+    font-size: 16px;
+    padding: 10px;
+    color: #333;
+}
+
+/* Status Styles */
+.status-pending {
+    color: var(--warning-color);
+    font-weight: 600;
+}
+
+.status-completed {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.status-adjusted {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.selisih-positif {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.selisih-negatif {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.selisih-nol {
+    color: var(--dark-color);
+}
+
+/* Search Box */
+.search-box {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    padding-left: 35px;
+    border-radius: 50px;
+    transition: all 0.3s;
+}
+
+.search-box input:focus {
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+}
+
+.search-box i {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    color: #888;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 4px;
+}
+
+/* Summary Dashboard */
+.summary-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.summary-item {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid var(--primary-color);
+    transition: transform 0.3s;
+}
+
+.summary-item:nth-child(2) {
+    border-left-color: var(--secondary-color);
+}
+
+.summary-item:nth-child(3) {
+    border-left-color: var(--warning-color);
+}
+
+.summary-item:nth-child(4) {
+    border-left-color: var(--danger-color);
+}
+
+.summary-item:hover {
+    transform: translateY(-2px);
+}
+
+.summary-title {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.summary-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-danger {
+    background-color: #ffecec;
+    color: var(--danger-color);
+}
+
+.badge-success {
+    background-color: #ecffef;
+    color: var(--secondary-color);
+}
+
+.badge-warning {
+    background-color: #fff8ec;
+    color: var(--warning-color);
+}
+
+/* Opname Header */
+.stockopname-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stockopname-header p {
+    color: #666;
+    margin: 5px 0 0 0;
+}
+
+/* Input dalam tabel */
+.input-aktual {
+    width: 100px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+.input-aktual:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 25px;
+    border-radius: 10px;
+    max-width: 600px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s;
+}
+
+.close:hover {
+    color: #333;
+}
+
+.modal-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #333;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Loading Spinner */
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.spinner {
+    border: 4px solid rgba(74, 108, 247, 0.1);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsif pada ukuran layar kecil */
+@media (max-width: 768px) {
+    .filter-section {
+        flex-direction: column;
+    }
+    
+    .form-group {
+        width: 100%;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .summary-box {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 90%;
+        margin: 10% auto;
+    }
+
+    th, td {
+        padding: 8px;
+        font-size: 13px;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+}
+   
+   
+ .download-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.download-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Selection checkboxes in table */
+.select-opname {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.select-all-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 10px 0;
+}
+
+.select-all-container label {
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.download-progress {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.progress-bar {
+    height: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    width: 0%;
+    transition: width 0.3s;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Download modal */
+#selectOpnameModal .modal-content {
+    max-width: 80%;
+    width: 100%;
+}
+
+#modalOpnameTable {
+    width: 100%;
+}
+
+#modalOpnameTable th {
+    position: sticky;
+    top: 0;
+    background-color: var(--header-bg);
+    z-index: 10;
+}  
+    </style>
+</head>
+<body>
+    <div class="container">
+     
+<!-- Perubahan pada bagian header untuk menambahkan tombol -->
+<div class="header">
+    <h1><i class="fas fa-clipboard-check"></i> Stok Opname</h1>
+    <div>
+        <button id="createOpnameBtn" class="btn-primary">
+            <i class="fas fa-plus"></i> Buat Stok Opname Baru
+        </button>
+        <button id="viewDeletedOpnameBtn" class="btn-warning" style="margin-left: 10px;">
+            <i class="fas fa-trash-restore"></i> Lihat Riwayat Hapus
+        </button>
+    </div>
+</div>
+        
+        <!-- Ringkasan Stok Opname -->
+        <div class="card">
+            <h2>Ringkasan Stok Opname</h2>
+            <div class="summary-box">
+                <div class="summary-item">
+                    <div class="summary-title">Total Stok Opname</div>
+                    <div class="summary-value" id="totalOpname">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-title">Stok Opname Hari Ini</div>
+                    <div class="summary-value" id="todayOpname">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-title">Selisih Stok (Total)</div>
+                    <div class="summary-value" id="totalSelisihStok">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-title">Selisih Rupiah (Total)</div>
+                    <div class="summary-value" id="totalSelisihRupiah">Rp 0</div>
+                </div>
+            </div>
+            
+           
+           
+           
+   <div class="download-section">
+    <h3>Download Data</h3>
+    <div class="download-buttons">
+        <button id="downloadPartialBtn" class="btn-primary">
+            <i class="fas fa-file-excel"></i> Download Sebagian Data
+        </button>
+        <button id="downloadAllBtn" class="btn-primary">
+            <i class="fas fa-file-excel"></i> Download Semua Data
+        </button>
+        <button id="downloadZipBtn" class="btn-secondary">
+            <i class="fas fa-file-archive"></i> Download Sebagai ZIP
+        </button>
+     
+<button id="downloadOpnamePdfBtn" class="btn btn-info" onclick="showPdfExportModal()">
+  <i class="fas fa-file-pdf"></i> Download PDF
+</button> 
+    </div>
+</div>
+
+<!-- Modal Pilih Stok Opname untuk Download -->
+<div id="selectOpnameModal" class="modal">
+    <div class="modal-content" style="width: 80%; max-width: 900px;">
+        <span class="close" id="closeSelectModal">&times;</span>
+        <h3 class="modal-title">Pilih Stok Opname untuk Diunduh</h3>
+        
+        <div class="filter-section">
+            <div class="form-group">
+                <label for="modalFilterTanggal">Filter Tanggal</label>
+                <input type="date" id="modalFilterTanggal">
+            </div>
+            <div class="form-group">
+                <label for="modalFilterStatus">Status</label>
+                <select id="modalFilterStatus">
+                    <option value="all">Semua</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Selesai</option>
+                    <option value="adjusted">Disesuaikan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="modalFilterKategori">Kategori</label>
+                <select id="modalFilterKategori">
+                    <option value="all">Semua</option>
+                    <!-- Kategori akan diisi dari JavaScript -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <button id="modalFilterBtn" class="btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="modalSearchOpname" placeholder="Cari stok opname...">
+        </div>
+        
+        <div class="select-all-container">
+            <input type="checkbox" id="modalSelectAll">
+            <label for="modalSelectAll">Pilih Semua</label>
+        </div>
+        
+        <div class="table-responsive">
+            <table id="modalOpnameTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">Pilih</th>
+                        <th>No. Opname</th>
+                        <th>Tanggal</th>
+                        <th>Kategori</th>
+                        <th>Jumlah Item</th>
+                        <th>Petugas</th>
+                        <th>Status</th>
+                        <th>Selisih Stok</th>
+                        <th>Selisih Rupiah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data riwayat stok opname akan diisi dari JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="download-progress" style="display:none;">
+            <div>Menyiapkan download: <span id="downloadProgress">0</span> dari <span id="totalProgress">0</span></div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+        
+        <div class="modal-footer">
+            <button id="downloadSelectedExcelBtn" class="btn-primary">
+                <i class="fas fa-file-excel"></i> Download Excel
+            </button>
+            <button id="downloadSelectedZipBtn" class="btn-secondary">
+                <i class="fas fa-file-archive"></i> Download ZIP
+            </button>
+            <button id="cancelDownloadBtn" class="btn-danger">Batal</button>
+        </div>
+    </div>
+</div>        
+           
+           
+           
+            <!-- Filter Riwayat Stok Opname -->
+            <div class="filter-section">
+                <div class="form-group">
+                    <label for="filterTanggal">Filter Tanggal</label>
+                    <input type="date" id="filterTanggal">
+                </div>
+                <div class="form-group">
+                    <label for="filterStatus">Status</label>
+                    <select id="filterStatus">
+                        <option value="all">Semua</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Selesai</option>
+                        <option value="adjusted">Disesuaikan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filterKategori">Kategori</label>
+                    <select id="filterKategori">
+                        <option value="all">Semua</option>
+                        <!-- Kategori akan diisi dari JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button id="filterBtn" class="btn-primary">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tabel Riwayat Stok Opname -->
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchOpname" placeholder="Cari stok opname...">
+            </div>
+            <table id="tabelRiwayatOpname">
+                <thead>
+                    <tr>
+                        <th>No. Opname</th>
+                        <th>Tanggal</th>
+                        <th>Kategori</th>
+                        <th>Jumlah Item</th>
+                        <th>Petugas</th>
+                        <th>Status</th>
+                        <th>Selisih Stok</th>
+                        <th>Selisih Rupiah</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data riwayat stok opname akan diisi dari JavaScript -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Detail Stok Opname (muncul saat ada stok opname aktif) -->
+        <div id="detailOpnameContainer" class="card" style="display: none;">
+            <div class="stockopname-header">
+                <div>
+                    <h2>Detail Stok Opname</h2>
+                    <p>No. Opname: <span id="opnameNumber"></span> | Tanggal: <span id="opnameDate"></span> | Status: <span id="opnameStatus"></span></p>
+                </div>
+                <div class="action-buttons">
+                    <button id="saveOpnameBtn" class="btn-primary">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
+                    <button id="completeOpnameBtn" class="btn-secondary">
+                        <i class="fas fa-check-circle"></i> Selesaikan
+                    </button>
+                    
+                    
+                    <button id="cancelOpnameBtn" class="btn-danger">
+                        <i class="fas fa-times-circle"></i> Batal
+                    </button>
+                    
+                    
+                </div>
+                
+            </div>
+            
+            <!-- Filter Stok Opname -->
+            <div class="filter-section">
+                <div class="form-group">
+                    <label for="opnameFilterKategori">Kategori</label>
+                    <select id="opnameFilterKategori">
+                        <option value="all">Semua</option>
+                        <!-- Kategori akan diisi dari JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="opnameFilterBarang">Cari Barang</label>
+                    <input type="text" id="opnameFilterBarang" placeholder="Kode/Nama barang...">
+                </div>
+                <div class="form-group">
+                    <label for="opnameFilterSelisih">Filter Selisih</label>
+                    <select id="opnameFilterSelisih">
+                        <option value="all">Semua</option>
+                        <option value="plus">Selisih Positif</option>
+                        <option value="minus">Selisih Negatif</option>
+                        <option value="zero">Tidak Ada Selisih</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button id="opnameFilterBtn" class="btn-primary">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tabel Detail Stok Opname -->
+            <table id="tabelDetailOpname">
+                <thead>
+                    
+                    <tr>
+                        <th>Kategori</th>
+                        <th>Kode Toko</th>
+                        <th>Kode Barang</th>
+                        <th>PLU</th>
+                        <th>Nama Barang</th>
+                        <th>Stok Sistem</th>
+                        <th>Stok Aktual</th>
+                        <th>Selisih</th>
+                        <th>Harga Beli</th>
+                        <th>Selisih Rupiah</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data detail stok opname akan diisi dari JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    
+    <!-- Modal Pembuatan Stok Opname Baru -->
+    <div id="createOpnameModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeCreateModal">&times;</span>
+            <h3 class="modal-title">Buat Stok Opname Baru</h3>
+            <div class="form-group">
+                <label for="opnameType">Tipe Stok Opname</label>
+                <select id="opnameType">
+                    <option value="all">Semua Barang</option>
+                    <option value="category">Per Kategori</option>
+                    <option value="selected">Barang Tertentu</option>
+                </select>
+            </div>
+            
+            <!-- Form untuk opname per kategori -->
+            <div id="categoryForm" class="form-group" style="display: none;">
+                <label for="selectCategory">Pilih Kategori</label>
+                <select id="selectCategory">
+                    <!-- Kategori akan diisi dari JavaScript -->
+                </select>
+            </div>
+            
+            <!-- Form untuk opname barang tertentu -->
+            <div id="selectedItemsForm" style="display: none;">
+                <div class="form-group">
+                    <label for="searchItems">Cari Barang</label>
+                    <input type="text" id="searchItems" placeholder="Kode/Nama barang...">
+                </div>
+                <table id="itemSelectionTable">
+                    <thead>
+                        <tr>
+                            <th>Pilih</th>
+                            <th>Kode</th>
+                            <th>Nama</th>
+                            <th>Kategori</th>
+                            <th>Stok</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data barang akan diisi dari JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="form-group">
+                <label for="opnameNote">Catatan (Opsional)</label>
+                <input type="text" id="opnameNote" placeholder="Catatan stok opname...">
+            </div>
+            
+            <div class="modal-footer">
+                <button id="startOpnameBtn" class="btn-primary">Mulai Stok Opname</button>
+                <button id="cancelCreateBtn" class="btn-danger">Batal</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Detail Riwayat Stok Opname -->
+    <div id="historyDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeHistoryModal">&times;</span>
+            <h3 class="modal-title">Detail Riwayat Stok Opname</h3>
+            <p>No. Opname: <span id="historyOpnameNumber"></span> | Tanggal: <span id="historyOpnameDate"></span></p>
+            <p>Status: <span id="historyOpnameStatus"></span> | Petugas: <span id="historyOpnameStaff"></span></p>
+            
+            <table id="historyDetailTable">
+                <thead>
+                    <tr>
+                        <th>Kategori</th>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Stok Sistem</th>
+                        <th>Stok Aktual</th>
+                        <th>Selisih</th>
+                        <th>Selisih Rupiah</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data detail riwayat akan diisi dari JavaScript -->
+                </tbody>
+            </table>
+            
+            <div class="modal-footer">
+                <button id="closeHistoryDetailBtn" class="btn-primary">Tutup</button>
+                <button id="adjustStockBtn" class="btn-warning" style="display: none;">Adjust Stok</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div id="loadingOverlay" class="loading" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.4.8/sweetalert2.min.js"></script>
+    
+    <script>
+        
+// Global variable to track if libraries have been loaded
+let pdfMakeLoaded = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Tambahkan tombol eksport PDF
+  addPdfExportButton();
+  
+  // Buat modal jika belum ada
+  if (!document.getElementById('pdfExportModal')) {
+    createPdfExportModal();
+  }
+  
+  // Muat library pdfMake
+  loadPdfMakeLibrary();
+});
+
+// Load PDF Make libraries with proper callback handling
+function loadPdfMakeLibrary() {
+  // Skip if already loaded
+  if (typeof pdfMake !== 'undefined' && typeof pdfMake.createPdf === 'function') {
+    pdfMakeLoaded = true;
+    return;
+  }
+  
+  console.log('Loading pdfMake libraries...');
+  
+  // Load pdfmake main script
+  const pdfMakeScript = document.createElement('script');
+  pdfMakeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js';
+  
+  pdfMakeScript.onload = function() {
+    console.log('pdfMake main script loaded');
+    
+    // Load fonts after main script is loaded
+    const pdfFontsScript = document.createElement('script');
+    pdfFontsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js';
+    
+    pdfFontsScript.onload = function() {
+      console.log('pdfMake fonts loaded');
+      pdfMakeLoaded = true;
+      
+      // Enable the generate button if it was disabled
+      const generateBtn = document.getElementById('generatePdfBtn');
+      if (generateBtn && generateBtn.disabled && generateBtn.getAttribute('data-library-loading')) {
+        generateBtn.disabled = false;
+        generateBtn.removeAttribute('data-library-loading');
+      }
+    };
+    
+    pdfFontsScript.onerror = function() {
+      console.error('Failed to load pdfMake fonts');
+      alert('Gagal memuat library PDF. Silakan coba lagi atau muat ulang halaman.');
+    };
+    
+    document.head.appendChild(pdfFontsScript);
+  };
+  
+  pdfMakeScript.onerror = function() {
+    console.error('Failed to load pdfMake main script');
+    alert('Gagal memuat library PDF. Silakan coba lagi atau muat ulang halaman.');
+  };
+  
+  document.head.appendChild(pdfMakeScript);
+}
+
+// Add the PDF export button to the UI
+function addPdfExportButton() {
+  // Create button in the detail opname container
+  const buttonContainer = document.querySelector('#detailOpnameContainer .button-group');
+  if (!buttonContainer) return;
+  
+  // Check if button already exists
+  if (document.getElementById('downloadOpnamePdfBtn')) return;
+  
+  // Create download PDF button
+  const downloadBtn = document.createElement('button');
+  downloadBtn.id = 'downloadOpnamePdfBtn';
+  downloadBtn.className = 'btn btn-info';
+  downloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Download PDF';
+  downloadBtn.addEventListener('click', showPdfExportModal);
+  
+  // Add button to container
+  buttonContainer.appendChild(downloadBtn);
+}
+
+// Create the PDF export modal
+function createPdfExportModal() {
+  // Check if modal already exists
+  if (document.getElementById('pdfExportModal')) return;
+  
+  const modalHtml = `
+    <div id="pdfExportModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Download Stok Opname PDF</h2>
+          <span class="close" onclick="document.getElementById('pdfExportModal').style.display='none'">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="pdfOpnameSelect">Pilih Stok Opname:</label>
+            <select id="pdfOpnameSelect" class="form-control">
+              <!-- Options will be loaded dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pdfIncludePrice">Tampilkan Harga:</label>
+            <input type="checkbox" id="pdfIncludePrice" checked>
+          </div>
+          <div class="form-group">
+            <button id="generatePdfBtn" class="btn btn-primary">
+              <i class="fas fa-download"></i> Download PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Add modal to the body
+  const modalContainer = document.createElement('div');
+  modalContainer.innerHTML = modalHtml;
+  document.body.appendChild(modalContainer);
+  
+  // Add style for the modal
+  const style = document.createElement('style');
+  style.textContent = `
+    #pdfExportModal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    #pdfExportModal .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+    }
+    #pdfExportModal .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    #pdfExportModal .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #pdfExportModal .form-group {
+      margin-bottom: 15px;
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Add event listener to generate button
+  const generateBtn = document.getElementById('generatePdfBtn');
+  if (generateBtn) {
+    generateBtn.addEventListener('click', generateOpnamePdf);
+  }
+}
+
+// Show the PDF export modal
+function showPdfExportModal() {
+  // Get modal element
+  const modal = document.getElementById('pdfExportModal');
+  if (!modal) {
+    createPdfExportModal();
+  }
+  
+  // Load pending opname options
+  loadPendingOpnameOptions();
+  
+  // Show the modal
+  document.getElementById('pdfExportModal').style.display = 'block';
+}
+
+// Load pending opname options into the select element
+function loadPendingOpnameOptions() {
+  const selectElement = document.getElementById('pdfOpnameSelect');
+  if (!selectElement) return;
+  
+  selectElement.innerHTML = '';
+  
+  // Check data availability
+  const hasCurrentOpname = typeof currentOpname !== 'undefined' && currentOpname;
+  const hasRiwayatOpname = typeof riwayatOpname !== 'undefined' && Array.isArray(riwayatOpname) && riwayatOpname.length > 0;
+  
+  // Add current opname if available
+  if (hasCurrentOpname) {
+    const option = document.createElement('option');
+    option.value = currentOpname.noOpname;
+    option.textContent = `${currentOpname.noOpname} (${formatDate(currentOpname.tanggal)})`;
+    selectElement.appendChild(option);
+  }
+  
+  // Add other pending opname options
+  if (hasRiwayatOpname) {
+    const pendingOpnames = riwayatOpname.filter(op => 
+      op.status === 'pending' && 
+      (!hasCurrentOpname || op.noOpname !== currentOpname.noOpname)
+    );
+    
+    pendingOpnames.forEach(opname => {
+      const option = document.createElement('option');
+      option.value = opname.noOpname;
+      option.textContent = `${opname.noOpname} (${formatDate(opname.tanggal)})`;
+      selectElement.appendChild(option);
+    });
+  }
+  
+  // Show message if no opnames available
+  if (selectElement.options.length === 0) {
+    const option = document.createElement('option');
+    option.disabled = true;
+    option.textContent = 'Tidak ada data stok opname';
+    selectElement.appendChild(option);
+    
+    // Disable generate button
+    const generateBtn = document.getElementById('generatePdfBtn');
+    if (generateBtn) {
+      generateBtn.disabled = true;
+    }
+  } else {
+    const generateBtn = document.getElementById('generatePdfBtn');
+    if (generateBtn) {
+      generateBtn.disabled = false;
+    }
+  }
+}
+
+// Format date for display
+function formatDate(dateString) {
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // Return original if invalid
+    
+    return date.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  } catch (e) {
+    console.error('Error formatting date:', e);
+    return dateString;
+  }
+}
+
+// Generate PDF for opname
+function generateOpnamePdf() {
+  const generateBtn = document.getElementById('generatePdfBtn');
+  
+  // Check if pdfMake is loaded
+  if (typeof pdfMake === 'undefined' || typeof pdfMake.createPdf !== 'function') {
+    console.log('pdfMake not loaded, loading now...');
+    
+    // Show loading state
+    if (generateBtn) {
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+      generateBtn.setAttribute('data-library-loading', 'true');
+    }
+    
+    // Load library and try again
+    loadPdfMakeLibrary();
+    setTimeout(() => {
+      if (pdfMakeLoaded) {
+        generateOpnamePdf();
+      }
+    }, 1000);
+    return;
+  }
+  
+  try {
+    // Get selected opname and options
+    const selectElement = document.getElementById('pdfOpnameSelect');
+    if (!selectElement || selectElement.options.length === 0) {
+      alert('Silakan pilih stok opname terlebih dahulu!');
+      return;
+    }
+    
+    const opnameNo = selectElement.value;
+    const includePrice = document.getElementById('pdfIncludePrice').checked;
+    
+    // Show loading state
+    if (generateBtn) {
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    }
+    
+    // Find opname data
+    let opnameData = null;
+    
+    // Check in currentOpname first
+    if (typeof currentOpname !== 'undefined' && currentOpname && currentOpname.noOpname === opnameNo) {
+      opnameData = currentOpname;
+    } 
+    // Then check in riwayatOpname
+    else if (typeof riwayatOpname !== 'undefined' && Array.isArray(riwayatOpname)) {
+      opnameData = riwayatOpname.find(op => op.noOpname === opnameNo);
+    }
+    
+    if (!opnameData) {
+      alert('Data stok opname tidak ditemukan!');
+      resetGenerateButton();
+      return;
+    }
+    
+    // Ensure opnameData.items exists
+    if (!opnameData.items || !Array.isArray(opnameData.items)) {
+      alert('Data item stok opname tidak ditemukan atau tidak valid!');
+      resetGenerateButton();
+      return;
+    }
+    
+    // Create document definition for pdfmake
+    const docDefinition = createPdfDocDefinition(opnameData, includePrice);
+    
+    // Generate PDF with error handling
+    console.log('Generating PDF...');
+    pdfMake.createPdf(docDefinition).download(`StokOpname_${opnameData.noOpname}.pdf`, function() {
+      console.log('PDF created successfully');
+      
+      // Reset button and close modal
+      resetGenerateButton();
+      document.getElementById('pdfExportModal').style.display = 'none';
+    }, function(error) {
+      console.error('PDF creation failed:', error);
+      alert('Gagal membuat PDF: ' + error);
+      resetGenerateButton();
+    });
+  } catch (error) {
+    console.error('Error in generateOpnamePdf:', error);
+    alert('Terjadi kesalahan: ' + error.message);
+    resetGenerateButton();
+  }
+}
+
+// Reset generate button state
+function resetGenerateButton() {
+  const generateBtn = document.getElementById('generatePdfBtn');
+  if (generateBtn) {
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF';
+  }
+}
+
+// Format currency in Rupiah
+function formatRupiah(amount) {
+  if (amount === null || amount === undefined || isNaN(amount)) return '';
+  return 'Rp ' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function createPdfDocDefinition(opnameData, includePrice) {
+  try {
+    // Company info - add this to configuration or pass as parameter
+    const companyInfo = {
+      name: opnameData.companyName || "FXID GRUP STORE",
+      logo: opnameData.companyLogo || null, // Path to company logo
+      address: opnameData.companyAddress || "Jl. Amd raya no 39, BOGOR 16120",
+      phone: opnameData.companyPhone || "0838-6507-4619",
+      email: opnameData.companyEmail || "fxidstore12@gmail.com"
+    };
+
+    // Color scheme
+    const colors = {
+      primary: '#2c3e50',    // Dark blue/slate for headers
+      secondary: '#3498db',  // Lighter blue for accents
+      light: '#ecf0f1',      // Light gray for alternating rows
+      border: '#bdc3c7',     // Medium gray for borders
+      text: '#333333',       // Dark gray for text
+      highlight: '#e74c3c'   // Red for important notes or highlights
+    };
+
+    // Format date with time
+    const tanggal = new Date(opnameData.tanggal);
+    const formattedDate = !isNaN(tanggal.getTime()) ? 
+      tanggal.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      }) : 'Tanggal tidak valid';
+    
+    const formattedTime = !isNaN(tanggal.getTime()) ?
+      tanggal.toLocaleTimeString('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : '';
+
+    // Calculate totals
+    let totalItems = 0;
+    let totalCategories = 0;
+    let totalValue = 0;
+
+    // Group items by category
+    const itemsByCategory = {};
+    opnameData.items.forEach(item => {
+      const category = item.kategori || 'Tidak Dikategorikan';
+      if (!itemsByCategory[category]) {
+        itemsByCategory[category] = [];
+        totalCategories++;
+      }
+      itemsByCategory[category].push(item);
+      totalItems++;
+      
+      if (includePrice && item.hargaBeli && item.stokSistem) {
+        totalValue += (parseFloat(item.hargaBeli) * parseFloat(item.stokSistem));
+      }
+    });
+    
+    // Define table headers with improved design
+    let tableHeaders = [
+      { text: 'KODE', style: 'tableHeader', fillColor: colors.primary, color: 'white' },
+      { text: 'PLU', style: 'tableHeader', fillColor: colors.primary, color: 'white' },
+      { text: 'NAMA BARANG', style: 'tableHeader', fillColor: colors.primary, color: 'white' },
+      { text: 'STOK AREA', style: 'tableHeader', fillColor: colors.primary, color: 'white' }
+    ];
+    
+    if (includePrice) {
+      tableHeaders.push({ text: 'HARGA BELI', style: 'tableHeader', fillColor: colors.primary, color: 'white' });
+      tableHeaders.push({ text: 'SUBTOTAL', style: 'tableHeader', fillColor: colors.primary, color: 'white' });
+    }
+    
+    tableHeaders.push({ text: 'KETERANGAN', style: 'tableHeader', fillColor: colors.primary, color: 'white' });
+    
+    // Document content with enhanced styling
+    const content = [];
+    
+    // Header with logo and company info
+    content.push({
+      columns: [
+        companyInfo.logo ? {
+          image: companyInfo.logo,
+          width: 60,
+          height: 60,
+          alignment: 'left'
+        } : {
+          width: 60,
+          text: ''
+        },
+        {
+          stack: [
+            { text: companyInfo.name, style: 'companyName', alignment: 'center' },
+            { text: companyInfo.address, style: 'companyDetails', alignment: 'center' },
+            { text: `${companyInfo.phone} | ${companyInfo.email}`, style: 'companyDetails', alignment: 'center' },
+          ],
+          width: '*'
+        },
+        {
+          width: 60,
+          text: ''
+        }
+      ]
+    });
+    
+    // Divider line
+    content.push({
+      canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 2, lineColor: colors.primary }],
+      margin: [0, 10, 0, 10]
+    });
+    
+    // Document title
+    content.push(
+      { text: 'FORM STOK OPNAME', style: 'header', alignment: 'center' },
+      { text: opnameData.noOpname, style: 'subheader', alignment: 'center', color: colors.secondary }
+    );
+    
+    // Informasi opname dengan layout yang lebih baik
+    content.push({
+      columns: [
+        {
+          width: 'auto',
+          stack: [
+            {
+              columns: [
+                { width: 80, text: 'Tanggal', style: 'labelBold' },
+                { width: 'auto', text: ':', style: 'labelBold' },
+                { width: '*', text: `${formattedDate}`, style: 'value' }
+              ]
+            },
+            {
+              columns: [
+                { width: 80, text: 'Jam', style: 'labelBold' },
+                { width: 'auto', text: ':', style: 'labelBold' },
+                { width: '*', text: `${formattedTime}`, style: 'value' }
+              ]
+            }
+          ]
+        },
+        {
+          width: '*',
+          stack: [
+            {
+              columns: [
+                { width: 80, text: 'Petugas', style: 'labelBold' },
+                { width: 'auto', text: ':', style: 'labelBold' },
+                { width: '*', text: `${opnameData.petugas || '-'}`, style: 'value' }
+              ]
+            },
+            {
+              columns: [
+                { width: 80, text: 'Lokasi', style: 'labelBold' },
+                { width: 'auto', text: ':', style: 'labelBold' },
+                { width: '*', text: `${opnameData.lokasi || '-'}`, style: 'value' }
+              ]
+            }
+          ]
+        }
+      ],
+      columnGap: 20,
+      margin: [0, 15, 0, 5]
+    });
+    
+    // Summary information box
+    content.push({
+      table: {
+        widths: ['*', '*', '*'],
+        body: [
+          [
+            { 
+              text: `TOTAL KATEGORI: ${totalCategories}`, 
+              style: 'summaryBox',
+              fillColor: colors.light,
+              alignment: 'center'
+            },
+            { 
+              text: `TOTAL ITEM: ${totalItems}`, 
+              style: 'summaryBox',
+              fillColor: colors.light,
+              alignment: 'center'
+            },
+            includePrice ? { 
+              text: `TOTAL NILAI: ${formatRupiah(totalValue)}`, 
+              style: 'summaryBox',
+              fillColor: colors.light,
+              alignment: 'center'
+            } : { 
+              text: `WAKTU MULAI: ${opnameData.waktuMulai || '-'}`, 
+              style: 'summaryBox',
+              fillColor: colors.light,
+              alignment: 'center'
+            }
+          ]
+        ]
+      },
+      margin: [0, 10, 0, 10]
+    });
+    
+    // Add notes section with border
+    content.push({
+      table: {
+        widths: ['*'],
+        body: [
+          [
+            {
+              stack: [
+                { text: 'CATATAN:', style: 'labelBold', margin: [0, 0, 0, 5] },
+                { text: opnameData.catatan || '-', style: 'value' }
+              ],
+              padding: [10, 10, 10, 10]
+            }
+          ]
+        ]
+      },
+      margin: [0, 0, 0, 15]
+    });
+    
+    // Add instruction text
+    content.push({
+      text: 'Harap isi stok aktual yang ditemukan secara fisik di area. Jika ada perbedaan, berikan keterangan.',
+      style: 'instructions',
+      margin: [0, 0, 0, 10]
+    });
+    
+    // Add tables for each category
+    const categories = Object.keys(itemsByCategory).sort();
+    
+    categories.forEach((category, categoryIndex) => {
+      const items = itemsByCategory[category];
+      
+      // Add category header with improved styling
+      content.push({
+        table: {
+          widths: ['*'],
+          body: [
+            [
+              {
+                text: `KATEGORI: ${category.toUpperCase()}`,
+                style: 'categoryHeader',
+                fillColor: colors.secondary,
+                color: 'white'
+              }
+            ]
+          ]
+        },
+        margin: [0, 10, 0, 0]
+      });
+      
+      // Create table body with alternating row colors
+      const tableBody = [tableHeaders];
+      
+      items.forEach((item, index) => {
+        const fillColor = index % 2 === 0 ? 'white' : colors.light;
+        
+        // Create row with updated styling
+        const row = [
+          { text: item.kode || '', alignment: 'center', fillColor },
+          { text: item.plu || '', alignment: 'center', fillColor },
+          { text: item.nama || '', fillColor },
+          { text: '', fillColor } // Kolom untuk input stok area manual
+        ];
+        
+        if (includePrice) {
+          const hargaBeli = item.hargaBeli || 0;
+          const stokSistem = item.stokSistem || 0;
+          const subtotal = hargaBeli * stokSistem;
+          
+          row.push({ 
+            text: formatRupiah(hargaBeli), 
+            alignment: 'right',
+            fillColor 
+          });
+          row.push({ 
+            text: formatRupiah(subtotal), 
+            alignment: 'right',
+            fillColor 
+          });
+        }
+        
+        row.push({ text: '', fillColor }); // Empty cell for notes
+        
+        tableBody.push(row);
+      });
+      
+      // Add table with improved styling
+      content.push({
+        table: {
+          headerRows: 1,
+          widths: includePrice 
+            ? ['auto', 'auto', '*', 'auto', 'auto', 'auto', '*'] 
+            : ['auto', 'auto', '*', 'auto', '*'],
+          body: tableBody
+        },
+        layout: {
+          hLineWidth: function(i, node) {
+            return (i === 0 || i === 1 || i === node.table.body.length) ? 1 : 0.5;
+          },
+          vLineWidth: function(i, node) {
+            return 0.5;
+          },
+          hLineColor: function(i, node) {
+            return colors.border;
+          },
+          vLineColor: function(i, node) {
+            return colors.border;
+          },
+          paddingLeft: function(i) { return 4; },
+          paddingRight: function(i) { return 4; },
+          paddingTop: function(i) { return 6; },
+          paddingBottom: function(i) { return 6; }
+        }
+      });
+      
+      // Add space after table except for last category
+      if (categoryIndex < categories.length - 1) {
+        content.push({ text: '', margin: [0, 10, 0, 0] });
+      }
+    });
+    
+    // Add summary section at the bottom
+    content.push({
+      columns: [
+        {
+          width: '*',
+          text: [
+            { text: 'Waktu Mulai: ', style: 'labelBold' },
+            { text: opnameData.waktuMulai || '-', style: 'value' }
+          ]
+        },
+        {
+          width: '*',
+          text: [
+            { text: 'Waktu Selesai: ', style: 'labelBold' },
+            { text: opnameData.waktuSelesai || '-', style: 'value' }
+          ]
+        }
+      ],
+      margin: [0, 20, 0, 10]
+    });
+    
+    // Add signature section with improved layout
+    content.push(
+      { 
+        columns: [
+          {
+            width: '33%',
+            stack: [
+              { text: 'Dibuat Oleh:', alignment: 'center', style: 'signatureLabel' },
+              { 
+                image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                width: 100,
+                height: 40,
+                alignment: 'center',
+                margin: [0, 10, 0, 10]
+              },
+              { canvas: [{ type: 'line', x1: 20, y1: 0, x2: 120, y2: 0, lineWidth: 1 }], alignment: 'center' },
+              { text: '(________________)', alignment: 'center', margin: [0, 5, 0, 0] },
+              { text: 'Petugas', alignment: 'center', fontSize: 8, margin: [0, 3, 0, 0] }
+            ]
+          },
+          {
+            width: '33%',
+            stack: [
+              { text: 'Diperiksa Oleh:', alignment: 'center', style: 'signatureLabel' },
+              { 
+                image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                width: 100,
+                height: 40,
+                alignment: 'center',
+                margin: [0, 10, 0, 10]
+              },
+              { canvas: [{ type: 'line', x1: 20, y1: 0, x2: 120, y2: 0, lineWidth: 1 }], alignment: 'center' },
+              { text: '(________________)', alignment: 'center', margin: [0, 5, 0, 0] },
+              { text: 'Supervisor', alignment: 'center', fontSize: 8, margin: [0, 3, 0, 0] }
+            ]
+          },
+          {
+            width: '33%',
+            stack: [
+              { text: 'Disetujui Oleh:', alignment: 'center', style: 'signatureLabel' },
+              { 
+                image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                width: 100,
+                height: 40,
+                alignment: 'center',
+                margin: [0, 10, 0, 10]
+              },
+              { canvas: [{ type: 'line', x1: 20, y1: 0, x2: 120, y2: 0, lineWidth: 1 }], alignment: 'center' },
+              { text: '(________________)', alignment: 'center', margin: [0, 5, 0, 0] },
+              { text: 'Manager', alignment: 'center', fontSize: 8, margin: [0, 3, 0, 0] }
+            ]
+          }
+        ],
+        margin: [0, 30, 0, 0]
+      }
+    );
+
+    // Add terms and guidelines
+    content.push({
+      text: [
+        { text: 'PETUNJUK: ', bold: true, fontSize: 8 },
+        { text: 'Formulir ini adalah dokumen resmi. Pastikan semua data terisi dengan benar dan lengkap sebelum ditandatangani. Simpan salinan untuk arsip.', fontSize: 8 }
+      ],
+      margin: [0, 20, 0, 0],
+      alignment: 'center'
+    });
+    
+    // Return the document definition with enhanced styling
+    return {
+      content: content,
+      defaultStyle: {
+        fontSize: 10,
+        color: colors.text
+      },
+      styles: {
+        companyName: {
+          fontSize: 16,
+          bold: true,
+          margin: [0, 0, 0, 2]
+        },
+        companyDetails: {
+          fontSize: 9,
+          color: colors.text,
+          margin: [0, 0, 0, 1]
+        },
+        header: {
+          fontSize: 18,
+          bold: true,
+          color: colors.primary,
+          margin: [0, 5, 0, 5]
+        },
+        subheader: {
+          fontSize: 13,
+          bold: true,
+          margin: [0, 0, 0, 10]
+        },
+        categoryHeader: {
+          fontSize: 12,
+          bold: true,
+          margin: [0, 2, 0, 2]
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 10,
+          alignment: 'center',
+          margin: [0, 4, 0, 4]
+        },
+        labelBold: {
+          bold: true,
+          fontSize: 10,
+          margin: [0, 2, 0, 2]
+        },
+        value: {
+          fontSize: 10,
+          margin: [0, 2, 0, 2]
+        },
+        summaryBox: {
+          fontSize: 11,
+          bold: true,
+          margin: [0, 7, 0, 7]
+        },
+        instructions: {
+          fontSize: 9,
+          italics: true,
+          color: colors.highlight
+        },
+        signatureLabel: {
+          fontSize: 10,
+          bold: true,
+          margin: [0, 0, 0, 10]
+        }
+      },
+      pageSize: 'A4',
+      pageMargins: [40, 60, 40, 60],
+      footer: function(currentPage, pageCount) {
+        return {
+          columns: [
+            { 
+              text: `${opnameData.noOpname || 'STOCK OPNAME'}`,
+              alignment: 'left',
+              fontSize: 8,
+              margin: [40, 0, 0, 0]
+            },
+            {
+              text: `Halaman ${currentPage} dari ${pageCount}`,
+              alignment: 'center',
+              fontSize: 8
+            },
+            {
+              text: `Dicetak: ${new Date().toLocaleString('id-ID')}`,
+              alignment: 'right',
+              fontSize: 8,
+              margin: [0, 0, 40, 0]
+            }
+          ],
+          margin: [40, 10, 40, 0]
+        };
+      },
+      header: function(currentPage, pageCount, pageSize) {
+        if (currentPage > 1) {
+          return {
+            columns: [
+              {
+                text: companyInfo.name,
+                alignment: 'left',
+                fontSize: 10,
+                bold: true,
+                margin: [40, 20, 0, 0]
+              },
+              {
+                text: 'FORM STOK OPNAME',
+                alignment: 'right',
+                fontSize: 10,
+                bold: true,
+                margin: [0, 20, 40, 0]
+              }
+            ]
+          };
+        }
+        return null;
+      }
+    };
+  } catch (error) {
+    console.error('Error creating PDF definition:', error);
+    throw new Error('Gagal membuat definisi PDF: ' + error.message);
+  }
+}
+
+// Helper function for formatting rupiah values
+function formatRupiah(amount) {
+  if (!amount) return 'Rp 0';
+  
+  try {
+    const number = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(number);
+  } catch (e) {
+    return 'Rp 0';
+  }
+}
+       
+       
+        
+        let riwayatOpname = []; // Declare riwayatOpname globally
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Global variables
+    let currentOpname = null;
+    let allBarang = [];
+    let filteredBarang = [];
+    // Don't redeclare riwayatOpname here, just use the global one
+    let activeOpnameItems = [];
+    
+    // Load data from localStorage
+    loadData();
+
+    function loadData() {
+        allBarang = JSON.parse(localStorage.getItem('barang')) || [];
+        riwayatOpname = JSON.parse(localStorage.getItem('stokOpname')) || []; // This now affects the global variable
+        updateSummary();
+        loadRiwayatOpname();
+        loadKategoriOptions();
+    }
+    
+    
+            // Format currency to Rupiah
+            function formatRupiah(angka) {
+                return 'Rp ' + parseFloat(angka).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+            
+            // Update summary statistics
+            function updateSummary() {
+                const totalOpname = riwayatOpname.length;
+                
+                // Count today's opname
+                const today = new Date().toISOString().split('T')[0];
+                const todayOpname = riwayatOpname.filter(op => op.tanggal.split('T')[0] === today).length;
+                
+                // Calculate total discrepancies
+                let totalSelisihStok = 0;
+                let totalSelisihRupiah = 0;
+                
+                riwayatOpname.forEach(opname => {
+                    if (opname.status === 'completed' || opname.status === 'adjusted') {
+                        opname.items.forEach(item => {
+                            const selisih = item.stokAktual - item.stokSistem;
+                            totalSelisihStok += selisih;
+                            totalSelisihRupiah += selisih * item.hargaBeli;
+                        });
+                    }
+                });
+                
+                document.getElementById('totalOpname').textContent = totalOpname;
+                document.getElementById('todayOpname').textContent = todayOpname;
+                document.getElementById('totalSelisihStok').textContent = totalSelisihStok;
+                document.getElementById('totalSelisihRupiah').textContent = formatRupiah(totalSelisihRupiah);
+            }
+            
+            // Load categories into select options
+            function loadKategoriOptions() {
+                const categories = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'Uncategorized'];
+                
+                // Add options to filter dropdowns
+                const filterKategori = document.getElementById('filterKategori');
+                const opnameFilterKategori = document.getElementById('opnameFilterKategori');
+                const selectCategory = document.getElementById('selectCategory');
+                
+                // Clear existing options
+                filterKategori.innerHTML = '<option value="all">Semua</option>';
+                opnameFilterKategori.innerHTML = '<option value="all">Semua</option>';
+                selectCategory.innerHTML = '';
+                
+                // Add new options
+                categories.forEach(category => {
+                    // Only add categories that have items
+                    const hasItems = allBarang.some(item => (item.kategori || 'Uncategorized') === category);
+                    
+                    if (hasItems) {
+                        filterKategori.innerHTML += `<option value="${category}">${category}</option>`;
+                        opnameFilterKategori.innerHTML += `<option value="${category}">${category}</option>`;
+                        selectCategory.innerHTML += `<option value="${category}">${category}</option>`;
+                    }
+                });
+            }
+            
+            // Load history of stock opname
+            function loadRiwayatOpname() {
+                const tbody = document.querySelector('#tabelRiwayatOpname tbody');
+                tbody.innerHTML = '';
+                
+                // Apply filters
+                const filterTanggal = document.getElementById('filterTanggal').value;
+                const filterStatus = document.getElementById('filterStatus').value;
+                const filterKategori = document.getElementById('filterKategori').value;
+                const searchTerm = document.getElementById('searchOpname').value.toLowerCase();
+                
+                let filteredOpname = [...riwayatOpname];
+                
+                // Apply date filter
+                if (filterTanggal) {
+                    filteredOpname = filteredOpname.filter(op => op.tanggal.split('T')[0] === filterTanggal);
+                }
+                
+                // Apply status filter
+                if (filterStatus !== 'all') {
+                    filteredOpname = filteredOpname.filter(op => op.status === filterStatus);
+                }
+                
+                // Apply category filter
+                if (filterKategori !== 'all') {
+                    filteredOpname = filteredOpname.filter(op => {
+                        if (op.tipeOpname === 'category') {
+                            return op.kategori === filterKategori;
+                        } else if (op.tipeOpname === 'selected') {
+                            return op.items.some(item => (item.kategori || 'Uncategorized') === filterKategori);
+                        }
+                        return true; // For 'all' type opname
+                    });
+                }
+                
+                // Apply search filter
+                if (searchTerm) {
+                    filteredOpname = filteredOpname.filter(op => 
+                        op.noOpname.toLowerCase().includes(searchTerm) || 
+                        op.petugas.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                // Sort by date, newest first
+                filteredOpname.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                
+                // Populate table
+                filteredOpname.forEach(opname => {
+                    const row = tbody.insertRow();
+                    
+                    // Calculate totals
+                    let totalSelisihStok = 0;
+                    let totalSelisihRupiah = 0;
+                    
+                    if (opname.status === 'completed' || opname.status === 'adjusted') {
+                        opname.items.forEach(item => {
+                            const selisih = item.stokAktual - item.stokSistem;
+                            totalSelisihStok += selisih;
+                            totalSelisihRupiah += selisih * item.hargaBeli;
+                        });
+                    }
+                    
+                    // Format date
+                    const opnameDate = new Date(opname.tanggal);
+                    const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }).replace(',', '');
+                    
+                    // Get category or 'Semua'
+                    let kategoriText = 'Semua';
+                    if (opname.tipeOpname === 'category') {
+                        kategoriText = opname.kategori;
+                    } else if (opname.tipeOpname === 'selected') {
+                        kategoriText = 'Tertentu';
+                    }
+                    
+                    // Set status class
+                    let statusClass = '';
+                    switch (opname.status) {
+                        case 'pending':
+                            statusClass = 'status-pending';
+                            break;
+                        case 'completed':
+                            statusClass = 'status-completed';
+                            break;
+                        case 'adjusted':
+                            statusClass = 'status-adjusted';
+                            break;
+                    }
+                    
+                    // Set status text
+                    let statusText = '';
+                    switch (opname.status) {
+                        case 'pending':
+                            statusText = 'Pending';
+                            break;
+                        case 'completed':
+                            statusText = 'Selesai';
+                            break;
+                        case 'adjusted':
+                            statusText = 'Disesuaikan';
+                            break;
+                    }
+                    
+                    // Determine selisih class
+                    let selisihClass = 'selisih-nol';
+                    if (totalSelisihStok > 0) {
+                        selisihClass = 'selisih-positif';
+                    } else if (totalSelisihStok < 0) {
+                        selisihClass = 'selisih-negatif';
+                    }
+                    
+                    // Create and populate cells
+                    const cells = [
+                        opname.noOpname,
+                        formattedDate,
+                        kategoriText,
+                        opname.items.length,
+                        opname.petugas,
+                        `<span class="${statusClass}">${statusText}</span>`,
+                        `<span class="${selisihClass}">${totalSelisihStok}</span>`,
+                        `<span class="${selisihClass}">${formatRupiah(totalSelisihRupiah)}</span>`
+                    ];
+                    
+                    // Insert cells with values
+                    cells.forEach(cellValue => {
+                        const cell = row.insertCell();
+                        cell.innerHTML = cellValue;
+                    });
+                    
+                    // Add action buttons
+                    const actionCell = row.insertCell();
+                    actionCell.className = 'action-buttons';
+                    
+                    // View button
+                    const viewBtn = document.createElement('button');
+                    viewBtn.className = 'action-btn btn-primary';
+                    viewBtn.innerHTML = '<i class="fas fa-eye"></i> Lihat';
+                    viewBtn.onclick = () => showOpnameDetail(opname.noOpname);
+                    actionCell.appendChild(viewBtn);
+                    
+                    
+                    
+                    
+                    
+                    // If status is pending, show continue button
+                    if (opname.status === 'pending') {
+                        const continueBtn = document.createElement('button');
+                        continueBtn.className = 'action-btn btn-secondary';
+                        continueBtn.innerHTML = '<i class="fas fa-play"></i> Lanjutkan';
+                        continueBtn.onclick = () => continueOpname(opname.noOpname);
+                        actionCell.appendChild(continueBtn);
+                    }
+                    
+                    // If status is completed, show adjust button
+                    if (opname.status === 'completed') {
+                        const adjustBtn = document.createElement('button');
+                        adjustBtn.className = 'action-btn btn-warning';
+                        adjustBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Adjust';
+                        adjustBtn.onclick = () => adjustOpname(opname.noOpname);
+                        actionCell.appendChild(adjustBtn);
+                    }
+                    
+                    // Delete button for all stock opname
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'action-btn btn-danger';
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus';
+                    deleteBtn.onclick = () => deleteOpname(opname.noOpname);
+                    actionCell.appendChild(deleteBtn);
+                });
+            }
+            
+            // Show opname details in modal
+            function showOpnameDetail(noOpname) {
+                const opname = riwayatOpname.find(op => op.noOpname === noOpname);
+                if (!opname) return;
+                
+                // Fill modal with data
+                document.getElementById('historyOpnameNumber').textContent = opname.noOpname;
+                
+                // Format date
+                const opnameDate = new Date(opname.tanggal);
+                const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).replace(',', '');
+                
+                document.getElementById('historyOpnameDate').textContent = formattedDate;
+                
+                // Set status with class
+                let statusText = '';
+                let statusClass = '';
+                switch (opname.status) {
+                    case 'pending':
+                        statusText = 'Pending';
+                        statusClass = 'status-pending';
+                        break;
+                    case 'completed':
+                        statusText = 'Selesai';
+                        statusClass = 'status-completed';
+                        break;
+                    case 'adjusted':
+                        statusText = 'Disesuaikan';
+                        statusClass = 'status-adjusted';
+                        break;
+                }
+                
+                document.getElementById('historyOpnameStatus').innerHTML = `<span class="${statusClass}">${statusText}</span>`;
+                document.getElementById('historyOpnameStaff').textContent = opname.petugas;
+                
+                // Populate detail table
+                const tbody = document.querySelector('#historyDetailTable tbody');
+                tbody.innerHTML = '';
+                
+                opname.items.forEach(item => {
+                    const selisih = item.stokAktual - item.stokSistem;
+                    const selisihRupiah = selisih * item.hargaBeli;
+                    
+                    // Determine selisih class
+                    let selisihClass = 'selisih-nol';
+                    if (selisih > 0) {
+                        selisihClass = 'selisih-positif';
+                    } else if (selisih < 0) {
+                        selisihClass = 'selisih-negatif';
+                    }
+                    
+                    const row = tbody.insertRow();
+                    
+                    // Create and populate cells
+                    const cells = [
+                        item.kategori || 'Uncategorized',
+                        item.kode,
+                        item.nama,
+                        item.stokSistem,
+                        item.stokAktual,
+                        `<span class="${selisihClass}">${selisih}</span>`,
+                        `<span class="${selisihClass}">${formatRupiah(selisihRupiah)}</span>`
+                    ];
+                    
+                    // Insert cells with values
+                    cells.forEach(cellValue => {
+                        const cell = row.insertCell();
+                        cell.innerHTML = cellValue;
+                    });
+                });
+                
+                // Show adjust button only for completed opname
+                const adjustBtn = document.getElementById('adjustStockBtn');
+                if (opname.status === 'completed') {
+                    adjustBtn.style.display = 'block';
+                    adjustBtn.onclick = () => adjustOpname(opname.noOpname);
+                } else {
+                    adjustBtn.style.display = 'none';
+                }
+                
+                // Show modal
+                document.getElementById('historyDetailModal').style.display = 'block';
+            }
+            
+            // Create new stock opname
+function createOpname() {
+    const opnameType = document.getElementById('opnameType').value;
+    const note = document.getElementById('opnameNote').value;
+    
+    // Get current user
+    const username = localStorage.getItem('username');
+    if (!username) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Anda harus login terlebih dahulu!'
+        });
+        return;
+    }
+    
+    // Generate opname number
+    const date = new Date();
+    const formattedDate = date.toISOString().split('T')[0].replace(/-/g, '');
+    const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const noOpname = `OP${formattedDate}${randomNum}`;
+    
+    // Prepare items based on opname type
+    let items = [];
+    let kategori = null;
+    
+    if (opnameType === 'all') {
+        // Include all items
+        items = allBarang.map(item => ({
+            kode: item.kode,
+            plu: item.plu || '',
+            nama: item.nama,
+            kategori: item.kategori || 'Uncategorized',
+            kodeToko: item.kodeToko || '',
+            stokSistem: item.stok, // Tampilkan stok sistem
+            stokAktual: null,
+            hargaBeli: item.hargaBeli,
+            hargaJual: item.hargaJual,
+            keterangan: ''
+        }));
+    } else if (opnameType === 'category') {
+        // Include items from selected category
+        kategori = document.getElementById('selectCategory').value;
+        items = allBarang
+            .filter(item => (item.kategori || 'Uncategorized') === kategori)
+            .map(item => ({
+                kode: item.kode,
+                plu: item.plu || '',
+                nama: item.nama,
+                kategori: item.kategori || 'Uncategorized',
+                kodeToko: item.kodeToko || '',
+                stokSistem: item.stok, // Tampilkan stok sistem
+                stokAktual: null,
+                hargaBeli: item.hargaBeli,
+                hargaJual: item.hargaJual,
+                keterangan: ''
+            }));
+    } else if (opnameType === 'selected') {
+        // Include selected items
+        const checkboxes = document.querySelectorAll('#itemSelectionTable input[type="checkbox"]:checked');
+        const selectedCodes = Array.from(checkboxes).map(cb => cb.value);
+        
+        if (selectedCodes.length === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Peringatan',
+                text: 'Pilih minimal satu barang untuk stok opname!'
+            });
+            return;
+        }
+        
+        items = allBarang
+            .filter(item => selectedCodes.includes(item.kode))
+            .map(item => ({
+                kode: item.kode,
+                plu: item.plu || '',
+                nama: item.nama,
+                kategori: item.kategori || 'Uncategorized',
+                kodeToko: item.kodeToko || '',
+                stokSistem: item.stok, // Tampilkan stok sistem
+                stokAktual: null,
+                hargaBeli: item.hargaBeli,
+                hargaJual: item.hargaJual,
+                keterangan: ''
+            }));
+    }
+    
+    // Create opname object
+    const newOpname = {
+        noOpname: noOpname,
+        tanggal: new Date().toISOString(),
+        petugas: username,
+        tipeOpname: opnameType,
+        kategori: kategori,
+        status: 'pending',
+        catatan: note,
+        items: items
+    };
+
+    // Save to localStorage
+    riwayatOpname.push(newOpname);
+    localStorage.setItem('stokOpname', JSON.stringify(riwayatOpname));
+
+    // Simpan status cek stok untuk barang yang sedang di opname
+    items.forEach(item => {
+        localStorage.setItem(`cekStok_${item.kode}`, JSON.stringify({ status: 'pending' }));
+    });
+
+    // Close modal and show opname details
+    document.getElementById('createOpnameModal').style.display = 'none';
+    
+    // Set as current opname and show detail view
+    currentOpname = newOpname;
+    showActiveOpname();
+    
+    // Update UI
+    loadRiwayatOpname();
+    updateSummary();
+}
+
+
+            // Continue an existing pending opname
+            function continueOpname(noOpname) {
+                const opname = riwayatOpname.find(op => op.noOpname === noOpname);
+                if (!opname || opname.status !== 'pending') return;
+                
+                currentOpname = opname;
+                showActiveOpname();
+            }
+            
+            // Show active opname details
+            function showActiveOpname() {
+                if (!currentOpname) return;
+                
+                // Show container
+                const container = document.getElementById('detailOpnameContainer');
+                container.style.display = 'block';
+                
+                // Fill header info
+                document.getElementById('opnameNumber').textContent = currentOpname.noOpname;
+                
+                // Format date
+                const opnameDate = new Date(currentOpname.tanggal);
+                const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }).replace(',', '');
+                
+                document.getElementById('opnameDate').textContent = formattedDate;
+                
+                // Set status text
+                let statusText = 'Pending';
+                switch (currentOpname.status) {
+                    case 'pending':
+                        statusText = 'Pending';
+                        break;
+                    case 'completed':
+                        statusText = 'Selesai';
+                        break;
+                    case 'adjusted':
+                        statusText = 'Disesuaikan';
+                        break;
+                }
+                document.getElementById('opnameStatus').textContent = statusText;
+                
+                // Load detail table
+                loadOpnameTable();
+            }
+            
+     function loadOpnameTable() {
+    if (!currentOpname) return;
+    
+    const tbody = document.querySelector('#tabelDetailOpname tbody');
+    tbody.innerHTML = '';
+    
+    // Get filter values
+    const filterKategori = document.getElementById('opnameFilterKategori').value;
+    const filterBarang = document.getElementById('opnameFilterBarang').value.toLowerCase();
+    const filterSelisih = document.getElementById('opnameFilterSelisih').value;
+    
+    // Filter items
+    activeOpnameItems = [...currentOpname.items];
+    
+    // Apply category filter
+    if (filterKategori !== 'all') {
+        activeOpnameItems = activeOpnameItems.filter(item => 
+            (item.kategori || 'Uncategorized') === filterKategori
+        );
+    }
+    
+    // Apply item name/code filter
+    if (filterBarang) {
+        activeOpnameItems = activeOpnameItems.filter(item => 
+            item.kode.toLowerCase().includes(filterBarang) || 
+            item.nama.toLowerCase().includes(filterBarang) ||
+            (item.plu && item.plu.toLowerCase().includes(filterBarang))
+        );
+    }
+    
+    // Apply selisih filter (only for completed items)
+    if (filterSelisih !== 'all' && currentOpname.status !== 'pending') {
+        activeOpnameItems = activeOpnameItems.filter(item => {
+            if (item.stokAktual === null) return false;
+            
+            const selisih = item.stokAktual - item.stokSistem;
+            if (filterSelisih === 'plus') return selisih > 0;
+            if (filterSelisih === 'minus') return selisih < 0;
+            if (filterSelisih === 'zero') return selisih === 0;
+            return true;
+        });
+    }
+    
+    // Group by category
+    const categories = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'Uncategorized'];
+    
+    categories.forEach(category => {
+        const categoryItems = activeOpnameItems.filter(item => 
+            (item.kategori || 'Uncategorized') === category
+        );
+        
+        if (categoryItems.length > 0) {
+            // Add category header
+            const headerRow = tbody.insertRow();
+            const headerCell = headerRow.insertCell(0);
+            headerCell.colSpan = 11;
+            headerCell.innerHTML = `<strong>Kategori: ${category}</strong>`;
+            headerCell.className = 'category-header';
+            
+            // Add items
+            categoryItems.forEach(item => {
+                const row = tbody.insertRow();
+                
+                // Calculate selisih if stokAktual is set
+                let selisih = null;
+                let selisihRupiah = null;
+                let selisihClass = '';
+                
+                if (item.stokAktual !== null) {
+                    selisih = item.stokAktual - item.stokSistem;
+                    selisihRupiah = selisih * item.hargaBeli;
+                    
+                    if (selisih > 0) {
+                        selisihClass = 'selisih-positif';
+                    } else if (selisih < 0) {
+                        selisihClass = 'selisih-negatif';
+                    } else {
+                        selisihClass = 'selisih-nol';
+                    }
+                }
+                
+                // Create cells with data
+                const cells = [
+                    item.kategori || 'Uncategorized',
+                    item.kodeToko || '',
+                    item.kode,
+                    item.plu || '',
+                    item.nama,
+                    currentOpname.status === 'pending' ? '-' : item.stokSistem // Sembunyikan stok sistem jika status 'pending'
+                ];
+                
+                // Add cells to row
+                cells.forEach(cellValue => {
+                    const cell = row.insertCell();
+                    cell.textContent = cellValue;
+                });
+                
+                // Add stokAktual cell (input // or value)
+                const stokAktualCell = row.insertCell();
+                if (currentOpname.status === 'pending') {
+                    // Create input
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '0';
+                    input.className = 'input-aktual';
+                    input.dataset.kode = item.kode;
+                    input.value = item.stokAktual !== null ? item.stokAktual : '';
+                    input.onchange = (e) => {
+                        updateStokAktual(item.kode, parseInt(e.target.value) || 0);
+                    };
+                    stokAktualCell.appendChild(input);
+                } else {
+                    // Show value
+                    stokAktualCell.textContent = item.stokAktual;
+                }
+                
+                // Add selisih cell
+                const selisihCell = row.insertCell();
+                if (currentOpname.status === 'pending') {
+                    selisihCell.textContent = '-'; // Tampilkan tanda '-' saat status pending
+                } else if (selisih !== null) {
+                    selisihCell.textContent = selisih;
+                    selisihCell.className = selisihClass;
+                } else {
+                    selisihCell.textContent = '-';
+                }
+                
+                // Add hargaBeli cell
+                const hargaBeliCell = row.insertCell();
+                hargaBeliCell.textContent = formatRupiah(item.hargaBeli);
+                
+                // Add selisihRupiah cell
+                const selisihRupiahCell = row.insertCell();
+                if (selisihRupiah !== null) {
+                    selisihRupiahCell.textContent = formatRupiah(selisihRupiah);
+                    selisihRupiahCell.className = selisihClass;
+                } else {
+                    selisihRupiahCell.textContent = '-';
+                }
+                
+                // Add keterangan cell
+                const keteranganCell = row.insertCell();
+                if (currentOpname.status === 'pending') {
+                    // Create input
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.style.width = '100%';
+                    input.dataset.kode = item.kode;
+                    input.value = item.keterangan || '';
+                    input.onchange = (e) => {
+                        updateKeterangan(item.kode, e.target.value);
+                    };
+                    keteranganCell.appendChild(input);
+                } else {
+                    // Show value
+                    keteranganCell.textContent = item.keterangan || '';
+                }
+            });
+        }
+    });
+    
+    // Show/hide buttons based on status
+    const saveBtn = document.getElementById('saveOpnameBtn');
+    const completeBtn = document.getElementById('completeOpnameBtn');
+    
+    if (currentOpname.status === 'pending') {
+        saveBtn.style.display = 'block';
+        completeBtn.style.display = 'block';
+    } else {
+        saveBtn.style.display = 'none';
+        completeBtn.style.display = 'none';
+    }
+}
+            
+            // Update stokAktual value
+            function updateStokAktual(kode, stokAktual) {
+                if (!currentOpname) return;
+                
+                // Find and update the item
+                const itemIndex = currentOpname.items.findIndex(item => item.kode === kode);
+                if (itemIndex !== -1) {
+                    currentOpname.items[itemIndex].stokAktual = stokAktual;
+                }
+            }
+            
+            // Update keterangan value
+            function updateKeterangan(kode, keterangan) {
+                if (!currentOpname) return;
+                
+                // Find and update the item
+                const itemIndex = currentOpname.items.findIndex(item => item.kode === kode);
+                if (itemIndex !== -1) {
+                    currentOpname.items[itemIndex].keterangan = keterangan;
+                }
+            }
+            
+            // Save current opname changes
+            function saveOpname() {
+                if (!currentOpname || currentOpname.status !== 'pending') return;
+                
+                // Update opname in the list
+                const index = riwayatOpname.findIndex(op => op.noOpname === currentOpname.noOpname);
+                if (index !== -1) {
+                    riwayatOpname[index] = currentOpname;
+                    localStorage.setItem('stokOpname', JSON.stringify(riwayatOpname));
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Data stok opname berhasil disimpan'
+                    });
+                }
+            }
+            
+            // Complete the current opname
+            function completeOpname() {
+                if (!currentOpname || currentOpname.status !== 'pending') return;
+                
+                // Check if all items have stokAktual value
+                const incomplete = currentOpname.items.some(item => item.stokAktual === null);
+                if (incomplete) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Peringatan',
+                        text: 'Semua stok aktual harus diisi sebelum menyelesaikan stok opname'
+                    });
+                    return;
+                }
+                
+                // Update status to completed
+                currentOpname.status = 'completed';
+                
+                // Update opname in the list
+                const index = riwayatOpname.findIndex(op => op.noOpname === currentOpname.noOpname);
+                if (index !== -1) {
+                    riwayatOpname[index] = currentOpname;
+                    localStorage.setItem('stokOpname', JSON.stringify(riwayatOpname));
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: 'Stok opname berhasil diselesaikan'
+                    }).then(() => {
+                        // Ask if user wants to adjust stock
+                        Swal.fire({
+                            title: 'Adjustment Stok',
+                            text: 'Apakah Anda ingin menyesuaikan stok sesuai hasil opname?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Ya, Sesuaikan',
+                            cancelButtonText: 'Tidak'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                adjustOpname(currentOpname.noOpname);
+                            } else {
+                                // Reset current opname and reload history
+                                currentOpname = null;
+                                document.getElementById('detailOpnameContainer').style.display = 'none';
+                                loadRiwayatOpname();
+                                updateSummary();
+                            }
+                        });
+                    });
+                }
+            }
+            
+            // Cancel current opname
+            function cancelOpname() {
+                if (!currentOpname) return;
+                
+                Swal.fire({
+                    title: 'Batalkan Stok Opname',
+                    text: 'Apakah Anda yakin ingin membatalkan stok opname ini?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Batalkan',
+                    cancelButtonText: 'Tidak'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Reset current opname and hide detail view
+                        currentOpname = null;
+                        document.getElementById('detailOpnameContainer').style.display = 'none';
+                    }
+                });
+            }
+            
+            // Adjust stock based on opname results
+            function adjustOpname(noOpname) {
+    const opname = riwayatOpname.find(op => op.noOpname === noOpname);
+    if (!opname || opname.status === 'adjusted') {
+        Swal.fire({
+            icon: 'info',
+            title: 'Info',
+            text: 'Stok sudah disesuaikan sebelumnya.'
+        });
+        return;
+    }
+    
+    Swal.fire({
+        title: 'Adjustment Stok',
+        text: 'Apakah Anda yakin ingin menyesuaikan stok sesuai hasil opname?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Sesuaikan',
+        cancelButtonText: 'Tidak'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // Update stock in barang data
+            let barang = JSON.parse(localStorage.getItem('barang')) || [];
+            
+            opname.items.forEach(opnameItem => {
+                const barangIndex = barang.findIndex(item => item.kode === opnameItem.kode);
+                if (barangIndex !== -1) {
+                    barang[barangIndex].stok = opnameItem.stokAktual; // Update the stock to the actual stock
+                    // Update the status in cekStok
+                    localStorage.setItem(`cekStok_${opnameItem.kode}`, JSON.stringify({ status: 'adjusted' }));
+                }
+            });
+            
+            // Save updated barang to localStorage
+            localStorage.setItem('barang', JSON.stringify(barang));
+            
+            // Update opname status
+            opname.status = 'adjusted';
+            
+            // Update opname in the list
+            const index = riwayatOpname.findIndex(op => op.noOpname === opname.noOpname);
+            if (index !== -1) {
+                riwayatOpname[index] = opname;
+                localStorage.setItem('stokOpname', JSON.stringify(riwayatOpname));
+            }
+            
+            // Hide loading
+            document.getElementById('loadingOverlay').style.display = 'none';
+            
+            // If this is the current opname, update UI
+            if (currentOpname && currentOpname.noOpname === opname.noOpname) {
+                currentOpname = opname;
+                showActiveOpname();
+            }
+            
+            // Hide history modal if open
+            document.getElementById('historyDetailModal').style.display = 'none';
+            
+            // Update UI
+            loadRiwayatOpname();
+            updateSummary();
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: 'Stok berhasil disesuaikan'
+            });
+        }
+    });
+}
+            
+
+
+function generatePin(noOpname) {
+    let hash = 0;
+    for (let i = 0; i < noOpname.length; i++) {
+        hash = ((hash << 5) - hash) + noOpname.charCodeAt(i);
+        hash = hash & hash;
+    }
+    return ('000000' + (Math.abs(hash) % 1000000)).slice(-6);
+}
+
+function deleteOpname(noOpname) {
+    const opname = riwayatOpname.find(op => op.noOpname === noOpname);
+    if (!opname) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Opname tidak ditemukan'
+        });
+        return;
+    }
+
+    const isPendingNotAdjusted = opname.status === 'pending' && !opname.adjustedAt;
+
+    if (isPendingNotAdjusted) {
+        const expectedPin = generatePin(noOpname);
+
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: `Masukkan PIN untuk menghapus opname ${noOpname}`,
+            input: 'password',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocorrect: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            preConfirm: (pin) => {
+                if (pin !== expectedPin) {
+                    Swal.showValidationMessage('PIN tidak valid');
+                    return false;
+                }
+                return true;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                performDeletion(noOpname);
+            }
+        });
+    } else {
+        Swal.fire({
+            title: 'Konfirmasi Hapus',
+            text: 'Masukkan PIN untuk menghapus data',
+            input: 'password',
+            inputAttributes: {
+                autocapitalize: 'off',
+                autocorrect: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal',
+            showLoaderOnConfirm: true,
+            preConfirm: (pin) => {
+                if (pin !== '451661750') {
+                    Swal.showValidationMessage('PIN tidak valid');
+                    return false;
+                }
+                return true;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                performDeletion(noOpname);
+            }
+        });
+    }
+}
+
+function performDeletion(noOpname) {
+    const index = riwayatOpname.findIndex(op => op.noOpname === noOpname);
+    if (index !== -1) {
+        const deletedOpname = riwayatOpname[index];
+        const deletedData = JSON.parse(localStorage.getItem('deleted_opname') || '[]');
+
+        deletedOpname.deletedAt = new Date().toISOString();
+        deletedOpname.deletedBy = localStorage.getItem('username') || 'unknown';
+        deletedData.push(deletedOpname);
+        localStorage.setItem('deleted_opname', JSON.stringify(deletedData));
+
+        if (deletedOpname.status === 'pending') {
+            deletedOpname.items.forEach(item => {
+                localStorage.removeItem(`cekStok_${item.kode}`);
+            });
+        }
+
+        riwayatOpname.splice(index, 1);
+        localStorage.setItem('stokOpname', JSON.stringify(riwayatOpname));
+
+        if (currentOpname && currentOpname.noOpname === noOpname) {
+            currentOpname = null;
+            document.getElementById('detailOpnameContainer').style.display = 'none';
+        }
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: 'Stok opname berhasil dihapus dan disimpan dalam riwayat penghapusan'
+        });
+    }
+}
+
+// Fungsi untuk melihat riwayat opname yang dihapus
+function viewDeletedOpname() {
+    const deletedData = JSON.parse(localStorage.getItem('deleted_opname') || '[]');
+    
+    if (deletedData.length === 0) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Tidak Ada Data',
+            text: 'Tidak ada riwayat stok opname yang dihapus'
+        });
+        return;
+    }
+    
+    // Buat HTML untuk menampilkan data yang dihapus
+    let tableHTML = `
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>No. Opname</th>
+                        <th>Tanggal</th>
+                        <th>Petugas</th>
+                        <th>Status</th>
+                        <th>Dihapus Pada</th>
+                        <th>Dihapus Oleh</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    deletedData.forEach(opname => {
+        const opnameDate = new Date(opname.tanggal);
+        const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+            day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+        
+        const deletedDate = new Date(opname.deletedAt);
+        const formattedDeletedDate = deletedDate.toLocaleDateString('id-ID', { 
+            day: '2-digit', month: '2-digit', year: 'numeric', 
+            hour: '2-digit', minute: '2-digit'
+        });
+        
+        let statusText = '';
+        switch (opname.status) {
+            case 'pending': statusText = 'Pending'; break;
+            case 'completed': statusText = 'Selesai'; break;
+            case 'adjusted': statusText = 'Disesuaikan'; break;
+        }
+        
+        tableHTML += `
+            <tr>
+                <td>${opname.noOpname}</td>
+                <td>${formattedDate}</td>
+                <td>${opname.petugas}</td>
+                <td>${statusText}</td>
+                <td>${formattedDeletedDate}</td>
+                <td>${opname.deletedBy}</td>
+            </tr>
+        `;
+    });
+    
+    tableHTML += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    Swal.fire({
+        title: 'Riwayat Stok Opname yang Dihapus',
+        html: tableHTML,
+        width: 800,
+        showCloseButton: true,
+        showConfirmButton: false
+    });
+}
+            
+            // Load items for selection in create modal
+           // Load items for selection in create modal
+function loadItemsForSelection() {
+    const searchTerm = document.getElementById('searchItems').value.toLowerCase();
+    const tbody = document.querySelector('#itemSelectionTable tbody');
+    tbody.innerHTML = '';
+    
+    // Filter items
+    filteredBarang = allBarang.filter(item => 
+        item.kode.toLowerCase().includes(searchTerm) || 
+        item.nama.toLowerCase().includes(searchTerm) ||
+        (item.plu && item.plu.toLowerCase().includes(searchTerm))
+    );
+    
+    // Populate table
+    filteredBarang.forEach(item => {
+        const row = tbody.insertRow();
+        
+        // Checkbox cell
+        const checkCell = row.insertCell();
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = item.kode;
+        checkCell.appendChild(checkbox);
+        
+        // Data cells
+        const cells = [
+            item.kode,
+            item.nama,
+            item.kategori || 'Uncategorized',
+            '' // Set stok to empty
+        ];
+        
+        // Add cells to row
+        cells.forEach(cellValue => {
+            const cell = row.insertCell();
+            cell.textContent = cellValue;
+        });
+    });
+}
+            // Event Listeners
+            
+            // Filter buttons
+            document.getElementById('filterBtn').addEventListener('click', loadRiwayatOpname);
+            document.getElementById('opnameFilterBtn').addEventListener('click', loadOpnameTable);
+            
+            // Create opname modal
+            document.getElementById('createOpnameBtn').addEventListener('click', () => {
+                // Reset form
+                document.getElementById('opnameType').value = 'all';
+                document.getElementById('categoryForm').style.display = 'none';
+                document.getElementById('selectedItemsForm').style.display = 'none';
+                document.getElementById('opnameNote').value = '';
+                document.getElementById('itemSelectionTable').querySelector('tbody').innerHTML = '';
+                
+                // Show modal
+                document.getElementById('createOpnameModal').style.display = 'block';
+            });
+            
+            // Modal close buttons
+            document.getElementById('closeCreateModal').addEventListener('click', () => {
+                document.getElementById('createOpnameModal').style.display = 'none';
+            });
+            
+            document.getElementById('closeHistoryModal').addEventListener('click', () => {
+                document.getElementById('historyDetailModal').style.display = 'none';
+            });
+            
+            // Create opname type change
+            document.getElementById('opnameType').addEventListener('change', (e) => {
+                const type = e.target.value;
+                
+                if (type === 'category') {
+                    document.getElementById('categoryForm').style.display = 'block';
+                    document.getElementById('selectedItemsForm').style.display = 'none';
+                } else if (type === 'selected') {
+                    document.getElementById('categoryForm').style.display = 'none';
+                    document.getElementById('selectedItemsForm').style.display = 'block';
+                    loadItemsForSelection();
+                } else {
+                    document.getElementById('categoryForm').style.display = 'none';
+                    document.getElementById('selectedItemsForm').style.display = 'none';
+                }
+            });
+            
+            // Search items in selection table
+            // Search items in selection table
+            document.getElementById('searchItems').addEventListener('keyup', loadItemsForSelection);
+            
+            // Search in opname history
+            document.getElementById('searchOpname').addEventListener('keyup', loadRiwayatOpname);
+            
+            // Modal action buttons
+            document.getElementById('startOpnameBtn').addEventListener('click', createOpname);
+            document.getElementById('cancelCreateBtn').addEventListener('click', () => {
+                document.getElementById('createOpnameModal').style.display = 'none';
+            });
+            
+            document.getElementById('closeHistoryDetailBtn').addEventListener('click', () => {
+                document.getElementById('historyDetailModal').style.display = 'none';
+            });
+            
+            // Opname detail action buttons
+            document.getElementById('saveOpnameBtn').addEventListener('click', saveOpname);
+            document.getElementById('completeOpnameBtn').addEventListener('click', completeOpname);
+            document.getElementById('cancelOpnameBtn').addEventListener('click', cancelOpname);
+            
+            // Initialize
+            loadData();
+            
+            // Check if there's a pending opname to continue
+            const pendingOpname = riwayatOpname.find(op => op.status === 'pending');
+            if (pendingOpname) {
+                Swal.fire({
+                    title: 'Stok Opname Pending',
+                    text: `Ditemukan stok opname yang belum selesai (${pendingOpname.noOpname}). Apakah Anda ingin melanjutkan?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Lanjutkan',
+                    cancelButtonText: 'Tidak'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        currentOpname = pendingOpname;
+                        showActiveOpname();
+                    }
+                });
+            }
+        });
+        
+        
+        
+        
+        
+document.addEventListener('DOMContentLoaded', function() {
+    // Get DOM elements
+    const downloadPartialBtn = document.getElementById('downloadPartialBtn');
+    const downloadAllBtn = document.getElementById('downloadAllBtn');
+    const downloadZipBtn = document.getElementById('downloadZipBtn');
+    const selectOpnameModal = document.getElementById('selectOpnameModal');
+    const closeSelectModal = document.getElementById('closeSelectModal');
+    const modalSelectAll = document.getElementById('modalSelectAll');
+    const modalFilterBtn = document.getElementById('modalFilterBtn');
+    const modalSearchOpname = document.getElementById('modalSearchOpname');
+    const downloadSelectedExcelBtn = document.getElementById('downloadSelectedExcelBtn');
+    const downloadSelectedZipBtn = document.getElementById('downloadSelectedZipBtn');
+    const cancelDownloadBtn = document.getElementById('cancelDownloadBtn');
+    const viewDeletedOpnameBtn = document.getElementById('viewDeletedOpnameBtn');
+    
+    // Definisikan function viewDeletedOpname langsung di sini
+    window.viewDeletedOpname = function() {
+        const deletedData = JSON.parse(localStorage.getItem('deleted_opname') || '[]');
+        
+        if (deletedData.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Tidak Ada Data',
+                text: 'Tidak ada riwayat stok opname yang dihapus'
+            });
+            return;
+        }
+        
+        // Buat HTML untuk menampilkan data yang dihapus
+        let tableHTML = `
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>No. Opname</th>
+                            <th>Tanggal</th>
+                            <th>Petugas</th>
+                            <th>Status</th>
+                            <th>Dihapus Pada</th>
+                            <th>Dihapus Oleh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        deletedData.forEach(opname => {
+            const opnameDate = new Date(opname.tanggal);
+            const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+                day: '2-digit', month: '2-digit', year: 'numeric'
+            });
+            
+            const deletedDate = new Date(opname.deletedAt);
+            const formattedDeletedDate = deletedDate.toLocaleDateString('id-ID', { 
+                day: '2-digit', month: '2-digit', year: 'numeric', 
+                hour: '2-digit', minute: '2-digit'
+            });
+            
+            let statusText = '';
+            switch (opname.status) {
+                case 'pending': statusText = 'Pending'; break;
+                case 'completed': statusText = 'Selesai'; break;
+                case 'adjusted': statusText = 'Disesuaikan'; break;
+            }
+            
+            tableHTML += `
+                <tr>
+                    <td>${opname.noOpname}</td>
+                    <td>${formattedDate}</td>
+                    <td>${opname.petugas}</td>
+                    <td>${statusText}</td>
+                    <td>${formattedDeletedDate}</td>
+                    <td>${opname.deletedBy}</td>
+                </tr>
+            `;
+        });
+        
+        tableHTML += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        Swal.fire({
+            title: 'Riwayat Stok Opname yang Dihapus',
+            html: tableHTML,
+            width: 800,
+            showCloseButton: true,
+            showConfirmButton: false
+        });
+    };
+    
+    // Add event listener for viewDeletedOpnameBtn
+    if (viewDeletedOpnameBtn) {
+        viewDeletedOpnameBtn.addEventListener('click', viewDeletedOpname);
+    } else {
+        console.warn('Tombol viewDeletedOpnameBtn tidak ditemukan');
+    }
+
+    // Add event listeners
+    if (downloadPartialBtn) {
+        downloadPartialBtn.addEventListener('click', showSelectOpnameModal);
+    }
+    
+    if (downloadAllBtn) {
+        downloadAllBtn.addEventListener('click', downloadAllOpnamesAsExcel);
+    }
+    
+    if (downloadZipBtn) {
+        downloadZipBtn.addEventListener('click', function() {
+            showSelectOpnameModal(true); // Show modal with all selected by default
+        });
+    }
+    
+    if (closeSelectModal) {
+        closeSelectModal.addEventListener('click', function() {
+            selectOpnameModal.style.display = 'none';
+        });
+    }
+    
+    if (modalSelectAll) {
+        modalSelectAll.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('#modalOpnameTable input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+    }
+    
+    if (modalFilterBtn) {
+        modalFilterBtn.addEventListener('click', loadModalOpnameTable);
+    }
+    
+    if (modalSearchOpname) {
+        modalSearchOpname.addEventListener('keyup', function() {
+            // Wait a bit before filtering to avoid too many updates
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(loadModalOpnameTable, 300);
+        });
+    }
+    
+    if (downloadSelectedExcelBtn) {
+        downloadSelectedExcelBtn.addEventListener('click', function() {
+            const selectedIds = getSelectedOpnameIds();
+            if (selectedIds.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Opname',
+                    text: 'Pilih minimal satu stok opname untuk diunduh'
+                });
+                return;
+            }
+            
+            if (selectedIds.length === 1) {
+                // Download single Excel file
+                downloadSingleOpname(selectedIds[0]);
+                selectOpnameModal.style.display = 'none';
+            } else {
+                // Download multiple in one Excel workbook
+                downloadMultipleOpnamesAsExcel(selectedIds);
+                selectOpnameModal.style.display = 'none';
+            }
+        });
+    }
+    
+    if (downloadSelectedZipBtn) {
+        downloadSelectedZipBtn.addEventListener('click', function() {
+            const selectedIds = getSelectedOpnameIds();
+            if (selectedIds.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pilih Opname',
+                    text: 'Pilih minimal satu stok opname untuk diunduh'
+                });
+                return;
+            }
+            
+            downloadSelectedOpnamesAsZip(selectedIds);
+        });
+    }
+    
+    if (cancelDownloadBtn) {
+        cancelDownloadBtn.addEventListener('click', function() {
+            selectOpnameModal.style.display = 'none';
+        });
+    }
+    
+    // Close modal if clicked outside the content
+    window.addEventListener('click', function(event) {
+        if (event.target === selectOpnameModal) {
+            selectOpnameModal.style.display = 'none';
+        }
+    });
+});
+// Function to show select opname modal
+function formatRupiah(angka) {
+    return 'Rp ' + parseFloat(angka).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+// Your existing download functions can remain unchanged
+function showSelectOpnameModal(selectAll = false) {
+    // Load categories for filter
+    const modalFilterKategori = document.getElementById('modalFilterKategori');
+    if (modalFilterKategori) {
+        modalFilterKategori.innerHTML = '<option value="all">Semua</option>';
+        const categories = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'Uncategorized'];
+        
+        // Get list of all used categories from riwayatOpname
+        const usedCategories = new Set();
+        riwayatOpname.forEach(opname => {
+            if (opname.tipeOpname === 'category' && opname.kategori) {
+                usedCategories.add(opname.kategori);
+            }
+            
+            opname.items.forEach(item => {
+                if (item.kategori) {
+                    usedCategories.add(item.kategori);
+                } else {
+                    usedCategories.add('Uncategorized');
+                }
+            });
+        });
+        
+        // Add only used categories to dropdown
+        categories.forEach(category => {
+            if (usedCategories.has(category)) {
+                modalFilterKategori.innerHTML += `<option value="${category}">${category}</option>`;
+            }
+        });
+    }
+    
+    // Reset filters
+    document.getElementById('modalFilterTanggal').value = '';
+    document.getElementById('modalFilterStatus').value = 'all';
+    document.getElementById('modalSearchOpname').value = '';
+    
+    // Load opname table
+    loadModalOpnameTable();
+    
+    // Show modal
+    document.getElementById('selectOpnameModal').style.display = 'block';
+    
+    // Set select all if requested
+    if (selectAll) {
+        document.getElementById('modalSelectAll').checked = true;
+        setTimeout(() => {
+            const checkboxes = document.querySelectorAll('#modalOpnameTable input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }, 100);
+    }
+}
+// Function to load opname table in modal
+function loadModalOpnameTable() {
+    const tbody = document.querySelector('#modalOpnameTable tbody');
+    tbody.innerHTML = '';
+    
+    // Apply filters
+    const filterTanggal = document.getElementById('modalFilterTanggal').value;
+    const filterStatus = document.getElementById('modalFilterStatus').value;
+    const filterKategori = document.getElementById('modalFilterKategori').value;
+    const searchTerm = document.getElementById('modalSearchOpname').value.toLowerCase();
+    
+    let filteredOpname = [...riwayatOpname];
+    
+    // Apply date filter
+    if (filterTanggal) {
+        filteredOpname = filteredOpname.filter(op => op.tanggal.split('T')[0] === filterTanggal);
+    }
+    
+    // Apply status filter
+    if (filterStatus !== 'all') {
+        filteredOpname = filteredOpname.filter(op => op.status === filterStatus);
+    }
+    
+    // Apply category filter
+    if (filterKategori !== 'all') {
+        filteredOpname = filteredOpname.filter(op => {
+            if (op.tipeOpname === 'category') {
+                return op.kategori === filterKategori;
+            } else if (op.tipeOpname === 'selected') {
+                return op.items.some(item => (item.kategori || 'Uncategorized') === filterKategori);
+            }
+            return true; // For 'all' type opname
+        });
+    }
+    
+    // Apply search filter
+    if (searchTerm) {
+        filteredOpname = filteredOpname.filter(op => 
+            op.noOpname.toLowerCase().includes(searchTerm) || 
+            op.petugas.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    // Sort by date, newest first
+    filteredOpname.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+    
+    // Populate table
+    filteredOpname.forEach(opname => {
+        const row = tbody.insertRow();
+        
+        // Add checkbox cell
+        const checkboxCell = row.insertCell();
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.dataset.opname = opname.noOpname;
+        checkbox.className = 'select-opname';
+        checkboxCell.appendChild(checkbox);
+        
+        // Calculate totals
+        let totalSelisihStok = 0;
+        let totalSelisihRupiah = 0;
+        
+        if (opname.status === 'completed' || opname.status === 'adjusted') {
+            opname.items.forEach(item => {
+                if (item.stokAktual !== null) {
+                    const selisih = item.stokAktual - item.stokSistem;
+                    totalSelisihStok += selisih;
+                    totalSelisihRupiah += selisih * item.hargaBeli;
+                }
+            });
+        }
+        
+        // Format date
+        const opnameDate = new Date(opname.tanggal);
+        const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(',', '');
+        
+        // Get category or 'Semua'
+        let kategoriText = 'Semua';
+        if (opname.tipeOpname === 'category') {
+            kategoriText = opname.kategori;
+        } else if (opname.tipeOpname === 'selected') {
+            kategoriText = 'Tertentu';
+        }
+        
+        // Set status class
+        let statusClass = '';
+        switch (opname.status) {
+            case 'pending':
+                statusClass = 'status-pending';
+                break;
+            case 'completed':
+                statusClass = 'status-completed';
+                break;
+            case 'adjusted':
+                statusClass = 'status-adjusted';
+                break;
+        }
+        
+        // Set status text
+        let statusText = '';
+        switch (opname.status) {
+            case 'pending':
+                statusText = 'Pending';
+                break;
+            case 'completed':
+                statusText = 'Selesai';
+                break;
+            case 'adjusted':
+                statusText = 'Disesuaikan';
+                break;
+        }
+        
+        // Determine selisih class
+        let selisihClass = 'selisih-nol';
+        if (totalSelisihStok > 0) {
+            selisihClass = 'selisih-positif';
+        } else if (totalSelisihStok < 0) {
+            selisihClass = 'selisih-negatif';
+        }
+        
+        // Create and populate cells
+        const cells = [
+            opname.noOpname,
+            formattedDate,
+            kategoriText,
+            opname.items.length,
+            opname.petugas,
+            `<span class="${statusClass}">${statusText}</span>`,
+            `<span class="${selisihClass}">${totalSelisihStok}</span>`,
+            `<span class="${selisihClass}">${formatRupiah(totalSelisihRupiah)}</span>`
+        ];
+        
+        // Insert cells with values
+        cells.forEach(cellValue => {
+            const cell = row.insertCell();
+            cell.innerHTML = cellValue;
+        });
+    });
+}
+
+// Get selected opname IDs from modal
+function getSelectedOpnameIds() {
+    const checkboxes = document.querySelectorAll('#modalOpnameTable input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(cb => cb.dataset.opname);
+}
+
+// Function to download a single opname as Excel
+function downloadSingleOpname(noOpname) {
+    const opname = riwayatOpname.find(op => op.noOpname === noOpname);
+    if (!opname) return;
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Create header for the items sheet
+    const itemHeaders = [
+        'Kategori',
+        'Kode Toko',
+        'Kode Barang',
+        'PLU',
+        'Nama Barang',
+        'Stok Sistem',
+        'Stok Aktual',
+        'Selisih',
+        'Harga Beli',
+        'Selisih Rupiah',
+        'Keterangan'
+    ];
+    
+    // Prepare items data
+    const itemsData = opname.items.map(item => {
+        const selisih = item.stokAktual !== null ? item.stokAktual - item.stokSistem : 0;
+        const selisihRupiah = selisih * item.hargaBeli;
+        
+        return [
+            item.kategori || 'Uncategorized',
+            item.kodeToko || '',
+            item.kode,
+            item.plu || '',
+            item.nama,
+            item.stokSistem,
+            item.stokAktual !== null ? item.stokAktual : '',
+            selisih,
+            item.hargaBeli,
+            selisihRupiah,
+            item.keterangan || ''
+        ];
+    });
+    
+    // Create items worksheet
+    const itemsWs = XLSX.utils.aoa_to_sheet([itemHeaders, ...itemsData]);
+    XLSX.utils.book_append_sheet(wb, itemsWs, 'Items');
+    
+    // Create summary worksheet
+    const summaryHeaders = [
+        'No Opname',
+        'Tanggal',
+        'Petugas',
+        'Tipe Opname',
+        'Kategori',
+        'Status',
+        'Jumlah Item',
+        'Total Selisih Stok',
+        'Total Selisih Rupiah',
+        'Catatan'
+    ];
+    
+    // Calculate summary data
+    let totalSelisihStok = 0;
+    let totalSelisihRupiah = 0;
+    
+    if (opname.status === 'completed' || opname.status === 'adjusted') {
+        opname.items.forEach(item => {
+            if (item.stokAktual !== null) {
+                const selisih = item.stokAktual - item.stokSistem;
+                totalSelisihStok += selisih;
+                totalSelisihRupiah += selisih * item.hargaBeli;
+            }
+        });
+    }
+    
+    // Format date
+    const opnameDate = new Date(opname.tanggal);
+    const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }).replace(',', '');
+    
+    // Get category or 'Semua'
+    let kategoriText = 'Semua';
+    if (opname.tipeOpname === 'category') {
+        kategoriText = opname.kategori;
+    } else if (opname.tipeOpname === 'selected') {
+        kategoriText = 'Tertentu';
+    }
+    
+    // Get status text
+    let statusText = '';
+    switch (opname.status) {
+        case 'pending':
+            statusText = 'Pending';
+            break;
+        case 'completed':
+            statusText = 'Selesai';
+            break;
+        case 'adjusted':
+            statusText = 'Disesuaikan';
+            break;
+    }
+    
+    // Prepare summary data
+    const summaryData = [
+        opname.noOpname,
+        formattedDate,
+        opname.petugas,
+        opname.tipeOpname === 'all' ? 'Semua Barang' : opname.tipeOpname === 'category' ? 'Per Kategori' : 'Barang Tertentu',
+        kategoriText,
+        statusText,
+        opname.items.length,
+        totalSelisihStok,
+        totalSelisihRupiah,
+        opname.catatan || ''
+    ];
+    
+    // Create summary worksheet
+    const summaryWs = XLSX.utils.aoa_to_sheet([summaryHeaders, summaryData]);
+    XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+    
+    // Generate Excel file
+    const fileName = `Stok_Opname_${opname.noOpname}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+}
+
+// Function to download multiple opnames in one Excel file
+function downloadMultipleOpnamesAsExcel(opnameIds) {
+    if (opnameIds.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Data Kosong',
+            text: 'Tidak ada data stok opname untuk diunduh'
+        });
+        return;
+    }
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Create header for the main sheet
+    const headers = [
+        'No Opname',
+        'Tanggal',
+        'Petugas',
+        'Tipe Opname',
+        'Kategori',
+        'Status',
+        'Jumlah Item',
+        'Total Selisih Stok',
+        'Total Selisih Rupiah',
+        'Catatan'
+    ];
+    
+    // Get selected opnames
+    const selectedOpnames = riwayatOpname.filter(opname => opnameIds.includes(opname.noOpname));
+    
+    // Prepare data for main sheet
+    const data = selectedOpnames.map(opname => {
+        // Calculate totals
+        let totalSelisihStok = 0;
+        let totalSelisihRupiah = 0;
+        
+        if (opname.status === 'completed' || opname.status === 'adjusted') {
+            opname.items.forEach(item => {
+                if (item.stokAktual !== null) {
+                    const selisih = item.stokAktual - item.stokSistem;
+                    totalSelisihStok += selisih;
+                    totalSelisihRupiah += selisih * item.hargaBeli;
+                }
+            });
+        }
+        
+        // Format date
+        const opnameDate = new Date(opname.tanggal);
+        const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(',', '');
+        
+        // Get category or 'Semua'
+        let kategoriText = 'Semua';
+        if (opname.tipeOpname === 'category') {
+            kategoriText = opname.kategori;
+        } else if (opname.tipeOpname === 'selected') {
+            kategoriText = 'Tertentu';
+        }
+        
+        // Get status text
+        let statusText = '';
+        switch (opname.status) {
+            case 'pending':
+                statusText = 'Pending';
+                break;
+            case 'completed':
+                statusText = 'Selesai';
+                break;
+            case 'adjusted':
+                statusText = 'Disesuaikan';
+                break;
+        }
+        
+        return [
+            opname.noOpname,
+            formattedDate,
+            opname.petugas,
+            opname.tipeOpname === 'all' ? 'Semua Barang' : opname.tipeOpname === 'category' ? 'Per Kategori' : 'Barang Tertentu',
+            kategoriText,
+            statusText,
+            opname.items.length,
+            totalSelisihStok,
+            totalSelisihRupiah,
+            opname.catatan || ''
+        ];
+    });
+    
+    // Create main worksheet
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+    XLSX.utils.book_append_sheet(wb, ws, 'Stok Opname');
+    
+    // For each opname, create a separate worksheet
+    selectedOpnames.forEach(opname => {
+        // Create header for the items sheet
+        const itemHeaders = [
+            'Kategori',
+            'Kode Toko',
+            'Kode Barang',
+            'PLU',
+            'Nama Barang',
+            'Stok Sistem',
+            'Stok Aktual',
+            'Selisih',
+            'Harga Beli',
+            'Selisih Rupiah',
+            'Keterangan'
+        ];
+        
+        // Prepare items data
+        const itemsData = opname.items.map(item => {
+            const selisih = item.stokAktual !== null ? item.stokAktual - item.stokSistem : 0;
+            const selisihRupiah = selisih * item.hargaBeli;
+            
+            return [
+                item.kategori || 'Uncategorized',
+                item.kodeToko || '',
+                item.kode,
+                item.plu || '',
+                item.nama,
+                item.stokSistem,
+                item.stokAktual !== null ? item.stokAktual : '',
+                selisih,
+                item.hargaBeli,
+                selisihRupiah,
+                item.keterangan || ''
+            ];
+        });
+        
+        // Create items worksheet (limit the name to 31 characters as per Excel's limitation)
+        const sheetName = `OP_${opname.noOpname.substring(0, 28)}`;
+        const itemsWs = XLSX.utils.aoa_to_sheet([itemHeaders, ...itemsData]);
+        XLSX.utils.book_append_sheet(wb, itemsWs, sheetName);
+    });
+    
+    // Generate Excel file
+    const fileName = `Stok_Opname_Selected_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+}
+
+// Function to download all opname as Excel
+function downloadAllOpnamesAsExcel() {
+    if (riwayatOpname.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Data Kosong',
+            text: 'Tidak ada data stok opname untuk diunduh'
+        });
+        return;
+    }
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Create header for the main sheet
+    const headers = [
+        'No Opname',
+        'Tanggal',
+        'Petugas',
+        'Tipe Opname',
+        'Kategori',
+        'Status',
+        'Jumlah Item',
+        'Total Selisih Stok',
+        'Total Selisih Rupiah',
+        'Catatan'
+    ];
+    
+    // Prepare data for main sheet
+    const data = riwayatOpname.map(opname => {
+        // Calculate totals
+        let totalSelisihStok = 0;
+        let totalSelisihRupiah = 0;
+        
+        if (opname.status === 'completed' || opname.status === 'adjusted') {
+            opname.items.forEach(item => {
+                if (item.stokAktual !== null) {
+                    const selisih = item.stokAktual - item.stokSistem;
+                    totalSelisihStok += selisih;
+                    totalSelisihRupiah += selisih * item.hargaBeli;
+                }
+            });
+        }
+        
+        // Format date
+        const opnameDate = new Date(opname.tanggal);
+        const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).replace(',', '');
+        
+        // Get category or 'Semua'
+        let kategoriText = 'Semua';
+        if (opname.tipeOpname === 'category') {
+            kategoriText = opname.kategori;
+        } else if (opname.tipeOpname === 'selected') {
+            kategoriText = 'Tertentu';
+        }
+        
+        // Get status text
+        let statusText = '';
+        switch (opname.status) {
+            case 'pending':
+                statusText = 'Pending';
+                break;
+            case 'completed':
+                statusText = 'Selesai';
+                break;
+            case 'adjusted':
+                statusText = 'Disesuaikan';
+                break;
+        }
+        
+        return [
+            opname.noOpname,
+            formattedDate,
+            opname.petugas,
+            opname.tipeOpname === 'all' ? 'Semua Barang' : opname.tipeOpname === 'category' ? 'Per Kategori' : 'Barang Tertentu',
+            kategoriText,
+            statusText,
+            opname.items.length,
+            totalSelisihStok,
+            totalSelisihRupiah,
+            opname.catatan || ''
+        ];
+    });
+    
+    // Create main worksheet
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+    XLSX.utils.book_append_sheet(wb, ws, 'Stok Opname');
+    
+    // For each opname, create a separate worksheet
+    riwayatOpname.forEach(opname => {
+        // Create header for the items sheet
+        const itemHeaders = [
+            'Kategori',
+            'Kode Toko',
+            'Kode Barang',
+            'PLU',
+            'Nama Barang',
+            'Stok Sistem',
+            'Stok Aktual',
+            'Selisih',
+            'Harga Beli',
+            'Selisih Rupiah',
+            'Keterangan'
+        ];
+        
+        // Prepare items data
+        const itemsData = opname.items.map(item => {
+            const selisih = item.stokAktual !== null ? item.stokAktual - item.stokSistem : 0;
+            const selisihRupiah = selisih * item.hargaBeli;
+            
+            return [
+                item.kategori || 'Uncategorized',
+                item.kodeToko || '',
+                item.kode,
+                item.plu || '',
+                item.nama,
+                item.stokSistem,
+                item.stokAktual !== null ? item.stokAktual : '',
+                selisih,
+                item.hargaBeli,
+                selisihRupiah,
+                item.keterangan || ''
+            ];
+        });
+        
+        // Create items worksheet (limit the name to 31 characters as per Excel's limitation)
+        const sheetName = `OP_${opname.noOpname.substring(0, 28)}`;
+        const itemsWs = XLSX.utils.aoa_to_sheet([itemHeaders, ...itemsData]);
+        XLSX.utils.book_append_sheet(wb, itemsWs, sheetName);
+    });
+    
+    // Generate Excel file and add to ZIP
+    const excelFileName = `Semua_Stok_Opname_${new Date().toISOString().split('T')[0]}.xlsx`;
+    
+    // Initialize JSZip
+    const zip = new JSZip();
+    
+    // Convert Excel to binary data
+    const excelBinary = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+    
+    // Convert binary string to array buffer
+    function s2ab(s) {
+        const buf = new ArrayBuffer(s.length);
+        const view = new Uint8Array(buf);
+        for (let i = 0; i < s.length; i++) {
+            view[i] = s.charCodeAt(i) & 0xFF;
+        }
+        return buf;
+    }
+    
+    // Add Excel file to the ZIP archive
+    zip.file(excelFileName, s2ab(excelBinary), {binary: true});
+    
+    // Generate ZIP file
+    zip.generateAsync({type: 'blob'})
+        .then(function(content) {
+            // Create a download link and trigger download
+            const zipFileName = `Stok_Opname_Archive_${new Date().toISOString().split('T')[0]}.zip`;
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = zipFileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: `File ZIP berhasil di-download dengan nama ${zipFileName}`
+            });
+        })
+        .catch(function(error) {
+            console.error('Error generating ZIP:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Gagal membuat file ZIP. Silakan coba lagi.'
+            });
+        });
+}
+
+// Function to download selected opnames as ZIP file
+async function downloadSelectedOpnamesAsZip(opnameIds) {
+    if (!opnameIds || opnameIds.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Pilih Opname',
+            text: 'Pilih minimal satu stok opname untuk diunduh'
+        });
+        return;
+    }
+    
+    // Show progress
+    const progressContainer = document.querySelector('.download-progress');
+    progressContainer.style.display = 'block';
+    
+    const progressText = document.getElementById('downloadProgress');
+    const totalProgress = document.getElementById('totalProgress');
+    const progressFill = document.getElementById('progressFill');
+    
+    totalProgress.textContent = opnameIds.length;
+    progressText.textContent = '0';
+    progressFill.style.width = '0%';
+    
+    try {
+        const zip = new JSZip();
+        
+        // Get selected opnames
+        const selectedOpnames = riwayatOpname.filter(opname => opnameIds.includes(opname.noOpname));
+        
+        for (let i = 0; i < selectedOpnames.length; i++) {
+            const opname = selectedOpnames[i];
+            
+            // Create workbook for each opname
+            const wb = XLSX.utils.book_new();
+            
+            // Create header for the items sheet
+            const itemHeaders = [
+                'Kategori',
+                'Kode Toko',
+                'Kode Barang',
+                'PLU',
+                'Nama Barang',
+                'Stok Sistem',
+                'Stok Aktual',
+                'Selisih',
+                'Harga Beli',
+                'Selisih Rupiah',
+                'Keterangan'
+            ];
+            
+            // Prepare items data
+            const itemsData = opname.items.map(item => {
+                const selisih = item.stokAktual !== null ? item.stokAktual - item.stokSistem : 0;
+                const selisihRupiah = selisih * item.hargaBeli;
+                
+                return [
+                    item.kategori || 'Uncategorized',
+                    item.kodeToko || '',
+                    item.kode,
+                    item.plu || '',
+                    item.nama,
+                    item.stokSistem,
+                    item.stokAktual !== null ? item.stokAktual : '',
+                    selisih,
+                    item.hargaBeli,
+                    selisihRupiah,
+                    item.keterangan || ''
+                ];
+            });
+            
+            // Create items worksheet
+            const itemsWs = XLSX.utils.aoa_to_sheet([itemHeaders, ...itemsData]);
+            XLSX.utils.book_append_sheet(wb, itemsWs, 'Items');
+            
+            // Create summary worksheet
+            const summaryHeaders = [
+                'No Opname',
+                'Tanggal',
+                'Petugas',
+                'Tipe Opname',
+                'Kategori',
+                'Status',
+                'Jumlah Item',
+                'Total Selisih Stok',
+                'Total Selisih Rupiah',
+                'Catatan'
+            ];
+            
+            // Calculate summary data
+            let totalSelisihStok = 0;
+            let totalSelisihRupiah = 0;
+            
+            if (opname.status === 'completed' || opname.status === 'adjusted') {
+                opname.items.forEach(item => {
+                    if (item.stokAktual !== null) {
+                        const selisih = item.stokAktual - item.stokSistem;
+                        totalSelisihStok += selisih;
+                        totalSelisihRupiah += selisih * item.hargaBeli;
+                    }
+                });
+            }
+            
+            // Format date
+            const opnameDate = new Date(opname.tanggal);
+            const formattedDate = opnameDate.toLocaleDateString('id-ID', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace(',', '');
+            
+            // Get category or 'Semua'
+            let kategoriText = 'Semua';
+            if (opname.tipeOpname === 'category') {
+                kategoriText = opname.kategori;
+            } else if (opname.tipeOpname === 'selected') {
+                kategoriText = 'Tertentu';
+            }
+            
+            // Get status text
+            let statusText = '';
+            switch (opname.status) {
+                case 'pending':
+                    statusText = 'Pending';
+                    break;
+                case 'completed':
+                    statusText = 'Selesai';
+                    break;
+                case 'adjusted':
+                    statusText = 'Disesuaikan';
+                    break;
+            }
+            
+            // Prepare summary data
+            const summaryData = [
+                opname.noOpname,
+                formattedDate,
+                opname.petugas,
+                opname.tipeOpname === 'all' ? 'Semua Barang' : opname.tipeOpname === 'category' ? 'Per Kategori' : 'Barang Tertentu',
+                kategoriText,
+                statusText,
+                opname.items.length,
+                totalSelisihStok,
+                totalSelisihRupiah,
+                opname.catatan || ''
+            ];
+            
+            // Create summary worksheet
+            const summaryWs = XLSX.utils.aoa_to_sheet([summaryHeaders, summaryData]);
+            XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
+            
+            // Convert workbook to binary string
+            const excelData = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+            
+            // Convert binary string to ArrayBuffer
+            const buf = new ArrayBuffer(excelData.length);
+            const view = new Uint8Array(buf);
+            for (let j = 0; j < excelData.length; j++) {
+                view[j] = excelData.charCodeAt(j) & 0xFF;
+            }
+            
+            // Add file to zip
+            zip.file(`Stok_Opname_${opname.noOpname}.xlsx`, buf);
+            
+            // Update progress
+            progressText.textContent = i + 1;
+            progressFill.style.width = `${((i + 1) / selectedOpnames.length) * 100}%`;
+            
+            // Give the browser time to update the UI
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
+        
+        // Generate zip file
+        const zipContent = await zip.generateAsync({
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: {
+                level: 6
+            }
+        });
+        
+        // Save zip file
+        saveAs(zipContent, `Stok_Opname_Data_${new Date().toISOString().split('T')[0]}.zip`);
+        
+        // Hide progress and close modal
+        progressContainer.style.display = 'none';
+        document.getElementById('selectOpnameModal').style.display = 'none';
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil',
+            text: `${selectedOpnames.length} file stok opname berhasil diunduh dalam format ZIP`
+        });
+        
+    } catch (error) {
+        console.error('Error creating ZIP file:', error);
+        
+        // Hide progress
+        progressContainer.style.display = 'none';
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Terjadi kesalahan saat membuat file ZIP'
+        });
+    }
+}
+    
+       
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+
+</body>
+
+</html>
