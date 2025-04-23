@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistem Generator PIN untuk Stok Opname dengan Riwayat Penggunaan">
+    <meta name="author" content="Administrator Sistem Inventaris">
+    <title>Generator PIN untuk Verifikasi Stok Opname</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        .bg-gradient-blue {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e2e8ff 100%);
+        }
+        .custom-card-shadow {
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.1);
+        }
+        .pin-display {
+            letter-spacing: 0.35em;
+            font-family: 'Courier New', monospace;
+        }
+        .floating-effect {
+            animation: float 3s infinite ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .status-card {
+            transition: all 0.3s ease;
+        }
+        .status-card:hover {
+            transform: translateY(-5px);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .grid-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 2fr 1fr;
+            gap: 0.5rem;
+        }
+        .grid-table > div {
+            padding: 0.5rem;
+        }
+        .grid-table-header {
+            font-weight: bold;
+            background-color: #f3f4f6;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4F46E5;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status-active {
+            color: #10B981;
+            font-weight: bold;
+        }
+        .status-expired {
+            color: #EF4444;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gradient-blue flex items-center justify-center min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto max-w-lg">
+        <div class="text-center mb-8">
+            <div class="inline-block p-3 bg-indigo-100 rounded-full mb-3 floating-effect">
+                <i class="fas fa-fingerprint text-4xl text-indigo-600"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Generator PIN</h1>
+            <p class="text-gray-600 mt-2">Sistem Verifikasi untuk Pengelolaan Stok Opname</p>
+            <div class="mt-3 text-sm bg-gray-100 rounded-full px-4 py-1 inline-flex items-center">
+                <i class="fas fa-user mr-1 text-gray-500"></i>
+                <span id="currentUsername">User ID</span>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl custom-card-shadow p-8 transition-all duration-300 hover:shadow-lg">
+            <div class="mb-6 border-b border-gray-200">
+                <div class="flex -mb-px">
+                    <button id="tab-generate" onclick="switchTab('generate')" class="py-2 px-4 border-b-2 border-indigo-500 text-indigo-600 font-medium text-sm flex-1 text-center active-tab">
+                        <i class="fas fa-key mr-1"></i> Generate PIN
+                    </button>
+                    <button id="tab-history" onclick="switchTab('history')" class="py-2 px-4 border-b-2 border-transparent text-gray-500 font-medium text-sm flex-1 text-center hover:text-gray-700">
+                        <i class="fas fa-history mr-1"></i> Riwayat PIN
+                    </button>
+                </div>
+            </div>
+            
+            <div id="content-generate">
+                <div class="mb-6">
+                    <label for="noOpname" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-barcode text-gray-500 mr-1"></i>Nomor Opname
+                    </label>
+                    <div class="relative rounded-md shadow-sm">
+                        <input type="text" 
+                               id="noOpname" 
+                               class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-4 pr-10 py-3 sm:text-sm border-gray-300 rounded-md" 
+                               placeholder="Masukkan nomor opname (contoh: OP123456)">
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="fas fa-hashtag text-gray-400"></i>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-xs text-gray-500">Status opname harus <span class="font-medium">pending</span> dan belum disesuaikan</p>
+                </div>
+                
+                <button 
+                    onclick="generatePinForOpname()" 
+                    id="generateBtn"
+                    class="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center">
+                    <i class="fas fa-key mr-2"></i>
+                    <span class="font-medium">Generate PIN</span>
+                    <div id="loadingSpinner" class="loading-spinner ml-2"></div>
+                </button>
+                
+                <div id="pinResult" class="mt-6 bg-gray-50 rounded-lg p-5 border border-gray-200 hidden fade-in">
+                    <div class="text-center">
+                        <div class="text-sm font-medium text-gray-500 mb-1">PIN untuk Opname:</div>
+                        <div class="text-lg font-bold text-gray-800 mb-1" id="opnameNumber">-</div>
+                        <div class="text-3xl font-bold text-indigo-600 pin-display my-3" id="pinDisplay">------</div>
+                        <p class="text-sm text-gray-600">Gunakan PIN ini untuk verifikasi penghapusan</p>
+                        <div class="mt-3 flex justify-center">
+                            <button onclick="copyPin()" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <i class="fas fa-copy mr-2"></i> Salin PIN
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="content-history" class="hidden">
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-800">Riwayat PIN</h3>
+                    <div class="flex space-x-2">
+                        <button onclick="refreshHistory()" class="text-indigo-600 hover:text-indigo-800 text-sm flex items-center">
+                            <i class="fas fa-sync-alt mr-1"></i> Refresh
+                        </button>
+                        <button onclick="exportHistoryToCSV()" class="text-green-600 hover:text-green-800 text-sm flex items-center">
+                            <i class="fas fa-download mr-1"></i> Ekspor CSV
+                        </button>
+                        <button onclick="clearHistory()" class="text-red-600 hover:text-red-800 text-sm flex items-center">
+                            <i class="fas fa-trash-alt mr-1"></i> Hapus Semua
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <input type="text" 
+                           id="historyFilter" 
+                           oninput="filterHistory()" 
+                           class="w-full p-2 border border-gray-300 rounded-md" 
+                           placeholder="Cari nomor opname atau pembuat...">
+                </div>
+                
+                <div class="border rounded-lg overflow-hidden">
+                    <div class="grid-table grid-table-header">
+                        <div>Nomor Opname</div>
+                        <div>PIN</div>
+                        <div>Pembuat</div>
+                        <div>Waktu Dibuat</div>
+                        <div>Aksi</div>
+                    </div>
+                    <div id="historyContainer" class="max-h-64 overflow-y-auto">
+                        <div class="text-center py-6 text-gray-500">
+                            Memuat riwayat...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-xs text-gray-500">
+                    <p>* Riwayat PIN disimpan secara lokal. PIN kadaluarsa setelah 24 jam.</p>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex items-center justify-between">
+                <a href="cek ulang stok.html" class="text-indigo-600 hover:text-indigo-800 flex items-center text-sm transition-colors duration-200">
+                    <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar Stok Opname
+                </a>
+                <div class="flex space-x-3">
+                    <button onclick="showHelp()" class="text-gray-500 hover:text-gray-700 text-sm flex items-center transition-colors duration-200">
+                        <i class="fas fa-question-circle mr-1"></i> Bantuan
+                    </button>
+                    <button onclick="logout()" class="text-red-500 hover:text-red-700 text-sm flex items-center transition-colors duration-200">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-6 text-center text-gray-500 text-xs">
+            <p>Sistem Manajemen Stok Opname © 2025</p>
+            <p class="mt-1">v3.6.0</p>
+        </div>
+    </div>
+
+    <script>
+        let currentUsername = '';
+
+        // Fungsi untuk sanitasi input
+        function sanitizeInput(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            document.getElementById('noOpname').focus();
+        });
+
+        function loadUserData() {
+            currentUsername = localStorage.getItem('currentUsername') || 'User ID';
+            document.getElementById('currentUsername').textContent = sanitizeInput(currentUsername);
+        }
+
+        function simulateLogin() {
+            const demoUsername = "admin_user";
+            localStorage.setItem('currentUsername', demoUsername);
+            currentUsername = demoUsername;
+            document.getElementById('currentUsername').textContent = sanitizeInput(demoUsername);
+
+            if (!localStorage.getItem('accounts')) {
+                const demoAccounts = [
+                    {
+                        username: "admin_user",
+                        password: CryptoJS.AES.encrypt("admin123", 'secret key 123').toString(),
+                        pin: "789012"
+                    }
+                ];
+                try {
+                    localStorage.setItem('accounts', JSON.stringify(demoAccounts));
+                } catch (e) {
+                    console.error('Gagal menyimpan akun demo:', e);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Penyimpanan',
+                        text: 'Gagal menyimpan data akun. Periksa penyimpanan browser.',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                }
+            }
+        }
+
+        function logout() {
+            Swal.fire({
+                title: 'Logout?',
+                text: 'Anda yakin ingin keluar dari sistem?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#4F46E5',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Logout',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('currentUsername');
+                    currentUsername = 'User ID';
+                    document.getElementById('currentUsername').textContent = currentUsername;
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Logout Berhasil',
+                        text: 'Anda telah keluar dari sistem',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                }
+            });
+        }
+
+        function validateNoOpname(noOpname) {
+            const regex = /^OP\d{4,}$/;
+            return regex.test(noOpname);
+        }
+
+        function generatePin(noOpname) {
+            let hash = 0;
+            for (let i = 0; i < noOpname.length; i++) {
+                hash = ((hash << 5) - hash) + noOpname.charCodeAt(i);
+                hash = hash & hash;
+            }
+            return ('000000' + (Math.abs(hash) % 1000000)).slice(-6);
+        }
+
+        function generatePinForOpname() {
+            const noOpname = sanitizeInput(document.getElementById('noOpname').value.trim());
+
+            if (!noOpname) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Masukkan nomor opname terlebih dahulu',
+                    confirmButtonColor: '#4F46E5'
+                });
+                return;
+            }
+
+            if (!validateNoOpname(noOpname)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Format Salah',
+                    text: 'Nomor opname harus dimulai dengan "OP" diikuti minimal 4 angka (contoh: OP123456)',
+                    confirmButtonColor: '#4F46E5'
+                });
+                return;
+            }
+
+            const generateBtn = document.getElementById('generateBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            generateBtn.disabled = true;
+            loadingSpinner.style.display = 'inline-block';
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+
+            simulateOpnameStatusCheck(noOpname).then(opnameData => {
+                generateBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+                generateBtn.innerHTML = '<i class="fas fa-key mr-2"></i><span class="font-medium">Generate PIN</span>';
+
+                if (!opnameData) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Opname Tidak Ditemukan',
+                        text: 'Nomor opname tidak terdaftar dalam sistem',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                    return;
+                }
+
+                const isPendingNotAdjusted = opnameData.status === 'pending' && !opnameData.adjustedAt;
+
+                if (isPendingNotAdjusted) {
+                    const pin = generatePin(noOpname);
+
+                    document.getElementById('pinResult').classList.remove('hidden');
+                    document.getElementById('opnameNumber').textContent = noOpname;
+                    document.getElementById('pinDisplay').textContent = pin;
+
+                    autoSaveToHistory(noOpname, pin);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'PIN Berhasil Dibuat',
+                        text: 'PIN telah dibuat dan disimpan ke riwayat',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Status Tidak Valid',
+                        html: `Opname <b>${noOpname}</b> tidak memenuhi syarat untuk pembuatan PIN.<br><br>Silakan verifikasi status opname.`,
+                        confirmButtonColor: '#4F46E5'
+                    });
+                }
+            }).catch(err => {
+                console.error('Error saat verifikasi opname:', err);
+                generateBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+                generateBtn.innerHTML = '<i class="fas fa-key mr-2"></i><span class="font-medium">Generate PIN</span>';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Sistem',
+                    text: 'Terjadi kesalahan saat memverifikasi opname. Coba lagi.',
+                    confirmButtonColor: '#4F46E5'
+                });
+            });
+        }
+
+        function autoSaveToHistory(noOpname, pin) {
+            let pinHistory = [];
+            try {
+                pinHistory = JSON.parse(localStorage.getItem('pinHistory')) || [];
+            } catch (e) {
+                console.error('Gagal membaca pinHistory:', e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Penyimpanan',
+                    text: 'Gagal membaca riwayat PIN. Periksa penyimpanan browser.',
+                    confirmButtonColor: '#4F46E5'
+                });
+                return;
+            }
+
+            const existingIndex = pinHistory.findIndex(item => item.noOpname === noOpname);
+
+            if (existingIndex >= 0) {
+                pinHistory[existingIndex] = {
+                    noOpname: noOpname,
+                    pin: pin,
+                    creator: currentUsername,
+                    timestamp: new Date().toISOString()
+                };
+            } else {
+                pinHistory.push({
+                    noOpname: noOpname,
+                    pin: pin,
+                    creator: currentUsername,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            try {
+                localStorage.setItem('pinHistory', JSON.stringify(pinHistory));
+            } catch (e) {
+                console.error('Gagal menyimpan pinHistory:', e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Penyimpanan',
+                    text: 'Gagal menyimpan riwayat PIN. Periksa penyimpanan browser.',
+                    confirmButtonColor: '#4F46E5'
+                });
+                return;
+            }
+
+            if (!document.getElementById('content-history').classList.contains('hidden')) {
+                displayPinHistory();
+            }
+        }
+
+        function isPinActive(timestamp) {
+            const pinAge = Date.now() - new Date(timestamp).getTime();
+            const oneDayInMs = 24 * 60 * 60 * 1000;
+            return pinAge < oneDayInMs;
+        }
+
+        function displayPinHistory() {
+            const historyContainer = document.getElementById('historyContainer');
+            const filterText = document.getElementById('historyFilter')?.value.toLowerCase() || '';
+            let pinHistory = [];
+            try {
+                pinHistory = JSON.parse(localStorage.getItem('pinHistory')) || [];
+            } catch (e) {
+                console.error('Gagal membaca pinHistory:', e);
+                historyContainer.innerHTML = `
+                    <div class="text-center py-6 text-gray-500">
+                        Gagal memuat riwayat PIN
+                    </div>
+                `;
+                return;
+            }
+
+            historyContainer.innerHTML = '';
+
+            if (pinHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="text-center py-6 text-gray-500">
+                        Belum ada riwayat PIN tersimpan
+                    </div>
+                `;
+                return;
+            }
+
+            pinHistory
+                .filter(item => 
+                    item.noOpname.toLowerCase().includes(filterText) || 
+                    item.creator.toLowerCase().includes(filterText)
+                )
+                .slice()
+                .reverse()
+                .forEach(item => {
+                    const date = new Date(item.timestamp).toLocaleString('id-ID');
+                    const isActive = isPinActive(item.timestamp);
+                    const historyRow = document.createElement('div');
+                    historyRow.className = 'grid-table border-b border-gray-100 hover:bg-gray-50';
+
+                    historyRow.innerHTML = `
+                        <div class="truncate" title="${sanitizeInput(item.noOpname)}">${sanitizeInput(item.noOpname)}</div>
+                        <div class="font-mono">${sanitizeInput(item.pin)}</div>
+                        <div class="truncate" title="${sanitizeInput(item.creator)}">${sanitizeInput(item.creator)}</div>
+                        <div class="truncate" title="${date}">${date} <span class="${isActive ? 'status-active' : 'status-expired'}">(${isActive ? 'Aktif' : 'Kadaluarsa'})</span></div>
+                        <div>
+                            <button onclick="deletePin('${sanitizeInput(item.noOpname)}')" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    historyContainer.appendChild(historyRow);
+                });
+        }
+
+        function filterHistory() {
+            displayPinHistory();
+        }
+
+        function refreshHistory() {
+            displayPinHistory();
+            Swal.fire({
+                icon: 'success',
+                title: 'Disegarkan',
+                text: 'Riwayat PIN telah disegarkan',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+        }
+
+        function clearHistory() {
+            Swal.fire({
+                title: 'Hapus Semua Riwayat?',
+                text: 'Semua riwayat PIN akan dihapus dan tidak dapat dikembalikan. Lanjutkan?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#4F46E5',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    try {
+                        localStorage.removeItem('pinHistory');
+                        displayPinHistory();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Riwayat Dihapus',
+                            text: 'Semua riwayat PIN telah dihapus',
+                            confirmButtonColor: '#4F46E5'
+                        });
+                    } catch (e) {
+                        console.error('Gagal menghapus riwayat:', e);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Gagal menghapus riwayat PIN. Periksa penyimpanan browser.',
+                            confirmButtonColor: '#4F46E5'
+                        });
+                    }
+                }
+            });
+        }
+
+        function deletePin(noOpname) {
+            Swal.fire({
+                title: 'Hapus PIN?',
+                text: `PIN untuk opname ${noOpname} akan dihapus dari riwayat. Lanjutkan?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#4F46E5',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    try {
+                        let pinHistory = JSON.parse(localStorage.getItem('pinHistory')) || [];
+                        pinHistory = pinHistory.filter(item => item.noOpname !== noOpname);
+                        localStorage.setItem('pinHistory', JSON.stringify(pinHistory));
+                        displayPinHistory();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'PIN Dihapus',
+                            text: `PIN untuk ${noOpname} telah dihapus`,
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true
+                        });
+                    } catch (e) {
+                        console.error('Gagal menghapus PIN:', e);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Gagal menghapus PIN. Periksa penyimpanan browser.',
+                            confirmButtonColor: '#4F46E5'
+                        });
+                    }
+                }
+            });
+        }
+
+        function exportHistoryToCSV() {
+            let pinHistory = [];
+            try {
+                pinHistory = JSON.parse(localStorage.getItem('pinHistory')) || [];
+            } catch (e) {
+                console.error('Gagal membaca pinHistory:', e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Gagal membaca riwayat PIN untuk ekspor.',
+                    confirmButtonColor: '#4F46E5'
+                });
+                return;
+            }
+
+            if (pinHistory.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Tidak Ada Data',
+                    text: 'Belum ada riwayat PIN untuk diekspor.',
+                    confirmButtonColor: '#4F46E5'
+                });
+                return;
+            }
+
+            const csvContent = [
+                '"Nomor Opname","PIN","Pembuat","Waktu Dibuat","Status"',
+                ...pinHistory.map(item => `"${item.noOpname}","${item.pin}","${item.creator}","${new Date(item.timestamp).toLocaleString('id-ID')}","${isPinActive(item.timestamp) ? 'Aktif' : 'Kadaluarsa'}"`)
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'riwayat_pin.csv';
+            link.click();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Ekspor Berhasil',
+                text: 'Riwayat PIN telah diekspor ke file CSV',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
+        }
+
+        function simulateOpnameStatusCheck(noOpname) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    if (noOpname.startsWith('OP') && noOpname.length > 5) {
+                        resolve({
+                            noOpname: noOpname,
+                            status: 'pending',
+                            adjustedAt: null,
+                            createdAt: new Date().toISOString()
+                        });
+                    } else if (noOpname.startsWith('ADJ')) {
+                        resolve({
+                            noOpname: noOpname,
+                            status: 'completed',
+                            adjustedAt: '2025-04-10T10:30:00Z',
+                            createdAt: '2025-04-01T08:15:00Z'
+                        });
+                    } else {
+                        resolve(null);
+                    }
+                }, 800);
+            });
+        }
+
+        function copyPin() {
+            const pin = document.getElementById('pinDisplay').textContent;
+            navigator.clipboard.writeText(pin).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'PIN Disalin',
+                    text: 'PIN berhasil disalin ke clipboard',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            }).catch(err => {
+                console.error('Gagal menyalin PIN:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menyalin',
+                    text: 'Tidak dapat menyalin PIN',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            document.getElementById('tab-generate').classList.remove('border-indigo-500', 'text-indigo-600');
+            document.getElementById('tab-generate').classList.add('border-transparent', 'text-gray-500');
+            document.getElementById('tab-history').classList.remove('border-indigo-500', 'text-indigo-600');
+            document.getElementById('tab-history').classList.add('border-transparent', 'text-gray-500');
+
+            document.getElementById('content-generate').classList.add('hidden');
+            document.getElementById('content-history').classList.add('hidden');
+
+            if (tabName === 'generate') {
+                document.getElementById('tab-generate').classList.remove('border-transparent', 'text-gray-500');
+                document.getElementById('tab-generate').classList.add('border-indigo-500', 'text-indigo-600');
+                document.getElementById('content-generate').classList.remove('hidden');
+                document.getElementById('noOpname').focus();
+            } else if (tabName === 'history') {
+                document.getElementById('tab-history').classList.remove('border-transparent', 'text-gray-500');
+                document.getElementById('tab-history').classList.add('border-indigo-500', 'text-indigo-600');
+                document.getElementById('content-history').classList.remove('hidden');
+                displayPinHistory();
+            }
+        }
+
+        function showHelp() {
+            Swal.fire({
+                title: 'Bantuan Sistem PIN',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-3">Generator PIN digunakan untuk membuat dan mengelola PIN untuk verifikasi penghapusan stok opname:</p>
+                        
+                        <div class="mb-3">
+                            <h3 class="font-medium mb-1">Membuat PIN</h3>
+                            <ul class="list-disc pl-5 mt-1 text-sm text-gray-600">
+                                <li>Masukkan nomor opname yang valid (format: OP diikuti minimal 4 angka)</li>
+                                <li>PIN hanya dapat dibuat untuk opname dengan status <b>pending</b> yang belum disesuaikan</li>
+                                <li>PIN akan otomatis disimpan ke riwayat setelah dibuat</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h3 class="font-medium mb-1">Riwayat PIN</h3>
+                            <ul class="list-disc pl-5 mt-1 text-sm text-gray-600">
+                                <li>Menyimpan semua PIN yang telah dibuat</li>
+                                <li>Menampilkan informasi pembuat PIN, waktu pembuatan, dan status (aktif/kadaluarsa)</li>
+                                <li>PIN dalam riwayat dapat digunakan kembali untuk verifikasi selama masih aktif</li>
+                                <li>Riwayat dapat difilter, diekspor ke CSV, atau dihapus</li>
+                            </ul>
+                        </div>
+                        
+                        <p class="text-sm text-gray-500 mt-3">Untuk bantuan lebih lanjut, hubungi administrator sistem.</p>
+                    </div>
+                `,
+                confirmButtonColor: '#4F46E5',
+                confirmButtonText: 'Mengerti'
+            });
+        }
+
+        document.getElementById('noOpname').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generatePinForOpname();
+            }
+        });
+    </script>
+</body>
+</html>
