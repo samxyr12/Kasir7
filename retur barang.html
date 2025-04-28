@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    
+    <title>Retur Barang Lanjutan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f9c74f;
+            --danger-color: #ef476f;
+            --gray-dark: #2b2d42;
+            --gray-medium: #8d99ae;
+            --gray-light: #edf2f4;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            color: var(--gray-dark);
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            padding: 35px;
+            max-width: 1200px;
+            margin: 30px auto;
+            border: 1px solid #e9ecef;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .btn-kembali {
+            background-color: var(--gray-medium);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-kembali:hover {
+            background-color: var(--gray-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-kembali i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .form-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            background-color: var(--gray-light);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--gray-dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+            outline: none;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.4s ease;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-tambah {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-tambah:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+
+        .btn-retur {
+            background-color: var(--accent-color);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-right: 15px;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-retur:hover {
+            background-color: #e6196f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-retur i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .btn-process {
+            background-color: var(--success-color);
+            color: white;
+            padding: 14px 25px;
+            font-size: 1rem;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-process:hover {
+            background-color: #3ab7da;
+        }
+
+        table {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-top: 25px;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 15px 12px;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.3s ease;
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #f1f4f9;
+        }
+
+        .stock-info {
+            background: linear-gradient(135deg, #f7f9fc 0%, #e5ebee 100%);
+            border-left: 5px solid var(--primary-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stock-info h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .stock-change {
+            color: var(--danger-color);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0 15px;
+        }
+
+        .section-title h3 {
+            color: var(--gray-dark);
+            margin: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-warning {
+            background-color: var(--warning-color);
+            color: #664d03;
+        }
+
+        .badge-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .badge-info {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .action-column {
+            text-align: center;
+        }
+
+        .footer-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        /* Autocomplete dropdown */
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #ddd;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .autocomplete-items div {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .autocomplete-items div:hover,
+        .autocomplete-active {
+            background-color: var(--primary-color) !important;
+            color: #ffffff;
+        }
+
+        .autocomplete-items .item-code {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .autocomplete-items div:hover .item-code,
+        .autocomplete-active .item-code {
+            color: #fff;
+        }
+
+        .autocomplete-items .item-stock {
+            color: var(--gray-medium);
+            font-size: 0.85rem;
+        }
+
+        .autocomplete-items div:hover .item-stock,
+        .autocomplete-active .item-stock {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .autocomplete-items .item-add {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .autocomplete-items .item-add:hover {
+            background-color: #3ab7da;
+            transform: scale(1.05);
+        }
+
+        .autocomplete-items div:hover .item-add,
+        .autocomplete-active .item-add {
+            background-color: white;
+            color: var(--primary-color);
+        }
+
+        .product-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .product-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-title {
+            font-weight: bold;
+        }
+
+        .product-subtitle {
+            font-size: 0.85rem;
+            color: var(--gray-medium);
+        }
+
+        .autocomplete-items div:hover .product-subtitle,
+        .autocomplete-active .product-subtitle {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Quick add button */
+        .quick-add-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .quick-add-btn:hover {
+            background-color: #3ab7da;
+            transform: scale(1.05);
+        }
+
+        .autocomplete-items div:hover .quick-add-btn {
+            background-color: white;
+            color: var(--primary-color);
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+                margin: 15px;
+            }
+            
+            .form-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .btn-kembali {
+                margin-bottom: 15px;
+            }
+            
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .section-title .btn-retur {
+                margin-top: 10px;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        /* Animation for row addition/removal */
+        @keyframes highlight {
+            0% { background-color: rgba(67, 97, 238, 0.3); }
+            100% { background-color: transparent; }
+        }
+
+        .highlight {
+            animation: highlight 1.5s ease;
+        }
+
+        /* Loading indicator */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Frequently returned items */
+        .frequently-returned {
+            margin-bottom: 20px;
+        }
+        
+        .frequently-returned h4 {
+            font-size: 1rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .quick-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .quick-item {
+            background-color: #f1f4f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .quick-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .quick-item i {
+            margin-right: 5px;
+            font-size: 0.8rem;
+        }
+        
+        
+        
+        /* Animasi untuk SweetAlert2 Popup */
+.swal2-popup {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: popupFadeIn 0.5s ease-out;
+}
+
+@keyframes popupFadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Animasi ikon kunci bergetar */
+.animated-lock {
+    display: inline-block;
+    animation: lockShake 1.5s ease-in-out infinite;
+    font-size: 3rem;
+    color: var(--danger-color);
+}
+
+@keyframes lockShake {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+    20%, 40%, 60%, 80% { transform: rotate(10deg); }
+}
+
+/* Overlay blur untuk latar belakang */
+.blur-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 999;
+    opacity: 0;
+    animation: fadeInOverlay 0.5s ease forwards;
+}
+
+@keyframes fadeInOverlay {
+    to { opacity: 1; }
+}
+
+/* Animasi fade-out untuk halaman */
+.fade-out {
+    animation: fadeOutPage 0.5s ease forwards;
+}
+
+@keyframes fadeOutPage {
+    to { opacity: 0; }
+}
+
+/* Progress bar kustom untuk timer */
+.swal2-timer-progress-bar {
+    background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+    height: 6px;
+    border-radius: 3px;
+    animation: progressPulse 3s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+/* Animasi loading untuk pengalihan */
+.redirect-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--gray-light);
+    z-index: 1000;
+    animation: fadeInOverlay 0.3s ease;
+}
+
+.redirect-loading .loading {
+    width: 40px;
+    height: 40px;
+    border-width: 5px;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+/* Pastikan animasi spin sudah ada dari kode asli Anda */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button onclick="window.location.href='barang.html'" class="btn-kembali">
+                <i class="fas fa-arrow-left"></i> Kembali 
+            </button>
+            <h2><i class="fas fa-exchange-alt"></i> Retur Barang Lanjutan</h2>
+        </div>
+        
+        <div class="stock-info" id="stockInfo" style="display: none;">
+            <h4><i class="fas fa-info-circle"></i> Informasi Stok</h4>
+            <p>Stok Awal: <strong id="stokAwal">0</strong></p>
+            <p>Perubahan: <span id="perubahanStok" class="stock-change">0</span></p>
+            <p>Stok Akhir: <strong id="stokAkhir">0</strong></p>
+        </div>
+
+        <!-- Frequently returned items section -->
+        <div class="frequently-returned" id="frequentlyReturned">
+            <h4><i class="fas fa-redo-alt"></i> Barang yang Sering Diretur</h4>
+            <div class="quick-items" id="quickItems">
+                <!-- Quick access items will be populated here -->
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div>
+                <div class="form-group">
+                    <label><i class="fas fa-barcode"></i> Kode Barang:</label>
+                    <div class="autocomplete">
+                        <input type="text" id="kodeBarang" placeholder="Masukkan Kode Barang" autocomplete="off">
+                        <div class="autocomplete-items" id="kodeBarangSuggestions"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-box"></i> Nama Barang:</label>
+                    <div class="autocomplete">
+                        <input type="text" id="namaBarang" placeholder="Masukkan Nama Barang" autocomplete="off">
+                        <div class="autocomplete-items" id="namaBarangSuggestions"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-cubes"></i> Stok Tersedia:</label>
+                    <input type="number" id="stokTersedia" readonly>
+                </div>
+            </div>
+            
+            <div>
+                <div class="form-group">
+                    <label><i class="fas fa-exclamation-triangle"></i> Alasan Retur:</label>
+                    <select id="alasanRetur">
+                        <option value="expired">Expired</option>
+                        <option value="rusak">Rusak</option>
+                        <option value="salah_kirim">Salah Kirim</option>
+                        <option value="kadaluwarsa">Kadaluwarsa</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-sort-numeric-down"></i> Jumlah Retur:</label>
+                    <input type="number" id="jumlahRetur" min="1">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-comment-alt"></i> Keterangan:</label>
+                    <textarea id="keteranganRetur" rows="3" placeholder="Tambahkan detail keterangan retur disini..."></textarea>
+                </div>
+                <button class="btn btn-tambah" id="tambahKeListRetur">
+                    <i class="fas fa-plus"></i> Tambah ke List Retur
+                </button>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <h3><i class="fas fa-clipboard-list"></i> List Retur Barang</h3>
+            <button onclick="window.location.href='riwayat retur.html'" class="btn-retur">
+                <i class="fas fa-history"></i> Riwayat Retur
+            </button>
+        </div>
+        
+        <table id="tabelReturBarang">
+            <thead>
+                <tr>
+                    <th>Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Alasan</th>
+                    <th>Jumlah</th>
+                    <th>Stok Awal</th>
+                    <th>Stok Akhir</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="listReturBarang"></tbody>
+        </table>
+
+        <div class="footer-actions">
+            <button class="btn btn-process" id="prosesSemuaRetur">
+                <i class="fas fa-check-circle"></i> Proses Semua Retur
+            </button>
+        </div>
+    </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const kodeBarangInput = document.getElementById('kodeBarang');
+        const namaBarangInput = document.getElementById('namaBarang');
+        const stokTersediaInput = document.getElementById('stokTersedia');
+        const jumlahReturInput = document.getElementById('jumlahRetur');
+        const alasanReturSelect = document.getElementById('alasanRetur');
+        const keteranganReturInput = document.getElementById('keteranganRetur');
+        const tambahKeListReturBtn = document.getElementById('tambahKeListRetur');
+        const listReturBarang = document.getElementById('listReturBarang');
+        const prosesSemuaReturBtn = document.getElementById('prosesSemuaRetur');
+        const stockInfo = document.getElementById('stockInfo');
+        const kodeBarangSuggestions = document.getElementById('kodeBarangSuggestions');
+        const namaBarangSuggestions = document.getElementById('namaBarangSuggestions');
+        const quickItems = document.getElementById('quickItems');
+        const frequentlyReturned = document.getElementById('frequentlyReturned');
+
+        let listRetur = [];
+        let allProducts = [];
+       
+       
+     function checkLogin() {
+    const loggedIn = localStorage.getItem('loggedIn');
+    if (loggedIn !== 'true') {
+        // Tambahkan overlay blur
+        const overlay = document.createElement('div');
+        overlay.className = 'blur-overlay';
+        document.body.appendChild(overlay);
+
+        // Tampilkan peringatan dengan animasi
+        Swal.fire({
+            title: 'Akses Ditolak',
+            html: `
+                <div style="margin-bottom: 15px;">
+                    <i class="fas fa-lock animated-lock"></i>
+                </div>
+                <p>Anda belum login. Silakan login terlebih dahulu untuk mengakses sistem.</p>
+            `,
+            icon: 'warning',
+            confirmButtonText: 'Ke Halaman Login',
+            confirmButtonColor: '#4361ee',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            timer: 5000, // 5 detik sebelum otomatis ke login
+            timerProgressBar: true,
+            showClass: {
+                popup: 'swal2-show', // Gunakan animasi default SweetAlert2
+            },
+            hideClass: {
+                popup: 'swal2-hide',
+            },
+            didOpen: () => {
+                // Terapkan animasi kustom pada popup
+                const popup = Swal.getPopup();
+                popup.style.animation = 'popupFadeIn 0.5s ease-out';
+            }
+        }).then((result) => {
+            // Saat popup ditutup (klik OK atau timer habis)
+            if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+                // Hapus overlay
+                overlay.remove();
+
+                // Tambahkan efek fade-out pada halaman
+                document.body.classList.add('fade-out');
+
+                // Tampilkan loading pengalihan
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'redirect-loading';
+                loadingDiv.innerHTML = '<div class="loading"></div>';
+                document.body.appendChild(loadingDiv);
+
+                // Tunda pengalihan untuk animasi
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 600); // Sinkronkan dengan durasi fade-out
+            }
+        });
+    }
+}
+    function logout() {
+    Swal.fire({
+        title: 'Konfirmasi Logout',
+        text: 'Apakah Anda yakin ingin keluar dari sistem?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Logout',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#4361ee',
+        cancelButtonColor: '#6c757d',
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Tampilkan indikator loading
+            Swal.fire({
+                title: 'Sedang logout...',
+                html: '<div class="loading"></div>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Simulasikan proses logout (misalnya, untuk komunikasi dengan server)
+            setTimeout(() => {
+                try {
+                    // Hapus data login dari localStorage
+                    localStorage.removeItem('loggedIn');
+                    localStorage.removeItem('username');
+                    localStorage.setItem('loginAttempts', JSON.stringify({}));
+
+                    // Tampilkan pesan sukses
+                    Swal.fire({
+                        title: 'Berhasil Logout',
+                        text: 'Anda telah keluar dari sistem.',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee',
+                        timer: 1500,
+                        timerProgressBar: true
+                    }).then(() => {
+                        // Arahkan ke halaman login
+                        window.location.href = 'login.html';
+                    });
+                } catch (error) {
+                    // Tangani error jika ada masalah saat menyimpan ke localStorage
+                    Swal.fire({
+                        title: 'Kesalahan',
+                        text: 'Gagal melakukan logout: ' + error.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee'
+                    });
+                    console.error('Error during logout:', error);
+                }
+            }, 800); // Delay untuk simulasi proses logout
+        }
+    });
+}
+    // Panggil checkLogin saat halaman dimuat
+    checkLogin();
+
+
+       
+        
+        // Load barang data from localStorage
+        function loadProducts() {
+            allProducts = JSON.parse(localStorage.getItem('barang')) || [];
+            return allProducts;
+        }
+        
+        // Initialize with product data
+        loadProducts();
+
+        // Load frequently returned items
+        function loadFrequentlyReturnedItems() {
+            const riwayatRetur = JSON.parse(localStorage.getItem('riwayatRetur')) || [];
+            
+            // Count occurrences of each product
+            const productCounts = {};
+            riwayatRetur.forEach(item => {
+                if (productCounts[item.kodeBarang]) {
+                    productCounts[item.kodeBarang].count++;
+                } else {
+                    productCounts[item.kodeBarang] = {
+                        kode: item.kodeBarang,
+                        nama: item.namaBarang,
+                        count: 1
+                    };
+                }
+            });
+            
+            // Convert to array and sort by count
+            const sortedProducts = Object.values(productCounts)
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5); // Take top 5
+            
+            // If we have frequently returned items, display them
+            if (sortedProducts.length > 0) {
+                quickItems.innerHTML = '';
+                
+                sortedProducts.forEach(product => {
+                    // Find current stock
+                    const currentProduct = allProducts.find(p => p.kode === product.kode);
+                    if (!currentProduct) return; // Skip if product no longer exists
+                    
+                    const quickItem = document.createElement('div');
+                    quickItem.className = 'quick-item';
+                    quickItem.innerHTML = `<i class="fas fa-box"></i> ${product.nama}`;
+                    quickItem.addEventListener('click', function() {
+                        selectProduct(currentProduct);
+                    });
+                    
+                    quickItems.appendChild(quickItem);
+                });
+                
+                frequentlyReturned.style.display = 'block';
+            } else {
+                frequentlyReturned.style.display = 'none';
+            }
+        }
+        
+        // Initialize frequently returned items
+        loadFrequentlyReturnedItems();
+
+        // Autocomplete for kode barang
+        kodeBarangInput.addEventListener('input', function() {
+            const inputValue = this.value.toLowerCase();
+            let suggestions = [];
+            
+            if (inputValue.length > 0) {
+                suggestions = allProducts.filter(item => 
+                    item.kode.toLowerCase().includes(inputValue) || 
+                    item.nama.toLowerCase().includes(inputValue)
+                ).slice(0, 5); // Limit to 5 suggestions
+            }
+            
+            showSuggestions(suggestions, kodeBarangSuggestions, 'kode');
+        });
+
+        // Autocomplete for nama barang
+        namaBarangInput.addEventListener('input', function() {
+            const inputValue = this.value.toLowerCase();
+            let suggestions = [];
+            
+            if (inputValue.length > 0) {
+                suggestions = allProducts.filter(item => 
+                    item.nama.toLowerCase().includes(inputValue) || 
+                    item.kode.toLowerCase().includes(inputValue)
+                ).slice(0, 5); // Limit to 5 suggestions
+            }
+            
+            showSuggestions(suggestions, namaBarangSuggestions, 'nama');
+        });
+
+        // Render suggestions with add button
+        function showSuggestions(suggestions, container, type) {
+    container.innerHTML = '';
+    
+    if (suggestions.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    suggestions.forEach(product => {
+        // Check if the product is currently in stock opname
+        const cekStok = JSON.parse(localStorage.getItem(`cekStok_${product.kode}`));
+        const isInOpname = cekStok && cekStok.status === 'pending';
+
+        const div = document.createElement('div');
+        
+        if (type === 'kode') {
+            div.innerHTML = `
+                <div class="product-container">
+                    <div class="product-info">
+                        <span class="product-title"><span class="item-code">${product.kode}</span>: ${product.nama}</span>
+                        <span class="product-subtitle">${isInOpname ? 'dalam proses SO' : 'Stok: ' + product.stok}</span>
+                    </div>
+                    <button class="quick-add-btn">Pilih</button>
+                </div>
+            `;
+        } else {
+            div.innerHTML = `
+                <div class="product-container">
+                    <div class="product-info">
+                        <span class="product-title">${product.nama}</span>
+                        <span class="product-subtitle">${isInOpname ? 'dalam proses SO' : 'Kode: ' + product.kode + ' | Stok: ' + product.stok}</span>
+                    </div>
+                    <button class="quick-add-btn">Pilih</button>
+                </div>
+            `;
+        }
+        
+        // Add click event for the entire row
+        div.addEventListener('click', function(e) {
+            // Don't trigger if clicking on the button
+            if (!e.target.classList.contains('quick-add-btn')) {
+                selectProduct(product);
+            }
+        });
+        
+        // Add specific event for the quick add button
+        const quickAddBtn = div.querySelector('.quick-add-btn');
+        quickAddBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent the parent div click event
+            selectProduct(product);
+        });
+        
+        container.appendChild(div);
+    });
+    
+    container.style.display = 'block';
+}
+        // Select a product from suggestions
+        function selectProduct(product) {
+    // Check if the product is currently in stock opname
+    const cekStok = JSON.parse(localStorage.getItem(`cekStok_${product.kode}`));
+    const isInOpname = cekStok && cekStok.status === 'pending';
+    
+    if (isInOpname) {
+        Swal.fire({
+            title: 'Barang Sedang Dalam Proses Stok Opname',
+            text: 'Barang ini tidak dapat dipilih karena sedang dalam proses stok opname.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#4361ee'
+        });
+        resetInputBarang();
+        return;
+    }
+
+    // Check if product is already in return list
+    const existingItem = listRetur.find(item => item.kodeBarang === product.kode);
+    if (existingItem) {
+        Swal.fire({
+            title: 'Barang Sudah Ada',
+            text: 'Barang ini sudah ada dalam list retur. Hapus item yang ada terlebih dahulu jika ingin mengubah jumlah retur.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#4361ee'
+        });
+        resetInputBarang();
+        return;
+    }
+
+    kodeBarangInput.value = product.kode;
+    namaBarangInput.value = product.nama;
+    stokTersediaInput.value = product.stok;
+    kodeBarangSuggestions.style.display = 'none';
+    namaBarangSuggestions.style.display = 'none';
+    
+    // Show stock info
+    document.getElementById('stokAwal').textContent = product.stok;
+    document.getElementById('perubahanStok').textContent = '0';
+    document.getElementById('stokAkhir').textContent = product.stok;
+    stockInfo.style.display = 'block';
+    
+    // Set focus to jumlah retur with a small delay
+    setTimeout(() => {
+        jumlahReturInput.focus();
+    }, 100);
+}
+        // Handle clicks outside autocomplete dropdown
+        document.addEventListener('click', function(e) {
+            if (!kodeBarangInput.contains(e.target) && !kodeBarangSuggestions.contains(e.target)) {
+                kodeBarangSuggestions.style.display = 'none';
+            }
+            if (!namaBarangInput.contains(e.target) && !namaBarangSuggestions.contains(e.target)) {
+                namaBarangSuggestions.style.display = 'none';
+            }
+        });
+
+        // Check product by code
+        kodeBarangInput.addEventListener('change', function() {
+            if (this.value.trim() === '') return;
+            
+            const selectedBarang = allProducts.find(item => item.kode === this.value);
+
+            if (selectedBarang) {
+                // Check if product is already in retur list
+                const existingItem = listRetur.find(item => item.kodeBarang === this.value);
+                if (existingItem) {
+                    Swal.fire({
+                        title: 'Barang Sudah Ada',
+                        text: 'Barang ini sudah ada dalam list retur. Hapus item yang ada terlebih dahulu jika ingin mengubah jumlah retur.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee'
+                    });
+                    resetInputBarang();
+                    return;
+                }
+
+                namaBarangInput.value = selectedBarang.nama;
+                stokTersediaInput.value = selectedBarang.stok;
+                
+                // Show stock info
+                document.getElementById('stokAwal').textContent = selectedBarang.stok;
+                document.getElementById('perubahanStok').textContent = '0';
+                document.getElementById('stokAkhir').textContent = selectedBarang.stok;
+                stockInfo.style.display = 'block';
+                
+                // Set focus to jumlah retur
+                jumlahReturInput.focus();
+            } else {
+                Swal.fire({
+                    title: 'Barang Tidak Ditemukan',
+                    text: 'Kode barang tidak ditemukan di database.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#4361ee'
+                });
+                resetInputBarang();
+            }
+        });
+
+        // Check product by name
+        namaBarangInput.addEventListener('change', function() {
+            if (this.value.trim() === '') return;
+            
+            const selectedBarang = allProducts.find(item => item.nama === this.value);
+
+            if (selectedBarang) {
+                // Check if product is already in retur list
+                const existingItem = listRetur.find(item => item.kodeBarang === selectedBarang.kode);
+                if (existingItem) {
+                    Swal.fire({
+                        title: 'Barang Sudah Ada',
+                        text: 'Barang ini sudah ada dalam list retur. Hapus item yang ada terlebih dahulu jika ingin mengubah jumlah retur.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee'
+                    });
+                    resetInputBarang();
+                    return;
+                }
+
+                kodeBarangInput.value = selectedBarang.kode;
+                stokTersediaInput.value = selectedBarang.stok;
+                
+                // Show stock info
+                document.getElementById('stokAwal').textContent = selectedBarang.stok;
+                document.getElementById('perubahanStok').textContent = '0';
+                document.getElementById('stokAkhir').textContent = selectedBarang.stok;
+                stockInfo.style.display = 'block';
+                
+                // Set focus to jumlah retur
+                jumlahReturInput.focus();
+            }
+        });
+
+        // Update stock info when return quantity changes
+        jumlahReturInput.addEventListener('input', function() {
+            const stokAwal = parseInt(stokTersediaInput.value) || 0;
+            const jumlahRetur = parseInt(this.value) || 0;
+            const stokAkhir = stokAwal - jumlahRetur;
+            
+            document.getElementById('perubahanStok').textContent = `-${jumlahRetur}`;
+            document.getElementById('stokAkhir').textContent = stokAkhir;
+            
+            // Warn if quantity exceeds stock
+            if (jumlahRetur > stokAwal) {
+                this.style.borderColor = '#ef476f';
+                Swal.fire({
+                    title: 'Peringatan!',
+                    text: 'Jumlah retur melebihi stok yang tersedia!',
+                    icon: 'warning',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            } else {
+                this.style.borderColor = '#ced4da';
+            }
+        });
+
+        // Add item to return list
+        tambahKeListReturBtn.addEventListener('click', function() {
+            addItemToReturnList();
+        });
+        
+        // Also allow Enter key to add item
+        jumlahReturInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addItemToReturnList();
+            }
+        });
+        
+        keteranganReturInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addItemToReturnList();
+            }
+        });
+        
+        // Function to add item to return list
+     function addItemToReturnList() {
+    const kodeBarang = kodeBarangInput.value;
+    const namaBarang = namaBarangInput.value;
+    const jumlahRetur = parseInt(jumlahReturInput.value);
+    const alasanRetur = alasanReturSelect.value;
+    const keteranganRetur = keteranganReturInput.value;
+    const stokAwal = parseInt(stokTersediaInput.value);
+    const stokAkhir = stokAwal - jumlahRetur;
+
+    // Basic input validation
+    if (!kodeBarang || !namaBarang) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Silahkan pilih barang terlebih dahulu!',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#4361ee'
+        });
+        return;
+    }
+    
+    if (!jumlahRetur || jumlahRetur <= 0) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Jumlah retur harus lebih dari 0!',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#4361ee'
+        });
+        jumlahReturInput.focus();
+        return;
+    }
+
+    // Check if the item is currently in stock opname
+    const cekStok = JSON.parse(localStorage.getItem(`cekStok_${kodeBarang}`));
+    const isInOpname = cekStok && cekStok.status === 'pending';
+    
+    if (isInOpname) {
+        Swal.fire({
+            title: 'Barang Sedang Dalam Proses Stok Opname',
+            text: 'Barang ini tidak dapat diretur karena sedang dalam proses stok opname.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#4361ee'
+        });
+        return;
+    }
+
+    // Check if the item is already in the list
+    const existingItem = listRetur.find(item => item.kodeBarang === kodeBarang);
+    if (existingItem) {
+        Swal.fire({
+            title: 'Barang Sudah Ada',
+            text: 'Barang ini sudah ada dalam list retur. Hapus item yang ada terlebih dahulu jika ingin mengubah jumlah retur.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#4361ee'
+        });
+        return;
+    }
+
+    if (jumlahRetur > stokAwal) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Jumlah retur melebihi stok yang tersedia!',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#4361ee'
+        });
+        return;
+    }
+
+    // Add to list
+    listRetur.push({
+        kodeBarang,
+        namaBarang,
+        alasan: alasanRetur,
+        jumlah: jumlahRetur,
+        keterangan: keteranganRetur,
+        stokAwal,
+        stokAkhir
+    });
+
+    updateListRetur();
+    resetInputBarang();
+    
+    // Show success message
+    Swal.fire({
+        title: 'Sukses',
+        text: 'Barang berhasil ditambahkan ke list retur',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+    });
+    
+    // Set focus back to kode barang for quick entry of next item
+    setTimeout(() => {
+        kodeBarangInput.focus();
+    }, 100);
+}
+        // Process all returns
+        prosesSemuaReturBtn.addEventListener('click', function() {
+            if (listRetur.length === 0) {
+                Swal.fire({
+                    title: 'Peringatan',
+                    text: 'Tidak ada barang yang akan diretur',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#4361ee'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Konfirmasi Retur',
+                html: generateReturConfirmationTable(),
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Proses Retur',
+                cancelButtonText: 'Batal',
+                cancelButtonColor: '#6c757d',
+                confirmButtonColor: '#4cc9f0',
+                width: '800px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    prosesRetur();
+                }
+            });
+        });
+
+        function generateReturConfirmationTable() {
+            let tableHTML = `
+                <table class="swal2-table" style="width: 100%; margin-top: 1em;">
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Nama</th>
+                            <th>Jumlah</th>
+                            <th>Stok Awal</th>
+                            <th>Stok Akhir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            listRetur.forEach(item => {
+                tableHTML += `
+                    <tr>
+                        <td>${item.kodeBarang}</td>
+                        <td>${item.namaBarang}</td>
+                        <td>${item.jumlah}</td>
+                        <td>${item.stokAwal}</td>
+                        <td>${item.stokAkhir}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            return tableHTML;
+        }
+
+        function prosesRetur() {
+            // Show loading
+            prosesSemuaReturBtn.innerHTML = '<span class="loading"></span> Memproses...';
+            prosesSemuaReturBtn.disabled = true;
+            
+            // Simulate processing delay (for better UX)
+            setTimeout(() => {
+                // Get data from localStorage
+                let barang = JSON.parse(localStorage.getItem('barang')) || [];
+                let riwayatRetur = JSON.parse(localStorage.getItem('riwayatRetur')) || [];
+                
+                // Use YYYY-MM-DD format for date consistency
+                const currentDate = new Date();
+                const tanggal = currentDate.toISOString().split('T')[0];
+                
+                // Format time as HH:MM
+                const jam = currentDate.toLocaleTimeString('en-US', {
+                    hour12: false,
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                // Process each return item
+                const hasilProses = listRetur.map(item => {
+                    const barangIndex = barang.findIndex(b => b.kode === item.kodeBarang);
+                    
+                    if (barangIndex === -1) {
+                        console.warn(`Barang dengan kode ${item.kodeBarang} tidak ditemukan`);
+                        return null;
+                    }
+
+                    // Update product stock
+                    barang[barangIndex].stok = item.stokAkhir;
+
+                    // Create return object
+                    const returItem = {
+                        id: generateReturId(riwayatRetur),
+                        tanggal: tanggal,
+                        jam: jam,
+                        kodeBarang: item.kodeBarang,
+                        namaBarang: item.namaBarang,
+                        alasan: item.alasan,
+                        jumlah: item.jumlah,
+                        keterangan: item.keterangan || '',
+                        stokAwal: item.stokAwal,
+                        stokAkhir: item.stokAkhir,
+                        status: 'Selesai'
+                    };
+
+                    return returItem;
+                }).filter(item => item !== null);
+
+                // Combine with existing return history
+                riwayatRetur = [...riwayatRetur, ...hasilProses];
+
+                // Save changes to localStorage
+                try {
+                    localStorage.setItem('barang', JSON.stringify(barang));
+                    localStorage.setItem('riwayatRetur', JSON.stringify(riwayatRetur));
+
+                    // Reset button state
+                    prosesSemuaReturBtn.innerHTML = '<i class="fas fa-check-circle"></i> Proses Semua Retur';
+                    prosesSemuaReturBtn.disabled = false;
+
+                    // Show confirmation
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        html: `
+                            <div style="margin-bottom: 15px">
+                                <i class="fas fa-check-circle" style="color: #4cc9f0; font-size: 3rem;"></i>
+                            </div>
+                            <p>${hasilProses.length} barang berhasil diretur</p>
+                        `,
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee'
+                    }).then(() => {
+                        // Reset return list
+                        listRetur = [];
+                        updateListRetur();
+                        
+                        // Reset form
+                        resetInputBarang();
+                        
+                        // Refresh frequently returned items
+                        loadFrequentlyReturnedItems();
+                    });
+                } catch (error) {
+                    // Reset button state
+                    prosesSemuaReturBtn.innerHTML = '<i class="fas fa-check-circle"></i> Proses Semua Retur';
+                    prosesSemuaReturBtn.disabled = false;
+                    
+                    Swal.fire({
+                        title: 'Kesalahan',
+                        text: 'Gagal menyimpan data retur: ' + error.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#4361ee'
+                    });
+                    console.error('Error saving data:', error);
+                }
+            }, 800); // Simulated delay for better UX
+        }
+
+        function generateReturId(riwayatRetur) {
+            // If no return history, start from 1
+            if (!riwayatRetur || riwayatRetur.length === 0) return 1;
+            
+            // Find maximum ID, if not found, return 1
+            const maxId = riwayatRetur.reduce((max, item) => 
+                (item.id && item.id > max) ? item.id : max, 0);
+            
+            return maxId + 1;
+        }
+
+        function updateListRetur() {
+            listReturBarang.innerHTML = '';
+            
+            if (listRetur.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+                    <td colspan="7" style="text-align: center; padding: 20px;">
+                        <i class="fas fa-info-circle" style="color: var(--gray-medium); font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p style="color: var(--gray-medium);">Belum ada barang yang ditambahkan ke list retur</p>
+                    </td>
+                `;
+                listReturBarang.appendChild(emptyRow);
+                return;
+            }
+            
+            listRetur.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = 'highlight';
+                
+                // Format alasan to be more readable
+                let alasanFormatted = item.alasan;
+                if (item.alasan === 'expired' || item.alasan === 'kadaluwarsa') {
+                    alasanFormatted = `<span class="badge badge-danger">${item.alasan}</span>`;
+                } else if (item.alasan === 'rusak') {
+                    alasanFormatted = `<span class="badge badge-warning">${item.alasan}</span>`;
+                } else if (item.alasan === 'salah_kirim') {
+                    alasanFormatted = `<span class="badge badge-info">Salah Kirim</span>`;
+                } else {
+                    alasanFormatted = `<span class="badge" style="background: #6c757d; color: white;">${item.alasan}</span>`;
+                }
+                
+                row.innerHTML = `
+                    <td><strong>${item.kodeBarang}</strong></td>
+                    <td>${item.namaBarang}</td>
+                    <td>${alasanFormatted}</td>
+                    <td><strong>${item.jumlah}</strong></td>
+                    <td>${item.stokAwal}</td>
+                    <td>${item.stokAkhir}</td>
+                    <td class="action-column">
+                        <button class="btn btn-danger" onclick="removeFromList(${index})">
+                            <i class="fas fa-trash"></i> Hapus
+                        </button>
+                    </td>
+                `;
+                listReturBarang.appendChild(row);
+            });
+        }
+
+        window.removeFromList = function(index) {
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                text: 'Apakah Anda yakin ingin menghapus item ini dari list retur?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#ef476f',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Store the item to be removed for notice
+                    const removedItem = listRetur[index];
+                    
+                    // Remove item
+                    listRetur.splice(index, 1);
+                    updateListRetur();
+                    
+                    Swal.fire({
+                        title: 'Terhapus!',
+                        text: `${removedItem.namaBarang} berhasil dihapus dari list retur.`,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        };
+
+        function resetInputBarang() {
+            kodeBarangInput.value = '';
+            namaBarangInput.value = '';
+            stokTersediaInput.value = '';
+            jumlahReturInput.value = '';
+            alasanReturSelect.value = 'expired';
+            keteranganReturInput.value = '';
+            stockInfo.style.display = 'none';
+            kodeBarangSuggestions.style.display = 'none';
+            namaBarangSuggestions.style.display = 'none';
+        }
+        
+        // Add keyboard navigation for suggestions
+        kodeBarangInput.addEventListener('keydown', function(e) {
+            const suggestions = kodeBarangSuggestions.getElementsByTagName('div');
+            if (suggestions.length === 0) return;
+            
+            let activeIndex = -1;
+            for (let i = 0; i < suggestions.length; i++) {
+                if (suggestions[i].classList.contains('autocomplete-active')) {
+                    activeIndex = i;
+                    break;
+                }
+            }
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                removeActive(suggestions);
+                activeIndex = (activeIndex + 1) % suggestions.length;
+                suggestions[activeIndex].classList.add('autocomplete-active');
+                suggestions[activeIndex].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                removeActive(suggestions);
+                activeIndex = activeIndex <= 0 ? suggestions.length - 1 : activeIndex - 1;
+                suggestions[activeIndex].classList.add('autocomplete-active');
+                suggestions[activeIndex].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter' && activeIndex > -1) {
+                e.preventDefault();
+                suggestions[activeIndex].click();
+            }
+        });
+        
+        namaBarangInput.addEventListener('keydown', function(e) {
+            const suggestions = namaBarangSuggestions.getElementsByTagName('div');
+            if (suggestions.length === 0) return;
+            
+            let activeIndex = -1;
+            for (let i = 0; i < suggestions.length; i++) {
+                if (suggestions[i].classList.contains('autocomplete-active')) {
+                    activeIndex = i;
+                    break;
+                }
+            }
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                removeActive(suggestions);
+                activeIndex = (activeIndex + 1) % suggestions.length;
+                suggestions[activeIndex].classList.add('autocomplete-active');
+                suggestions[activeIndex].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                removeActive(suggestions);
+                activeIndex = activeIndex <= 0 ? suggestions.length - 1 : activeIndex - 1;
+                suggestions[activeIndex].classList.add('autocomplete-active');
+                suggestions[activeIndex].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter' && activeIndex > -1) {
+                e.preventDefault();
+                suggestions[activeIndex].click();
+            }
+        });
+        
+        function removeActive(suggestions) {
+            for (let i = 0; i < suggestions.length; i++) {
+                suggestions[i].classList.remove('autocomplete-active');
+            }
+        }
+        
+        // Enhance with scanner support
+        kodeBarangInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                // This could be a barcode scanner input
+                const code = this.value.trim();
+                if (code) {
+                    const selectedBarang = allProducts.find(item => item.kode === code);
+                    if (selectedBarang) {
+                        selectProduct(selectedBarang);
+                    } else {
+                        Swal.fire({
+                            title: 'Barang Tidak Ditemukan',
+                            text: 'Kode barang tidak ditemukan di database.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#4361ee'
+                        });
+                    }
+                }
+            }
+        });
+        
+        // Initialize the empty list message
+        updateListRetur();
+    });
+    </script>
+</body>
+</html>
