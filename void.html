@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Void - Dashboard Toko</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3f37c9;
+            --accent-color: #f72585;
+            --warning-color: #ff6b6b;
+            --success-color: #4cc9f0;
+            --info-color: #4895ef;
+            --text-color: #2b2d42;
+            --text-light: #8d99ae;
+            --bg-light: #f8f9fa;
+            --bg-white: #ffffff;
+            --bg-dark: #212529;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --border-radius-sm: 0.25rem;
+            --border-radius: 0.5rem;
+            --border-radius-lg: 1rem;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .layout-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(to bottom, var(--primary-dark), var(--primary-color));
+            color: var(--bg-white);
+            padding: 1.5rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--bg-white);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-logo i {
+            font-size: 1.75rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu-link:hover, .sidebar-menu-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--bg-white);
+            border-left-color: var(--accent-color);
+        }
+
+        .sidebar-menu-link i {
+            margin-right: 0.75rem;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background-color: var(--bg-white);
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-title i {
+            color: var(--primary-color);
+        }
+
+        .user-dropdown {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .user-info:hover {
+            background-color: var(--bg-light);
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-white);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .user-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 200px;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            padding: 0.75rem 0;
+            display: none;
+            z-index: 100;
+        }
+
+        .user-dropdown-menu-item {
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .user-dropdown-menu-item:hover {
+            background-color: var(--bg-light);
+        }
+
+        .user-dropdown-menu-item.logout {
+            color: var(--warning-color);
+            border-top: 1px solid var(--bg-light);
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+        }
+
+        /* Dashboard Cards */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card:nth-child(1) {
+            border-left-color: var(--primary-color);
+        }
+
+        .stat-card:nth-child(2) {
+            border-left-color: var(--success-color);
+        }
+
+        .stat-card:nth-child(3) {
+            border-left-color: var(--warning-color);
+        }
+
+        .stat-card:nth-child(4) {
+            border-left-color: var(--accent-color);
+        }
+
+        .stat-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .stat-card:nth-child(1) .stat-card-icon {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+
+        .stat-card:nth-child(2) .stat-card-icon {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+        }
+
+        .stat-card:nth-child(3) .stat-card-icon {
+            background-color: rgba(255, 107, 107, 0.1);
+            color: var(--warning-color);
+        }
+
+        .stat-card:nth-child(4) .stat-card-icon {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--accent-color);
+        }
+
+        .stat-card-content {
+            flex: 1;
+        }
+
+        .stat-card-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card-description {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* Filters & Controls */
+        .filters-container {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--bg-light);
+        }
+
+        .filters-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filters-body {
+            padding: 1.5rem;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .filter-input {
+            padding: 0.625rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.875rem;
+            transition: var(--transition);
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
+        }
+
+
+
+        /* Table */
+        .table-container {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--bg-light);
+        }
+
+        .table-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-color);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tbody tr {
+            transition: var(--transition);
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .table-action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.75rem;
+        }
+
+        .table-action-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .pagination-item {
+            background-color: var(--bg-white);
+        }
+
+        .pagination-button {
+            padding: 0.5rem 0.75rem;
+            min-width: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background-color: transparent;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border-right: 1px solid #e2e8f0;
+            transition: var(--transition);
+            color: var(--text-color);
+        }
+
+        .pagination-item:last-child .pagination-button {
+            border-right: none;
+        }
+
+        .pagination-button:hover {
+            background-color: #f8fafc;
+        }
+
+        .pagination-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Charts */
+        .chart-container {
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #voidChart {
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1050;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            overflow: hidden;
+        }
+
+        .modal-dialog {
+            max-width: 600px;
+            margin: 1.75rem auto;
+            display: flex;
+            align-items: center;
+            min-height: calc(100% - 3.5rem);
+        }
+
+        .modal-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            background-color: var(--bg-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            animation: modalOpen 0.3s;
+        }
+
+        @keyframes modalOpen {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-close {
+            background-color: transparent;
+            border: none;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            color: var(--text-light);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--warning-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* Spinner & Overlay */
+        .spinner-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(67, 97, 238, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1060;
+        }
+
+        .toast {
+            visibility: hidden;
+            min-width: 300px;
+            margin-bottom: 10px;
+            background-color: var(--bg-white);
+            color: var(--text-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            padding: 0;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s linear;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .toast-header {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .toast-body {
+            padding: 0.75rem 1rem;
+        }
+
+        .toast.success .toast-icon {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.error .toast-icon {
+            background-color: rgba(255, 107, 107, 0.1);
+            color: var(--warning-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        /* Detail grid in modal */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 0.75rem 1.5rem;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .detail-value {
+            color: var(--text-color);
+        }
+
+        .detail-section {
+            margin-top: 1.5rem;
+        }
+
+        .detail-section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-note {
+            padding: 0.75rem;
+            background-color: #f8fafc;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 80px;
+                padding: 1.5rem 0;
+            }
+            
+            .sidebar-logo {
+                justify-content: center;
+                margin-bottom: 2rem;
+            }
+            
+            .sidebar-logo span, .sidebar-menu-link span {
+                display: none;
+            }
+            
+            .sidebar-menu-link {
+                justify-content: center;
+                padding: 0.75rem;
+            }
+            
+            .sidebar-menu-link i {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .filters {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+.action-buttons {
+    display: flex;
+    justify-content: flex-start; /* susun dari kiri */
+    gap: 12px;
+    flex-wrap: nowrap; /* jangan pindah ke bawah */
+    margin-top: 1.5rem;
+    overflow-x: auto; /* kalau penuh, bisa geser */
+}
+
+.btn {
+    flex: 0 0 auto; /* jangan dipaksa melebar */
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+}
+
+.btn i {
+    font-size: 1rem;
+}
+
+/* Warna-warna tombol */
+.btn-primary {
+    background-color: #4361ee;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #f1f3f9;
+    color: #333;
+}
+
+.btn-success {
+    background-color: #3ec1d3;
+    color: white;
+}
+
+/* Hover efek */
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+        @media (max-width: 576px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .user-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .user-dropdown-menu {
+                width: 100%;
+            }
+        }
+        
+        
+        .chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px; /* Sesuaikan dengan kebutuhan */
+    height: 350px; /* Batasi tinggi container */
+    margin: 20px auto;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Cegah konten meluber */
+}
+
+#voidChart {
+    width: 100% !important;
+    max-height: 320px !important; /* Batasi tinggi canvas */
+}
+
+
+
+        
+    </style>
+</head>
+
+<body>
+    <!-- Spinner and Overlay -->
+    <div id="overlay" class="spinner-overlay">
+        <div id="spinner" class="spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container">
+        <div id="toast" class="toast">
+            <div class="toast-header">
+                <div class="toast-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="toast-title">Notification</div>
+                <button type="button" class="modal-close" onclick="hideToast()">×</button>
+            </div>
+            <div class="toast-body">
+                Operasi berhasil dilakukan.
+            </div>
+        </div>
+    </div>
+
+    <!-- Layout -->
+    <div class="layout-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-store"></i>
+                    <span>POS System</span>
+                </div>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="kasir.html" class="sidebar-menu-link">
+                        <i class="fas fa-cash-register"></i>
+                        <span>KASIR</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="laporan.html" class="sidebar-menu-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>LAPORAN</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="void.html" class="sidebar-menu-link active">
+                        <i class="fas fa-ban"></i>
+                        <span>VOID</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="setoran.html" class="sidebar-menu-link">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>SETORAN</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="akun.html" class="sidebar-menu-link">
+                        <i class="fas fa-users"></i>
+                        <span>AKUN</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="retur.html" class="sidebar-menu-link">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>RETUR</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Page Header -->
+                <header class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-ban"></i>
+                        Laporan Void
+                    </h1>
+                    
+                    <div class="user-dropdown">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <div id="username">Admin</div>
+                                <div style="font-size: 0.75rem; color: var(--text-light);">Administrator</div>
+                            </div>
+                            <i class="fas fa-chevron-down" style="font-size: 0.75rem; color: var(--text-light); margin-left: 0.5rem;"></i>
+                        </div>
+                        
+                       <div class="user-dropdown-menu">
+                            <a href="#" class="user-dropdown-menu-item">
+                                <i class="fas fa-user-circle"></i>
+                                Profil Saya
+                            </a>
+                            <a href="#" class="user-dropdown-menu-item">
+                                <i class="fas fa-cog"></i>
+                                Pengaturan
+                            </a>
+                            <a href="#" class="user-dropdown-menu-item logout" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Keluar
+                            </a>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Dashboard Cards -->
+                <section class="dashboard">
+                    <div class="stat-card">
+                        <div class="stat-card-icon">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div class="stat-card-content">
+                            <div class="stat-card-label">Total Void</div>
+                            <div id="totalVoid" class="stat-card-value">0</div>
+                            <div class="stat-card-description">Total transaksi</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-card-content">
+                            <div class="stat-card-label">Total Nilai Void</div>
+                            <div id="totalNilaiVoid" class="stat-card-value">Rp0</div>
+                            <div class="stat-card-description">Nominal kerugian</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="stat-card-content">
+                            <div class="stat-card-label">Barang Terbanyak di-Void</div>
+                            <div id="topVoidItem" class="stat-card-value">-</div>
+                            <div class="stat-card-description">Item paling sering void</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-card-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-card-content">
+                            <div class="stat-card-label">Bulan Ini</div>
+                            <div id="monthlyVoid" class="stat-card-value">0</div>
+                            <div class="stat-card-description">Jumlah void bulan ini</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Filters -->
+                <section class="filters-container">
+                    <div class="filters-header">
+                        <h2 class="filters-title">
+                            <i class="fas fa-filter"></i>
+                            Filter Data
+                        </h2>
+                    </div>
+                    
+                    <div class="filters-body">
+                        <div class="filters">
+                            <div class="filter-item">
+                                <label class="filter-label" for="dateStart">Tanggal Mulai</label>
+                                <input type="date" id="dateStart" name="dateStart" class="filter-input">
+                            </div>
+                            
+                            <div class="filter-item">
+                                <label class="filter-label" for="dateEnd">Tanggal Akhir</label>
+                                <input type="date" id="dateEnd" name="dateEnd" class="filter-input">
+                            </div>
+                            
+                            <div class="filter-item">
+                                <label class="filter-label" for="itemFilter">Nama Barang</label>
+                                <input type="text" id="itemFilter" placeholder="Cari nama barang..." class="filter-input">
+                            </div>
+                            
+                            <div class="filter-item">
+                                <label class="filter-label" for="sortBy">Urutkan</label>
+                                <select id="sortBy" class="filter-input">
+                                    <option value="date-new">Tanggal (Terbaru)</option>
+                                    <option value="date-old">Tanggal (Terlama)</option>
+                                    <option value="name-asc">Nama Barang (A-Z)</option>
+                                    <option value="name-desc">Nama Barang (Z-A)</option>
+                                    <option value="price-high">Harga (Tertinggi)</option>
+                                    <option value="price-low">Harga (Terendah)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                 
+
+<div class="action-buttons">
+    <button onclick="applyFilters()" class="btn btn-primary">
+        <i class="fas fa-filter"></i> Filter
+    </button>
+    
+    <button onclick="resetFilters()" class="btn btn-secondary">
+        <i class="fas fa-sync-alt"></i> Reset
+    </button>
+    
+    <button onclick="exportToExcel()" class="btn btn-success">
+        <i class="fas fa-file-excel"></i> Excel
+    </button>
+    
+    <button onclick="exportToPDF()" class="btn btn-success">
+        <i class="fas fa-file-pdf"></i> PDF
+    </button>
+    
+    <button onclick="printReport()" class="btn btn-secondary">
+        <i class="fas fa-print"></i> Cetak
+    </button>
+    
+    <button onclick="openVoidDetailModal()" class="btn btn-primary">
+        <i class="fas fa-info-circle"></i> Detail
+    </button>
+</div>
+
+                <!-- Data Table -->
+                <section class="table-container">
+                    <div class="table-header">
+                        <h2 class="table-title">
+                            <i class="fas fa-table"></i>
+                            Data Void
+                        </h2>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table id="tabelVoid">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Kode Void</th>
+                                    <th>Nama Barang</th>
+                                    <th>Jumlah</th>
+                                    <th>Harga</th>
+                                    <th>Total</th>
+                                    <th>Tanggal</th>
+                                    <th>Alasan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelVoidBody">
+                                <!-- Data akan diisi oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <div class="pagination" id="pagination">
+                        <!-- Pagination buttons will be added here -->
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <section class="chart-container">
+                    <div class="chart-header">
+                        <h2 class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            Tren Void per Bulan
+                        </h2>
+                    </div>
+                    
+                  <div class="chart-container">
+    <canvas id="voidChart"></canvas>
+</div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Detail -->
+    <div id="detailModal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Detail Laporan Void</h3>
+                    <button type="button" class="modal-close" onclick="closeVoidDetailModal()">&times;</button>
+                </div>
+                <div class="modal-body" id="modalContent">
+                    <!-- Detail content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeVoidDetailModal()" class="btn btn-secondary">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<<script>
+ // Main JavaScript for Void Report Page
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize variables
+    let voidData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    let rowsPerPage = 10;
+    let sortConfig = 'date-new';
+    let voidChartInstance = null;
+
+    // Load sample data if none exists
+    function loadInitialData() {
+        const storedVoids = localStorage.getItem('voids');
+        if (!storedVoids) {
+            // Sample void data for demonstration
+            const sampleVoids = [
+                {
+                    kodeVoid: 'V2025001',
+                    namaBarang: 'Mie Instan',
+                    jumlah: 3,
+                    harga: 3500,
+                    total: 10500,
+                    tanggal: '2025-04-20T10:15:00',
+                    alasan: 'Kemasan rusak'
+                },
+                {
+                    kodeVoid: 'V2025002',
+                    namaBarang: 'Susu UHT',
+                    jumlah: 2,
+                    harga: 12000,
+                    total: 24000,
+                    tanggal: '2025-04-18T14:30:00',
+                    alasan: 'Dekat kedaluwarsa'
+                },
+                {
+                    kodeVoid: 'V2025003',
+                    namaBarang: 'Roti Tawar',
+                    jumlah: 1,
+                    harga: 15000,
+                    total: 15000,
+                    tanggal: '2025-04-15T11:20:00',
+                    alasan: 'Kemasan terbuka'
+                },
+                {
+                    kodeVoid: 'V2025004',
+                    namaBarang: 'Mie Instan',
+                    jumlah: 5,
+                    harga: 3500,
+                    total: 17500,
+                    tanggal: '2025-03-25T09:45:00',
+                    alasan: 'Pembatalan transaksi'
+                },
+                {
+                    kodeVoid: 'V2025005',
+                    namaBarang: 'Kecap Manis',
+                    jumlah: 1,
+                    harga: 18000,
+                    total: 18000,
+                    tanggal: '2025-03-20T16:10:00',
+                    alasan: 'Botol bocor'
+                }
+            ];
+            
+            localStorage.setItem('voids', JSON.stringify(sampleVoids));
+            voidData = sampleVoids;
+        } else {
+            voidData = JSON.parse(storedVoids);
+        }
+        
+        // Set default date range to current month
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        
+        document.getElementById('dateStart').value = formatDateForInput(firstDay);
+        document.getElementById('dateEnd').value = formatDateForInput(today);
+    }
+
+    // Format date for date input fields (YYYY-MM-DD)
+    function formatDateForInput(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    // Format date for display
+    function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        return moment(dateStr).format('DD MMM YYYY HH:mm');
+    }
+
+    // Format currency in Indonesian Rupiah
+    function formatRupiah(number) {
+        if (number === null || number === undefined) return 'Rp0';
+        return new Intl.NumberFormat('id-ID', { 
+            style: 'currency', 
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(number);
+    }
+
+    // Apply filters to data
+    function applyFilters() {
+        showSpinner();
+        
+        setTimeout(() => {
+            try {
+                // Get filter values
+                const dateStart = document.getElementById('dateStart').value;
+                const dateEnd = document.getElementById('dateEnd').value;
+                const itemFilter = document.getElementById('itemFilter').value.toLowerCase().trim();
+                sortConfig = document.getElementById('sortBy').value;
+                
+                // Filter data
+                filteredData = voidData.filter(item => {
+                    // Date filtering
+                    const itemDate = item.tanggal ? new Date(item.tanggal) : null;
+                    const startDate = dateStart ? new Date(dateStart) : null;
+                    const endDate = dateEnd ? new Date(dateEnd) : null;
+                    
+                    if (startDate && itemDate && itemDate < startDate) return false;
+                    if (endDate && itemDate) {
+                        // Set end date to end of day
+                        const endOfDay = new Date(endDate);
+                        endOfDay.setHours(23, 59, 59, 999);
+                        if (itemDate > endOfDay) return false;
+                    }
+                    
+                    // Item name filtering
+                    if (itemFilter && item.namaBarang && 
+                        !item.namaBarang.toLowerCase().includes(itemFilter)) {
+                        return false;
+                    }
+                    
+                    return true;
+                });
+                
+                // Sort the filtered data
+                sortData();
+                
+                // Reset to first page and update display
+                currentPage = 1;
+                renderTable();
+                setupPagination();
+                updateDashboard(filteredData);
+                updateVoidChart(filteredData);
+                
+                // Show success message
+                showToast(`${filteredData.length} data ditemukan`, 'success');
+            } catch (error) {
+                console.error('Error applying filters:', error);
+                showToast('Terjadi kesalahan saat memfilter data', 'error');
+            } finally {
+                hideSpinner();
+            }
+        }, 300);
+    }
+
+    // Reset all filters to default values
+    function resetFilters() {
+        document.getElementById('dateStart').value = '';
+        document.getElementById('dateEnd').value = '';
+        document.getElementById('itemFilter').value = '';
+        document.getElementById('sortBy').value = 'date-new';
+        applyFilters();
+    }
+
+    // Sort data based on selected sort configuration
+    function sortData() {
+        filteredData.sort((a, b) => {
+            switch (sortConfig) {
+                case 'date-new': 
+                    return new Date(b.tanggal || 0) - new Date(a.tanggal || 0);
+                case 'date-old': 
+                    return new Date(a.tanggal || 0) - new Date(b.tanggal || 0);
+                case 'name-asc': 
+                    return (a.namaBarang || '').localeCompare(b.namaBarang || '');
+                case 'name-desc': 
+                    return (b.namaBarang || '').localeCompare(a.namaBarang || '');
+                case 'price-high': 
+                    return parseFloat(b.harga || 0) - parseFloat(a.harga || 0);
+                case 'price-low': 
+                    return parseFloat(a.harga || 0) - parseFloat(b.harga || 0);
+                default: 
+                    return 0;
+            }
+        });
+    }
+
+    // Render the data table with current page of filtered data
+    function renderTable() {
+        const tabelVoidBody = document.getElementById('tabelVoidBody');
+        tabelVoidBody.innerHTML = '';
+        
+        // Calculate page range
+        const startIdx = (currentPage - 1) * rowsPerPage;
+        const endIdx = startIdx + rowsPerPage;
+        const pageData = filteredData.slice(startIdx, endIdx);
+        
+        // If no data to display
+        if (pageData.length === 0) {
+            const row = tabelVoidBody.insertRow();
+            const cell = row.insertCell(0);
+            cell.colSpan = 9;
+            cell.style.textAlign = 'center';
+            cell.innerHTML = `
+                <div style="padding: 2rem; color: var(--text-light);">
+                    <i class="fas fa-info-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <br>Tidak ada data yang ditemukan
+                </div>`;
+            return;
+        }
+        
+        // Add data rows
+        pageData.forEach((item, index) => {
+            const row = tabelVoidBody.insertRow();
+            
+            // Row number
+            row.insertCell(0).innerText = startIdx + index + 1;
+            
+            // Kode Void
+            row.insertCell(1).innerText = item.kodeVoid || '-';
+            
+            // Nama Barang
+            row.insertCell(2).innerText = item.namaBarang || '-';
+            
+            // Jumlah
+            row.insertCell(3).innerText = item.jumlah || '0';
+            
+            // Harga
+            row.insertCell(4).innerText = formatRupiah(item.harga);
+            
+            // Total
+            row.insertCell(5).innerText = formatRupiah(item.total);
+            
+            // Tanggal
+            row.insertCell(6).innerText = formatDate(item.tanggal);
+            
+            // Alasan
+            const reasonCell = row.insertCell(7);
+            const reason = item.alasan || 'Tidak ada alasan';
+            if (reason.length > 30) {
+                reasonCell.innerHTML = `<span title="${reason}">${reason.substring(0, 30)}...</span>`;
+            } else {
+                reasonCell.innerText = reason;
+            }
+            
+            // Actions
+            const actionsCell = row.insertCell(8);
+            actionsCell.innerHTML = `
+                <button onclick="viewDetail('${item.kodeVoid}')" class="table-action-btn" title="Lihat Detail">
+                    <i class="fas fa-eye"></i>
+                </button>`;
+        });
+    }
+
+    // Setup pagination based on filtered data
+    function setupPagination() {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+        
+        // If only one page or less, don't show pagination
+        if (totalPages <= 1) return;
+        
+        // Prev button
+        const prevItem = document.createElement('li');
+        prevItem.className = 'pagination-item';
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'pagination-button';
+        prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+                updatePaginationButtons();
+            }
+        };
+        prevItem.appendChild(prevBtn);
+        pagination.appendChild(prevItem);
+        
+        // Page buttons
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const pageItem = document.createElement('li');
+            pageItem.className = 'pagination-item';
+            const pageBtn = document.createElement('button');
+            pageBtn.className = 'pagination-button';
+            if (i === currentPage) {
+                pageBtn.classList.add('active');
+            }
+            pageBtn.innerText = i;
+            pageBtn.onclick = () => {
+                currentPage = i;
+                renderTable();
+                updatePaginationButtons();
+            };
+            pageItem.appendChild(pageBtn);
+            pagination.appendChild(pageItem);
+        }
+        
+        // Next button
+        const nextItem = document.createElement('li');
+        nextItem.className = 'pagination-item';
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'pagination-button';
+        nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+                updatePaginationButtons();
+            }
+        };
+        nextItem.appendChild(nextBtn);
+        pagination.appendChild(nextItem);
+    }
+
+    // Update active state of pagination buttons
+    function updatePaginationButtons() {
+        const buttons = document.querySelectorAll('.pagination-button');
+        buttons.forEach(button => {
+            button.classList.remove('active');
+        });
+        
+        const pageNum = currentPage;
+        const pageButtons = Array.from(buttons).filter(btn => 
+            !btn.innerHTML.includes('fas fa-chevron'));
+        
+        const currentButton = pageButtons.find(btn => parseInt(btn.innerText) === pageNum);
+        if (currentButton) {
+            currentButton.classList.add('active');
+        }
+    }
+
+    // Update dashboard statistics with filtered data
+    function updateDashboard(data) {
+        try {
+            const totalVoidEl = document.getElementById('totalVoid');
+            const totalNilaiVoidEl = document.getElementById('totalNilaiVoid');
+            const topVoidItemEl = document.getElementById('topVoidItem');
+            const monthlyVoidEl = document.getElementById('monthlyVoid');
+
+            // Handle empty data
+            if (!data || data.length === 0) {
+                totalVoidEl.textContent = '0';
+                totalNilaiVoidEl.textContent = 'Rp0';
+                topVoidItemEl.textContent = '-';
+                monthlyVoidEl.textContent = '0';
+                return;
+            }
+
+            // Total void count
+            totalVoidEl.textContent = data.length;
+            
+            // Total void value
+            const totalNilaiVoid = data.reduce((sum, item) => 
+                sum + (parseFloat(item.total) || 0), 0);
+            totalNilaiVoidEl.textContent = formatRupiah(totalNilaiVoid);
+
+            // Most voided item
+            const itemQuantities = data.reduce((acc, item) => {
+                const qty = parseInt(item.jumlah) || 0;
+                acc[item.namaBarang] = (acc[item.namaBarang] || 0) + qty;
+                return acc;
+            }, {});
+            
+            const topItem = Object.entries(itemQuantities).reduce((max, [item, qty]) => {
+                return qty > (max.qty || 0) ? { item, qty } : max;
+            }, { item: '-', qty: 0 });
+            
+            topVoidItemEl.textContent = topItem.item;
+
+            // Current month void count
+            const currentMonth = moment().format('YYYY-MM');
+            const monthlyVoid = data.filter(item => 
+                moment(item.tanggal).format('YYYY-MM') === currentMonth).length;
+            monthlyVoidEl.textContent = monthlyVoid;
+        } catch (error) {
+            console.error('Error updating dashboard:', error);
+            showToast('Gagal memperbarui dashboard', 'error');
+        }
+    }
+
+    // Update void chart with filtered data
+function updateVoidChart(data) {
+    try {
+        const ctx = document.getElementById('voidChart').getContext('2d');
+
+        // Destroy existing chart if it exists
+        if (voidChartInstance) {
+            voidChartInstance.destroy();
+        }
+
+        // Handle empty data
+        if (!data || data.length === 0) {
+            voidChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [moment().format('MMM YYYY')],
+                    datasets: [{
+                        label: 'Jumlah Void',
+                        data: [0],
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        backgroundColor: 'rgba(67, 97, 238, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Pastikan chart tidak memaksakan rasio aspek
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { 
+                                precision: 0,
+                                stepSize: 1,
+                                color: '#555'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: { color: '#555' },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Tidak ada data void',
+                            font: { size: 14, family: 'Arial', weight: 'bold' },
+                            color: '#333',
+                            padding: 15 // Kurangi padding untuk menghemat ruang
+                        }
+                    },
+                    layout: {
+                        padding: { top: 15, right: 20, bottom: 15, left: 20 } // Kurangi padding
+                    }
+                }
+            });
+            return;
+        }
+
+        // Aggregate void counts by month
+        const monthlyData = data.reduce((acc, item) => {
+            if (!item.tanggal) return acc;
+            const month = moment(item.tanggal).format('YYYY-MM');
+            acc[month] = (acc[month] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Generate data for last 6 months
+        const endDate = moment();
+        const startDate = moment().subtract(5, 'months').startOf('month');
+        const labels = [];
+        const counts = [];
+        let current = startDate.clone();
+
+        while (current <= endDate) {
+            const monthKey = current.format('YYYY-MM');
+            labels.push(current.format('MMM YY'));
+            counts.push(monthlyData[monthKey] || 0);
+            current.add(1, 'month');
+        }
+
+        // Create the chart
+        voidChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Jumlah Void',
+                    data: counts,
+                    borderColor: 'rgba(67, 97, 238, 1)',
+                    backgroundColor: 'rgba(67, 97, 238, 0.15)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: 'rgba(67, 97, 238, 1)',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Pastikan chart menyesuaikan dengan container
+                layout: {
+                    padding: { top: 15, right: 20, bottom: 15, left: 20 } // Kurangi padding
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            stepSize: Math.max(1, Math.ceil(Math.max(...counts) / 5)),
+                            color: '#555',
+                            font: { size: 11, family: 'Arial' } // Kurangi ukuran font
+                        },
+                        grid: { 
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Jumlah Transaksi Void',
+                            color: '#333',
+                            font: { size: 11, family: 'Arial', weight: 'bold' }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#555',
+                            font: { size: 11, family: 'Arial' },
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        grid: { 
+                            display: false 
+                        },
+                        title: {
+                            display: true,
+                            text: 'Bulan',
+                            color: '#333',
+                            font: { size: 11, family: 'Arial', weight: 'bold' }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 11, family: 'Arial' },
+                        bodyFont: { size: 11, family: 'Arial' },
+                        padding: 8,
+                        cornerRadius: 4,
+                        callbacks: {
+                            label: context => `${context.raw} transaksi void`
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Grafik Transaksi Void per Bulan',
+                        font: { size: 14, family: 'Arial', weight: 'bold' },
+                        color: '#333',
+                        padding: { top: 10, bottom: 15 }
+                    }
+                },
+                animation: {
+                    duration: 800, // Kurangi durasi animasi untuk performa
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error updating chart:', error);
+        showToast('Gagal memperbarui grafik void', 'error');
+    }
+}
+
+    // View details of a void transaction
+    function viewDetail(kodeVoid) {
+        try {
+            const voidItem = voidData.find(item => item.kodeVoid === kodeVoid);
+            
+            if (!voidItem) {
+                showToast('Data void tidak ditemukan', 'error');
+                return;
+            }
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="detail-grid">
+                    <div class="detail-label">Kode Void</div>
+                    <div class="detail-value">${voidItem.kodeVoid || '-'}</div>
+                    <div class="detail-label">Nama Barang</div>
+                    <div class="detail-value">${voidItem.namaBarang || '-'}</div>
+                    <div class="detail-label">Jumlah</div>
+                    <div class="detail-value">${voidItem.jumlah || '0'}</div>
+                    <div class="detail-label">Harga</div>
+                    <div class="detail-value">${formatRupiah(voidItem.harga)}</div>
+                    <div class="detail-label">Total</div>
+                    <div class="detail-value">${formatRupiah(voidItem.total)}</div>
+                    <div class="detail-label">Tanggal</div>
+                    <div class="detail-value">${formatDate(voidItem.tanggal)}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-section-title">Alasan Void</div>
+                    <div class="detail-note">${voidItem.alasan || 'Tidak ada alasan'}</div>
+                </div>
+            `;
+            
+            openVoidDetailModal();
+        } catch (error) {
+            console.error('Error viewing detail:', error);
+            showToast('Gagal menampilkan detail void', 'error');
+        }
+    }
+
+    // Export data to Excel
+    function exportToExcel() {
+        showSpinner();
+        setTimeout(() => {
+            try {
+                // Prepare data for export
+                const exportData = filteredData.map(item => ({
+                    'Kode Void': item.kodeVoid || '-',
+                    'Nama Barang': item.namaBarang || '-',
+                    'Jumlah': item.jumlah || '0',
+                    'Harga': item.harga || '0',
+                    'Total': item.total || '0',
+                    'Tanggal': formatDate(item.tanggal),
+                    'Alasan': item.alasan || 'Tidak ada alasan'
+                }));
+                
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Laporan Void');
+                
+                // Generate file name with current date
+                const fileName = `Laporan_Void_${moment().format('YYYYMMDD_HHmmss')}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+                
+                showToast('Laporan berhasil diunduh sebagai Excel', 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Gagal mengunduh laporan Excel', 'error');
+            } finally {
+                hideSpinner();
+            }
+        }, 300);
+    }
+
+    // Export data to PDF
+    function exportToPDF() {
+        showSpinner();
+        setTimeout(() => {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4');
+                
+                // Add title
+                doc.setFontSize(16);
+                doc.text('Laporan Void Transaksi', 14, 15);
+                
+                // Add date range
+                const dateStart = document.getElementById('dateStart').value;
+                const dateEnd = document.getElementById('dateEnd').value;
+                let dateRange = 'Periode: Semua data';
+                
+                if (dateStart && dateEnd) {
+                    dateRange = `Periode: ${moment(dateStart).format('DD MMM YYYY')} - ${moment(dateEnd).format('DD MMM YYYY')}`;
+                } else if (dateStart) {
+                    dateRange = `Periode: Dari ${moment(dateStart).format('DD MMM YYYY')}`;
+                } else if (dateEnd) {
+                    dateRange = `Periode: Sampai ${moment(dateEnd).format('DD MMM YYYY')}`;
+                }
+                
+                doc.setFontSize(10);
+                doc.text(dateRange, 14, 22);
+                
+                // Add timestamp
+                doc.setFontSize(8);
+                doc.text(`Dicetak pada: ${moment().format('DD MMM YYYY HH:mm:ss')}`, 14, 26);
+                
+                // Add table
+                doc.autoTable({
+                    startY: 30,
+                    head: [['No', 'Kode Void', 'Nama Barang', 'Jumlah', 'Harga', 'Total', 'Tanggal', 'Alasan']],
+                    body: filteredData.map((item, index) => [
+                        index + 1,
+                        item.kodeVoid || '-',
+                        item.namaBarang || '-',
+                        item.jumlah || '0',
+                        formatRupiah(item.harga),
+                        formatRupiah(item.total),
+                        formatDate(item.tanggal),
+                        (item.alasan || 'Tidak ada alasan').substring(0, 50)
+                    ]),
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 2 },
+                    headStyles: { fillColor: [67, 97, 238] }
+                });
+                
+                // Add summary
+                const totalVoid = filteredData.length;
+                const totalNilaiVoid = filteredData.reduce((sum, item) => sum + (parseFloat(item.total) || 0), 0);
+                
+                const finalY = doc.lastAutoTable.finalY + 10;
+                doc.setFontSize(10);
+                doc.text(`Total Transaksi Void: ${totalVoid}`, 14, finalY);
+                doc.text(`Total Nominal Void: ${formatRupiah(totalNilaiVoid)}`, 14, finalY + 6);
+                
+                // Save PDF
+                const fileName = `Laporan_Void_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
+                doc.save(fileName);
+                
+                showToast('Laporan berhasil diunduh sebagai PDF', 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Gagal mengunduh laporan PDF', 'error');
+            } finally {
+                hideSpinner();
+            }
+        }, 300);
+    }
+
+    // Print report
+    function printReport() {
+        window.print();
+    }
+
+    // Open void detail modal
+    function openVoidDetailModal() {
+        document.getElementById('detailModal').style.display = 'block';
+    }
+
+    // Close void detail modal
+    function closeVoidDetailModal() {
+        document.getElementById('detailModal').style.display = 'none';
+    }
+
+    // Show spinner overlay during loading
+    function showSpinner() {
+        const spinner = document.getElementById('overlay');
+        if (spinner) {
+            spinner.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    // Hide spinner overlay
+    function hideSpinner() {
+        const spinner = document.getElementById('overlay');
+        if (spinner) {
+            spinner.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const toastIcon = toast.querySelector('.toast-icon i');
+        const toastBody = document.querySelector('.toast-body');
+        
+        toastBody.textContent = message;
+        toast.className = 'toast';
+        toast.classList.add(type);
+        
+        if (type === 'success') {
+            toastIcon.className = 'fas fa-check';
+        } else if (type === 'error') {
+            toastIcon.className = 'fas fa-exclamation-triangle';
+        }
+        
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    // Hide toast notification
+    function hideToast() {
+        const toast = document.getElementById('toast');
+        toast.classList.remove('show');
+    }
+
+    // Handle logout
+    function logout() {
+        localStorage.removeItem('username');
+        window.location.href = 'login.html';
+    }
+
+    // Initialize and setup event listeners
+    function init() {
+        // Setup user dropdown toggle
+        const userDropdown = document.querySelector('.user-dropdown');
+        const userDropdownMenu = document.querySelector('.user-dropdown-menu');
+        
+        userDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdownMenu.style.display = userDropdownMenu.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        // Close dropdown when clicking elsewhere
+        document.addEventListener('click', function() {
+            if (userDropdownMenu.style.display === 'block') {
+                userDropdownMenu.style.display = 'none';
+            }
+        });
+        
+        // Display username
+        const username = localStorage.getItem('username') || 'Admin';
+        document.getElementById('username').textContent = username;
+        
+        // Add event listeners to filter controls
+        document.getElementById('sortBy').addEventListener('change', applyFilters);
+        
+        // Add event listeners to buttons
+        document.getElementById('dateStart').addEventListener('change', function() {
+            if (this.value && document.getElementById('dateEnd').value) {
+                applyFilters();
+            }
+        });
+        
+        document.getElementById('dateEnd').addEventListener('change', function() {
+            if (this.value && document.getElementById('dateStart').value) {
+                applyFilters();
+            }
+        });
+        
+        // Add window resize event listener for responsive adjustments
+        window.addEventListener('resize', function() {
+            if (voidChartInstance) {
+                voidChartInstance.resize();
+            }
+        });
+        
+        // Load initial data
+        loadInitialData();
+        applyFilters();
+    }
+
+    // Run initialization
+    init();
+    
+    // Add functions to window object for global access
+    window.viewDetail = viewDetail;
+    window.applyFilters = applyFilters;
+    window.resetFilters = resetFilters;
+    window.exportToExcel = exportToExcel;
+    window.exportToPDF = exportToPDF;
+    window.printReport = printReport;
+    window.openVoidDetailModal = openVoidDetailModal;
+    window.closeVoidDetailModal = closeVoidDetailModal;
+    window.showToast = showToast;
+    window.hideToast = hideToast;
+    window.showSpinner = showSpinner;
+    window.hideSpinner = hideSpinner;
+    window.logout = logout;
+});
+</script>
+</script>
+    </body>
+    </html>
+    
+
+
