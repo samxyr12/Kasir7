@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Data Void - Enhanced</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- SweetAlert2 for Notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Chart.js for Visualizations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <!-- jsPDF for PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+        }
+        .sidebar {
+            transition: transform 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+        .table-header {
+            background: linear-gradient(to right, #10b981, #059669);
+            color: white;
+        }
+        .table-row {
+            transition: background-color 0.2s ease;
+        }
+        .table-row:hover {
+            background-color: #f0fdf4;
+        }
+        .filter-input {
+            transition: all 0.3s ease;
+        }
+        .filter-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+        .sort-icon {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .sort-icon:hover {
+            color: #ffffff;
+        }
+        #download-animation {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .loading::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+        }
+        .modal {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .pagination-btn {
+            transition: all 0.2s ease;
+        }
+        .pagination-btn:hover {
+            background-color: #10b981;
+            color: white;
+        }
+        .category-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .category-food {
+            background-color: #e9f5ff;
+            color: #3b82f6;
+        }
+        .category-beverage {
+            background-color: #fff1f2;
+            color: #ec4899;
+        }
+        .category-grocery {
+            background-color: #f3e8ff;
+            color: #8b5cf6;
+        }
+        .category-other {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+        .stat-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #10b981;
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Download Animation -->
+    <div id="download-animation" class="p-6 rounded-xl shadow-2xl">
+        <i class="fas fa-spinner fa-spin text-5xl text-emerald-600"></i>
+        <p class="mt-3 text-lg font-medium text-gray-800">Mempersiapkan file...</p>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 w-64 bg-white shadow-xl sidebar z-20" id="sidebar">
+        <div class="p-6 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white">
+            <h2 class="text-2xl font-bold">FXID void</h2>
+            <p class="text-sm opacity-80">Void Management</p>
+        </div>
+        <div class="p-4">
+            <div class="relative">
+                <input type="text" placeholder="Search menu..." class="w-full p-2 pl-8 text-sm bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+        </div>
+        <nav class="mt-2">
+            <a href="kasir.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-emerald-100 hover:text-emerald-600 transition">
+                <i class="fas fa-home mr-3 w-5 text-center"></i> Dashboard
+            </a>
+            <a href="void.html" class="flex items-center px-6 py-3 bg-emerald-100 text-emerald-600 font-semibold">
+                <i class="fas fa-ban mr-3 w-5 text-center"></i> Data Void
+            </a>
+            <a href="barang.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-emerald-100 hover:text-emerald-600 transition">
+                <i class="fas fa-box mr-3 w-5 text-center"></i> barang
+            </a>
+            <a href="kasir" class="flex items-center px-6 py-3 text-gray-700 hover:bg-emerald-100 hover:text-emerald-600 transition">
+                <i class="fas fa-users mr-3 w-5 text-center"></i> Kasir
+            </a>
+            <a href="laporan.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-emerald-100 hover:text-emerald-600 transition">
+                <i class="fas fa-chart-bar mr-3 w-5 text-center"></i> Laporan
+            </a>
+            <a href="akun.html" class="flex items-center px-6 py-3 text-gray-700 hover:bg-emerald-100 hover:text-emerald-600 transition">
+                <i class="fas fa-cog mr-3 w-5 text-center"></i> akun
+            </a>
+        </nav>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-emerald-200 flex items-center justify-center">
+                    <i class="fas fa-user text-emerald-600"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-900">Admin User</p>
+                    <p class="text-xs text-gray-500">admin@example.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 p-6" id="mainContent">
+        <!-- Header -->
+        <div class="bg-white shadow-xl rounded-xl p-6 mb-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-900">Data Void</h1>
+                <p class="text-gray-600 mt-1">Kelola dan analisis catatan void transaksi dengan mudah</p>
+            </div>
+            <div class="flex space-x-4">
+                <button id="toggleTheme" class="text-gray-600 hover:text-emerald-600 transition p-2">
+                    <i class="fas fa-moon text-xl"></i>
+                </button>
+                <button onclick="toggleSidebar()" class="text-gray-600 hover:text-emerald-600 transition p-2">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="bg-white shadow-xl rounded-xl p-3 mb-6">
+            <div class="flex">
+                <button id="tabData" class="tab-button active flex-1 py-2 px-4 rounded-lg font-medium text-sm">
+                    <i class="fas fa-table mr-2"></i>Data
+                </button>
+                <button id="tabStats" class="tab-button flex-1 py-2 px-4 rounded-lg font-medium text-gray-600 text-sm">
+                    <i class="fas fa-chart-pie mr-2"></i>Statistik
+                </button>
+                <button id="tabVisualization" class="tab-button flex-1 py-2 px-4 rounded-lg font-medium text-gray-600 text-sm">
+                    <i class="fas fa-chart-line mr-2"></i>Visualisasi
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Tab Content -->
+        <div id="dataContent">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <div class="bg-white shadow-xl rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Void</p>
+                            <h3 id="totalVoids" class="text-2xl font-bold mt-1">0</h3>
+                        </div>
+                        <div class="bg-emerald-100 p-3 rounded-lg">
+                            <i class="fas fa-ban text-emerald-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm flex items-center">
+                        <span id="totalVoidsChange" class="text-emerald-500 font-medium"><i class="fas fa-arrow-up mr-1"></i>0%</span>
+                        <span class="text-gray-400 ml-2">dari bulan lalu</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white shadow-xl rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Nilai Void</p>
+                            <h3 id="totalVoidValue" class="text-2xl font-bold mt-1">Rp 0</h3>
+                        </div>
+                        <div class="bg-red-100 p-3 rounded-lg">
+                            <i class="fas fa-money-bill-wave text-red-500"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm flex items-center">
+                        <span id="totalValueChange" class="text-red-500 font-medium"><i class="fas fa-arrow-up mr-1"></i>0%</span>
+                        <span class="text-gray-400 ml-2">dari bulan lalu</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white shadow-xl rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">Kasir Teratas</p>
+                            <h3 id="topCashier" class="text-2xl font-bold mt-1">-</h3>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-lg">
+                            <i class="fas fa-user text-blue-500"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm flex items-center">
+                        <span id="topCashierCount" class="text-blue-500 font-medium">0 voids</span>
+                        <span class="text-gray-400 ml-2">bulan ini</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white shadow-xl rounded-xl p-5 stat-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-500 text-sm">Alasan Tersering</p>
+                            <h3 id="topReason" class="text-2xl font-bold mt-1">-</h3>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-lg">
+                            <i class="fas fa-question-circle text-purple-500"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-sm flex items-center">
+                        <span id="topReasonCount" class="text-purple-500 font-medium">0 kasus</span>
+                        <span class="text-gray-400 ml-2">bulan ini</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter and Search -->
+            <div class="bg-white shadow-xl rounded-xl p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
+                        <div class="relative">
+                            <input type="text" id="searchInput" class="filter-input w-full p-3 pl-10 border rounded-lg focus:outline-none" placeholder="Kode, nama, alasan...">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
+                        <input type="date" id="startDateFilter" class="filter-input w-full p-3 border rounded-lg focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</label>
+                        <input type="date" id="endDateFilter" class="filter-input w-full p-3 border rounded-lg focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kasir</label>
+                        <select id="kasirFilter" class="filter-input w-full p-3 border rounded-lg focus:outline-none">
+                            <option value="">Semua Kasir</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                        <select id="categoryFilter" class="filter-input w-full p-3 border rounded-lg focus:outline-none">
+                            <option value="">Semua Kategori</option>
+                            <option value="food">Makanan</option>
+                            <option value="beverage">Minuman</option>
+                            <option value="grocery">Sembako</option>
+                            <option value="other">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="resetFilters()" class="bg-gray-500 text-white px-4 py-3 rounded-lg hover:bg-gray-600 transition w-full">
+                            <i class="fas fa-undo mr-2"></i>Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mb-6 flex flex-wrap gap-4">
+                <button onclick="downloadExcel()" class="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition shadow-md flex items-center">
+                    <i class="fas fa-file-excel mr-2"></i>Ekspor Semua ke Excel
+                </button>
+                <button onclick="downloadFilteredExcel()" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition shadow-md flex items-center">
+                    <i class="fas fa-filter mr-2"></i>Ekspor Hasil Filter
+                </button>
+                <button id="exportChartBtn" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition shadow-md flex items-center">
+                    <i class="fas fa-chart-pie mr-2"></i>Ekspor Grafik
+                </button>
+                <button onclick="clearVoidData()" class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition shadow-md flex items-center">
+                    <i class="fas fa-trash mr-2"></i>Hapus Semua Data
+                </button>
+                <button id="addVoidBtn" class="bg-indigo-500 text-white px-6 py-3 rounded-lg hover:bg-indigo-600 transition shadow-md flex items-center">
+                    <i class="fas fa-plus-circle mr-2"></i>Tambah Data Void
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white shadow-xl rounded-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Kode Void <i class="fas fa-sort sort-icon" onclick="sortTable('kodeVoid')"></i>
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Nama Barang <i class="fas fa-sort sort-icon" onclick="sortTable('namaBarang')"></i>
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Kategori
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Jumlah <i class="fas fa-sort sort-icon" onclick="sortTable('jumlah')"></i>
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Harga
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Total <i class="fas fa-sort sort-icon" onclick="sortTable('total')"></i>
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Tanggal <i class="fas fa-sort sort-icon" onclick="sortTable('tanggal')"></i>
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Alasan
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Kasir
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Kode Barang
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                                    Aksi
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="voidTableBody" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+                
+                <!-- Table Footer Summary -->
+                <div class="p-4 bg-gray-50 border-t flex flex-wrap justify-between items-center">
+                    <div class="text-sm text-gray-600">
+                        Total: <span id="tableTotalAmount" class="font-medium"></span> | 
+                        Average: <span id="tableAverageAmount" class="font-medium"></span>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-gray-600 text-sm">Menampilkan <span id="pageInfo"></span> dari <span id="totalRecords"></span> data</span>
+                        </div>
+                        <div class="flex space-x-2 ml-4">
+                            <button id="prevPage" class="pagination-btn px-4 py-2 border rounded-lg text-gray-600 hover:bg-emerald-500 hover:text-white" disabled>
+                                <i class="fas fa-chevron-left mr-2"></i>Sebelumnya
+                            </button>
+                            <button id="nextPage" class="pagination-btn px-4 py-2 border rounded-lg text-gray-600 hover:bg-emerald-500 hover:text-white">
+                                Selanjutnya<i class="fas fa-chevron-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Tab Content -->
+        <div id="statsContent" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Monthly Void Count -->
+                <div class="bg-white shadow-xl rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Void per Bulan</h3>
+                    <canvas id="monthlyVoidChart" height="300"></canvas>
+                </div>
+                
+                <!-- Cashier Performance -->
+                <div class="bg-white shadow-xl rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Performa Kasir (Void per Kasir)</h3>
+                    <canvas id="cashierChart" height="300"></canvas>
+                </div>
+                
+                <!-- Void Reasons -->
+                <div class="bg-white shadow-xl rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Alasan Void</h3>
+                    <canvas id="reasonChart" height="300"></canvas>
+                </div>
+                
+                <!-- Product Categories -->
+                <div class="bg-white shadow-xl rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Void per Kategori</h3>
+                    <canvas id="categoryChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization Tab Content -->
+        <div id="visualizationContent" class="hidden">
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Time-based Analysis -->
+                <div class="bg-white shadow-xl rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Analisis Void Berdasarkan Waktu</h3>
+                        <div class="flex space-x-2">
+                            <button class="time-period-btn px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg font-medium text-sm active" data-period="daily">Harian</button>
+                            <button class="time-period-btn px-3 py-1 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm" data-period="weekly">Mingguan</button>
+                            <button class="time-period-btn px-3 py-1 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm" data-period="monthly">Bulanan</button>
+                        </div>
+                    </div>
+                    <canvas id="timeAnalysisChart" height="300"></canvas>
+                </div>
+                
+                <!-- Heat Map -->
+                <div class="bg-white shadow-xl rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Heat Map Void Berdasarkan Hari & Jam</h3>
+                    <div id="heatmapContainer" class="w-full overflow-x-auto">
+                        <table id="heatmap" class="min-w-full border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="border p-2 bg-gray-100"></th>
+                                    <th class="border p-2 bg-gray-100">00-03</th>
+                                    <th class="border p-2 bg-gray-100">03-06</th>
+                                    <th class="border p-2 bg-gray-100">06-09</th>
+                                    <th class="border p-2 bg-gray-100">09-12</th>
+                                    <th class="border p-2 bg-gray-100">12-15</th>
+                                    <th class="border p-2 bg-gray-100">15-18</th>
+                                    <th class="border p-2 bg-gray-100">18-21</th>
+                                    <th class="border p-2 bg-gray-100">21-24</th>
+                                </tr>
+                            </thead>
+                            <tbody id="heatmapBody">
+                                <!-- Will be populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Comparison Tool -->
+                <div class="bg-white shadow-xl rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Perbandingan Periode</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Periode 1</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="date" id="period1Start" class="filter-input w-full p-3 border rounded-lg focus:outline-none">
+                                <input type="date" id="period1End" class="filter-input w-full p-3 border rounded-lg focus:outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Periode 2</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <input type="date" id="period2Start" class="filter-input w-full p-3 border rounded-lg focus:outline-none">
+                                <input type="date" id="period2End" class="filter-input w-full p-3 border rounded-lg focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+                    <button id="compareBtn" class="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition shadow-md flex items-center mx-auto mb-4">
+                        <i class="fas fa-exchange-alt mr-2"></i>Bandingkan Periode
+                    </button>
+                    <canvas id="comparisonChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Void Details Modal -->
+    <div id="voidModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-30">
+        <div class="bg-white rounded-xl p-6 w-full max-w-lg modal shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Detail Void</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="modalContent" class="space-y-4">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <div class="mt-6 flex space-x-3 justify-end">
+                <button onclick="editVoid()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                    <i class="fas fa-edit mr-2"></i>Edit
+                </button>
+              <button onclick="closeModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+                    <i class="fas fa-times mr-2"></i>Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Void Modal -->
+    <div id="addEditVoidModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-30">
+        <div class="bg-white rounded-xl p-6 w-full max-w-2xl modal shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-800">Tambah Data Void</h3>
+                <button onclick="closeAddEditModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="voidForm" class="space-y-4">
+                <input type="hidden" id="editVoidId" value="-1">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kode Void</label>
+                        <input type="text" id="inputKodeVoid" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kode Barang</label>
+                        <input type="text" id="inputKodeBarang" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Barang</label>
+                        <input type="text" id="inputNamaBarang" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                        <select id="inputKategori" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                            <option value="food">Makanan</option>
+                            <option value="beverage">Minuman</option>
+                            <option value="grocery">Sembako</option>
+                            <option value="other">Lainnya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
+                        <input type="number" id="inputJumlah" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" min="1" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
+                        <input type="number" id="inputHarga" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" min="0" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                        <input type="datetime-local" id="inputTanggal" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kasir</label>
+                        <input type="text" id="inputKasir" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alasan Void</label>
+                        <textarea id="inputAlasan" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="flex space-x-3 justify-end mt-6">
+                    <button type="button" onclick="closeAddEditModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+                        <i class="fas fa-times mr-2"></i>Batal
+                    </button>
+                    <button type="submit" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition">
+                        <i class="fas fa-save mr-2"></i>Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Export Chart Modal -->
+    <div id="exportChartModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-30">
+        <div class="bg-white rounded-xl p-6 w-full max-w-2xl modal shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Ekspor Grafik</h3>
+                <button onclick="closeExportModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition" onclick="selectChart('monthly')">
+                        <h4 class="font-medium mb-2">Void per Bulan</h4>
+                        <div class="flex justify-center">
+                            <i class="fas fa-chart-bar text-6xl text-emerald-500"></i>
+                        </div>
+                    </div>
+                    <div class="p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition" onclick="selectChart('cashier')">
+                        <h4 class="font-medium mb-2">Performa Kasir</h4>
+                        <div class="flex justify-center">
+                            <i class="fas fa-chart-pie text-6xl text-blue-500"></i>
+                        </div>
+                    </div>
+                    <div class="p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition" onclick="selectChart('reason')">
+                        <h4 class="font-medium mb-2">Alasan Void</h4>
+                        <div class="flex justify-center">
+                            <i class="fas fa-chart-pie text-6xl text-red-500"></i>
+                        </div>
+                    </div>
+                    <div class="p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition" onclick="selectChart('category')">
+                        <h4 class="font-medium mb-2">Void per Kategori</h4>
+                        <div class="flex justify-center">
+                            <i class="fas fa-chart-pie text-6xl text-purple-500"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Format</label>
+                        <select id="exportFormat" class="p-2 border rounded-lg">
+                            <option value="png">PNG</option>
+                            <option value="jpg">JPG</option>
+                            <option value="pdf">PDF</option>
+                        </select>
+                    </div>
+                    <button id="downloadChartBtn" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition">
+                        <i class="fas fa-download mr-2"></i>Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data Generator (This is to simulate data)
+        function generateSampleData() {
+            if (localStorage.getItem('voids') && JSON.parse(localStorage.getItem('voids')).length > 0) {
+                return;
+            }
+            
+            const categoryMap = {
+                'Nasi Goreng': 'food',
+                'Mie Goreng': 'food',
+                'Ayam Bakar': 'food',
+                'Soto Ayam': 'food',
+                'Es Teh': 'beverage',
+                'Kopi': 'beverage',
+                'Jus Jeruk': 'beverage',
+                'Beras': 'grocery',
+                'Minyak Goreng': 'grocery',
+                'Gula': 'grocery',
+                'Tissue': 'other',
+                'Rokok': 'other'
+            };
+            
+            const alasanList = [
+                'Pembatalan oleh pelanggan',
+                'Kesalahan input',
+                'Perubahan pesanan',
+                'Stok kosong',
+                'Kesalahan harga'
+            ];
+            
+            const kasirList = ['Ani', 'Budi', 'Citra', 'Dedi', 'Eka'];
+            
+            const sampleVoids = [];
+            const startDate = new Date(2024, 0, 1); // Jan 1, 2024
+            const currentDate = new Date();
+            
+            for (let i = 1; i <= 100; i++) {
+                const randomDate = new Date(startDate.getTime() + Math.random() * (currentDate.getTime() - startDate.getTime()));
+                const productNames = Object.keys(categoryMap);
+                const randomProduct = productNames[Math.floor(Math.random() * productNames.length)];
+                const category = categoryMap[randomProduct];
+                const price = Math.floor(Math.random() * 50000) + 5000;
+                const quantity = Math.floor(Math.random() * 5) + 1;
+                
+                sampleVoids.push({
+                    kodeVoid: 'V' + String(i).padStart(5, '0'),
+                    kodeBarang: 'P' + String(Math.floor(Math.random() * 1000)).padStart(5, '0'),
+                    namaBarang: randomProduct,
+                    category: category,
+                    jumlah: quantity,
+                    harga: price,
+                    total: price * quantity,
+                    tanggal: randomDate.toISOString(),
+                    alasan: alasanList[Math.floor(Math.random() * alasanList.length)],
+                    kasir: kasirList[Math.floor(Math.random() * kasirList.length)]
+                });
+            }
+            
+            localStorage.setItem('voids', JSON.stringify(sampleVoids));
+        }
+
+        // Initialize data
+        let voids = [];
+        let sortDirection = {};
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let selectedVoidIndex = -1;
+        
+        // Load void data into table
+        function loadVoidData() {
+            voids = JSON.parse(localStorage.getItem('voids')) || [];
+            const tableBody = document.getElementById('voidTableBody');
+            tableBody.innerHTML = '';
+            const filteredVoids = filterVoids(voids);
+            const totalRecords = filteredVoids.length;
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedVoids = filteredVoids.slice(start, end);
+
+            if (paginatedVoids.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+                    <td colspan="11" class="px-6 py-8 text-center text-gray-500">
+                        <i class="fas fa-inbox text-4xl mb-3 block"></i>
+                        <p>Tidak ada data void yang ditemukan</p>
+                        <button id="addFirstVoidBtn" class="mt-3 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-sm">
+                            <i class="fas fa-plus mr-2"></i>Tambah Data Void
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(emptyRow);
+                document.getElementById('addFirstVoidBtn').addEventListener('click', showAddVoidModal);
+            } else {
+                // Calculate total and average for displayed items
+                let tableTotal = 0;
+                paginatedVoids.forEach(item => tableTotal += item.total);
+                
+                paginatedVoids.forEach((item, index) => {
+                    const globalIndex = start + index;
+                    const row = document.createElement('tr');
+                    row.className = 'table-row cursor-pointer';
+                    
+                    // Get category styling
+                    const categoryClass = getCategoryClass(item.category);
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.kodeVoid}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.namaBarang}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="${categoryClass}">${getCategoryLabel(item.category)}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.jumlah}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatCurrency(item.harga)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatCurrency(item.total)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(item.tanggal)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.alasan}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.kasir}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${item.kodeBarang}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div class="flex space-x-2">
+                                <button onclick="editVoidItem(${globalIndex}); event.stopPropagation();" class="text-blue-500 hover:text-blue-700">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteVoid(${globalIndex}); event.stopPropagation();" class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    row.onclick = () => showVoidDetails(item, globalIndex);
+                    tableBody.appendChild(row);
+                });
+                
+                // Update table footer summary
+                document.getElementById('tableTotalAmount').textContent = formatCurrency(tableTotal);
+                document.getElementById('tableAverageAmount').textContent = formatCurrency(tableTotal / paginatedVoids.length);
+            }
+
+            updatePagination(totalRecords);
+            populateKasirFilter();
+            updateStatistics();
+        }
+
+        // Filter voids
+        function filterVoids(data) {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const startDate = document.getElementById('startDateFilter').value;
+            const endDate = document.getElementById('endDateFilter').value;
+            const kasir = document.getElementById('kasirFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+
+            return data.filter(item => {
+                const matchesSearch = 
+                    (item.kodeVoid && item.kodeVoid.toLowerCase().includes(search)) ||
+                    (item.namaBarang && item.namaBarang.toLowerCase().includes(search)) ||
+                    (item.alasan && item.alasan.toLowerCase().includes(search)) ||
+                    (item.kasir && item.kasir.toLowerCase().includes(search));
+                
+                let matchesStartDate = true;
+                if (startDate) {
+                    matchesStartDate = new Date(item.tanggal) >= new Date(startDate);
+                }
+                
+                let matchesEndDate = true;
+                if (endDate) {
+                    const endDateTime = new Date(endDate);
+                    endDateTime.setHours(23, 59, 59, 999);
+                    matchesEndDate = new Date(item.tanggal) <= endDateTime;
+                }
+                
+                const matchesKasir = !kasir || item.kasir === kasir;
+                const matchesCategory = !category || item.category === category;
+                
+                return matchesSearch && matchesStartDate && matchesEndDate && matchesKasir && matchesCategory;
+            });
+        }
+
+        // Category helpers
+        function getCategoryClass(category) {
+            switch(category) {
+                case 'food': return 'category-badge category-food';
+                case 'beverage': return 'category-badge category-beverage';
+                case 'grocery': return 'category-badge category-grocery';
+                default: return 'category-badge category-other';
+            }
+        }
+        
+        function getCategoryLabel(category) {
+            switch(category) {
+                case 'food': return 'Makanan';
+                case 'beverage': return 'Minuman';
+                case 'grocery': return 'Sembako';
+                default: return 'Lainnya';
+            }
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+    if (!amount || isNaN(amount)) return 'Rp 0';
+
+    // Convert to absolute value to handle negative numbers if any
+    const absAmount = Math.abs(amount);
+    
+    if (absAmount >= 1000000) {
+        // Handle millions (JT)
+        const millions = amount / 1000000;
+        // Check if it's a whole number or has decimal
+        const formatted = millions % 1 === 0 ? millions : millions.toFixed(1).replace('.', ',');
+        return `Rp ${formatted}JT`;
+    } else if (absAmount >= 1000) {
+        // Handle thousands (K)
+        const thousands = amount / 1000;
+        // Check if it's a whole number
+        const formatted = thousands % 1 === 0 ? thousands : thousands.toFixed(1).replace('.', ',');
+        return `Rp ${formatted}K`;
+    } else {
+        // Handle amounts less than 1000
+        return `Rp ${amount}`;
+    }
+}
+        
+        // Format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        // Sort table
+        function sortTable(key) {
+            sortDirection[key] = !sortDirection[key];
+            voids.sort((a, b) => {
+                let valA = a[key], valB = b[key];
+                if (key === 'tanggal') {
+                    valA = new Date(valA);
+                    valB = new Date(valB);
+                } else if (typeof valA === 'string') {
+                    valA = valA.toLowerCase();
+                    valB = valB.toLowerCase();
+                }
+                if (valA < valB) return sortDirection[key] ? 1 : -1;
+                if (valA > valB) return sortDirection[key] ? -1 : 1;
+                return 0;
+            });
+            currentPage = 1;
+            loadVoidData();
+        }
+
+        // Delete single void
+        function deleteVoid(index) {
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                text: 'Apakah Anda yakin ingin menghapus void ini?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    voids.splice(index, 1);
+                    localStorage.setItem('voids', JSON.stringify(voids));
+                    loadVoidData();
+                    updateCharts();
+                    Swal.fire('Dihapus!', 'Data void telah dihapus.', 'success');
+                }
+            });
+        }
+
+        // Clear all void data
+        function clearVoidData() {
+            Swal.fire({
+                title: 'Konfirmasi Hapus Semua',
+                text: 'Apakah Anda yakin ingin menghapus semua data void? Tindakan ini tidak dapat dibatalkan!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Hapus Semua',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    voids = [];
+                    localStorage.setItem('voids', JSON.stringify(voids));
+                    loadVoidData();
+                    updateCharts();
+                    Swal.fire('Dihapus!', 'Semua data void telah dihapus.', 'success');
+                }
+            });
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('startDateFilter').value = '';
+            document.getElementById('endDateFilter').value = '';
+            document.getElementById('kasirFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            currentPage = 1;
+            loadVoidData();
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('sidebar-hidden');
+            
+            if (sidebar.classList.contains('sidebar-hidden')) {
+                mainContent.classList.remove('ml-64');
+                mainContent.classList.add('ml-0');
+            } else {
+                mainContent.classList.remove('ml-0');
+                mainContent.classList.add('ml-64');
+            }
+        }
+
+        // Populate kasir filter dropdown
+        function populateKasirFilter() {
+            const kasirDropdown = document.getElementById('kasirFilter');
+            // Store current selection
+            const currentSelection = kasirDropdown.value;
+            
+            // Clear all options except the first one
+            while (kasirDropdown.options.length > 1) {
+                kasirDropdown.remove(1);
+            }
+            
+            // Get unique kasirs
+            const uniqueKasirs = [...new Set(voids.map(item => item.kasir))].sort();
+            
+            // Add options
+            uniqueKasirs.forEach(kasir => {
+                const option = document.createElement('option');
+                option.value = kasir;
+                option.textContent = kasir;
+                kasirDropdown.appendChild(option);
+            });
+            
+            // Restore selection if possible
+            if (uniqueKasirs.includes(currentSelection)) {
+                kasirDropdown.value = currentSelection;
+            }
+        }
+
+        // Pagination
+        function updatePagination(totalRecords) {
+            const totalPages = Math.ceil(totalRecords / rowsPerPage);
+            document.getElementById('pageInfo').textContent = totalRecords > 0 ? 
+                `${Math.min((currentPage - 1) * rowsPerPage + 1, totalRecords)} - ${Math.min(currentPage * rowsPerPage, totalRecords)}` :
+                "0 - 0";
+            document.getElementById('totalRecords').textContent = totalRecords;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage === totalPages || totalRecords === 0;
+        }
+
+        document.getElementById('prevPage').onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadVoidData();
+            }
+        };
+
+        document.getElementById('nextPage').onclick = () => {
+            const filteredVoids = filterVoids(voids);
+            if (currentPage < Math.ceil(filteredVoids.length / rowsPerPage)) {
+                currentPage++;
+                loadVoidData();
+            }
+        };
+
+        // Show void details modal
+        function showVoidDetails(item, index) {
+            selectedVoidIndex = index;
+            const modalContent = document.getElementById('modalContent');
+            
+            const categoryLabel = getCategoryLabel(item.category);
+            const categoryClass = getCategoryClass(item.category);
+            
+            modalContent.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="font-medium text-gray-700">Kode Void:</div>
+                    <div>${item.kodeVoid}</div>
+                    <div class="font-medium text-gray-700">Nama Barang:</div>
+                    <div>${item.namaBarang}</div>
+                    <div class="font-medium text-gray-700">Kategori:</div>
+                    <div><span class="${categoryClass}">${categoryLabel}</span></div>
+                    <div class="font-medium text-gray-700">Jumlah:</div>
+                    <div>${item.jumlah}</div>
+                    <div class="font-medium text-gray-700">Harga:</div>
+                    <div>${formatCurrency(item.harga)}</div>
+                    <div class="font-medium text-gray-700">Total:</div>
+                    <div class="font-semibold">${formatCurrency(item.total)}</div>
+                    <div class="font-medium text-gray-700">Tanggal:</div>
+                    <div>${formatDate(item.tanggal)}</div>
+                    <div class="font-medium text-gray-700">Alasan:</div>
+                    <div>${item.alasan}</div>
+                    <div class="font-medium text-gray-700">Kasir:</div>
+                    <div>${item.kasir}</div>
+                    <div class="font-medium text-gray-700">Kode Barang:</div>
+                    <div>${item.kodeBarang}</div>
+                </div>
+            `;
+            document.getElementById('voidModal').classList.remove('hidden');
+        }
+
+        // Show add void modal
+        function showAddVoidModal() {
+            document.getElementById('modalTitle').textContent = 'Tambah Data Void';
+            document.getElementById('editVoidId').value = -1;
+            document.getElementById('voidForm').reset();
+            
+            // Set default date to now
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('inputTanggal').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            
+            document.getElementById('addEditVoidModal').classList.remove('hidden');
+        }
+
+        // Edit void item
+        function editVoidItem(index) {
+            const item = voids[index];
+            document.getElementById('modalTitle').textContent = 'Edit Data Void';
+            document.getElementById('editVoidId').value = index;
+            
+            document.getElementById('inputKodeVoid').value = item.kodeVoid;
+            document.getElementById('inputKodeBarang').value = item.kodeBarang;
+            document.getElementById('inputNamaBarang').value = item.namaBarang;
+            document.getElementById('inputKategori').value = item.category || 'other';
+            document.getElementById('inputJumlah').value = item.jumlah;
+            document.getElementById('inputHarga').value = item.harga;
+            document.getElementById('inputAlasan').value = item.alasan;
+            document.getElementById('inputKasir').value = item.kasir;
+            
+            // Format date for datetime-local input
+            const date = new Date(item.tanggal);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            document.getElementById('inputTanggal').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            
+            document.getElementById('addEditVoidModal').classList.remove('hidden');
+        }
+
+        // Edit void from details modal
+        function editVoid() {
+            closeModal();
+            if (selectedVoidIndex >= 0) {
+                editVoidItem(selectedVoidIndex);
+            }
+        }
+
+        // Close modals
+        function closeModal() {
+            document.getElementById('voidModal').classList.add('hidden');
+        }
+        
+        function closeAddEditModal() {
+            document.getElementById('addEditVoidModal').classList.add('hidden');
+        }
+        
+        function closeExportModal() {
+            document.getElementById('exportChartModal').classList.add('hidden');
+        }
+
+        // Save void data
+        function saveVoidData(e) {
+            e.preventDefault();
+            
+            const editIndex = parseInt(document.getElementById('editVoidId').value);
+            const kodeVoid = document.getElementById('inputKodeVoid').value;
+            const kodeBarang = document.getElementById('inputKodeBarang').value;
+            const namaBarang = document.getElementById('inputNamaBarang').value;
+            const category = document.getElementById('inputKategori').value;
+            const jumlah = parseInt(document.getElementById('inputJumlah').value);
+            const harga = parseFloat(document.getElementById('inputHarga').value);
+            const tanggal = document.getElementById('inputTanggal').value;
+            const alasan = document.getElementById('inputAlasan').value;
+            const kasir = document.getElementById('inputKasir').value;
+            
+            const newVoidData = {
+                kodeVoid: kodeVoid,
+                kodeBarang: kodeBarang,
+                namaBarang: namaBarang,
+                category: category,
+                jumlah: jumlah,
+                harga: harga,
+                total: jumlah * harga,
+                tanggal: new Date(tanggal).toISOString(),
+                alasan: alasan,
+                kasir: kasir
+            };
+            
+            if (editIndex >= 0) {
+                // Edit existing
+                voids[editIndex] = newVoidData;
+                Swal.fire('Berhasil!', 'Data void berhasil diperbarui.', 'success');
+            } else {
+                // Add new
+                voids.push(newVoidData);
+                Swal.fire('Berhasil!', 'Data void baru berhasil ditambahkan.', 'success');
+            }
+            
+            localStorage.setItem('voids', JSON.stringify(voids));
+            closeAddEditModal();
+            loadVoidData();
+            updateCharts();
+        }
+
+        // Download all voids to Excel
+        // Download all voids to Excel as ZIP
+function downloadExcel() {
+    if (voids.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Ada Data',
+            text: 'Tidak ada data void untuk diekspor.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+
+    document.body.classList.add('loading');
+    document.getElementById('download-animation').style.display = 'block';
+
+    setTimeout(() => {
+        // Create a new JSZip instance
+        let zip = new JSZip();
+        let workbook = XLSX.utils.book_new();
+        let worksheet_data = [
+            ['Kode Void', 'Nama Barang', 'Kategori', 'Jumlah', 'Harga', 'Total', 'Tanggal', 'Alasan', 'Kasir', 'Kode Barang']
+        ];
+        voids.forEach(item => {
+            worksheet_data.push([
+                item.kodeVoid,
+                item.namaBarang,
+                getCategoryLabel(item.category),
+                item.jumlah,
+                item.harga,
+                item.total,
+                new Date(item.tanggal).toLocaleString(),
+                item.alasan,
+                item.kasir,
+                item.kodeBarang
+            ]);
+        });
+
+        let worksheet = XLSX.utils.aoa_to_sheet(worksheet_data);
+        worksheet['!cols'] = [
+            { wpx: 120 },
+            { wpx: 200 },
+            { wpx: 100 },
+            { wpx: 80 },
+            { wpx: 100 },
+            { wpx: 100 },
+            { wpx: 150 },
+            { wpx: 200 },
+            { wpx: 100 },
+            { wpx: 120 }
+        ];
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Void');
+
+        // Write the workbook to a binary string
+        let excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        // Add the Excel file to the ZIP
+        zip.file('data_void_complete.xlsx', excelBuffer);
+
+        // Generate the ZIP file and trigger download
+        zip.generateAsync({ type: 'blob' }).then(function (content) {
+            saveAs(content, 'data_void_complete.zip');
+        });
+
+        document.body.classList.remove('loading');
+        document.getElementById('download-animation').style.display = 'none';
+    }, 1000);
+}
+
+// Download filtered voids to Excel as ZIP
+function downloadFilteredExcel() {
+    const filteredVoids = filterVoids(voids);
+    if (filteredVoids.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Ada Data',
+            text: 'Tidak ada data yang sesuai dengan filter untuk diekspor.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+
+    document.body.classList.add('loading');
+    document.getElementById('download-animation').style.display = 'block';
+
+    setTimeout(() => {
+        // Create a new JSZip instance
+        let zip = new JSZip();
+        let workbook = XLSX.utils.book_new();
+        let worksheet_data = [
+            ['Kode Void', 'Nama Barang', 'Kategori', 'Jumlah', 'Harga', 'Total', 'Tanggal', 'Alasan', 'Kasir', 'Kode Barang']
+        ];
+        filteredVoids.forEach(item => {
+            worksheet_data.push([
+                item.kodeVoid,
+                item.namaBarang,
+                getCategoryLabel(item.category),
+                item.jumlah,
+                item.harga,
+                item.total,
+                new Date(item.tanggal).toLocaleString(),
+                item.alasan,
+                item.kasir,
+                item.kodeBarang
+            ]);
+        });
+
+        const filterDesc = [];
+        if (document.getElementById('searchInput').value) {
+            filterDesc.push(`Pencarian: ${document.getElementById('searchInput').value}`);
+        }
+        if (document.getElementById('startDateFilter').value) {
+            filterDesc.push(`Dari: ${document.getElementById('startDateFilter').value}`);
+        }
+        if (document.getElementById('endDateFilter').value) {
+            filterDesc.push(`Sampai: ${document.getElementById('endDateFilter').value}`);
+        }
+        if (document.getElementById('kasirFilter').value) {
+            filterDesc.push(`Kasir: ${document.getElementById('kasirFilter').value}`);
+        }
+        if (document.getElementById('categoryFilter').value) {
+            filterDesc.push(`Kategori: ${getCategoryLabel(document.getElementById('categoryFilter').value)}`);
+        }
+
+        // Add filter description
+        if (filterDesc.length > 0) {
+            worksheet_data.splice(0, 0, ['Filter yang digunakan:']);
+            worksheet_data.splice(1, 0, [filterDesc.join(', ')]);
+            worksheet_data.splice(2, 0, []);
+        }
+
+        let worksheet = XLSX.utils.aoa_to_sheet(worksheet_data);
+        worksheet['!cols'] = [
+            { wpx: 120 },
+            { wpx: 200 },
+            { wpx: 100 },
+            { wpx: 80 },
+            { wpx: 100 },
+            { wpx: 100 },
+            { wpx: 150 },
+            { wpx: 200 },
+            { wpx: 100 },
+            { wpx: 120 }
+        ];
+
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Void Filtered');
+
+        // Write the workbook to a binary string
+        let excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        // Add the Excel file to the ZIP
+        zip.file('data_void_filtered.xlsx', excelBuffer);
+
+        // Generate the ZIP file and trigger download
+        zip.generateAsync({ type: 'blob' }).then(function (content) {
+            saveAs(content, 'data_void_filtered.zip');
+        });
+
+        document.body.classList.remove('loading');
+        document.getElementById('download-animation').style.display = 'none';
+    }, 1000);
+}
+
+        // Statistics & Charts
+        function updateStatistics() {
+            if (voids.length === 0) {
+                document.getElementById('totalVoids').textContent = '0';
+                document.getElementById('totalVoidValue').textContent = 'Rp 0';
+                document.getElementById('topCashier').textContent = '-';
+                document.getElementById('topReason').textContent = '-';
+                return;
+            }
+            
+            // Total voids
+            document.getElementById('totalVoids').textContent = voids.length;
+            
+            // Total value
+            const totalValue = voids.reduce((sum, item) => sum + item.total, 0);
+            document.getElementById('totalVoidValue').textContent = formatCurrency(totalValue);
+            
+            // Find top cashier
+            const cashierCounts = {};
+            voids.forEach(item => {
+                cashierCounts[item.kasir] = (cashierCounts[item.kasir] || 0) + 1;
+            });
+            
+            const topCashier = Object.keys(cashierCounts).reduce((a, b) => 
+                cashierCounts[a] > cashierCounts[b] ? a : b
+            );
+            
+            document.getElementById('topCashier').textContent = topCashier;
+            document.getElementById('topCashierCount').textContent = `${cashierCounts[topCashier]} voids`;
+            
+            // Find top reason
+            const reasonCounts = {};
+            voids.forEach(item => {
+                reasonCounts[item.alasan] = (reasonCounts[item.alasan] || 0) + 1;
+            });
+            
+            const topReason = Object.keys(reasonCounts).reduce((a, b) => 
+                reasonCounts[a] > reasonCounts[b] ? a : b
+            );
+            
+            const shortenedReason = topReason.length > 15 ? 
+                topReason.substring(0, 15) + '...' : 
+                topReason;
+            
+            document.getElementById('topReason').textContent = shortenedReason;
+            document.getElementById('topReasonCount').textContent = `${reasonCounts[topReason]} kasus`;
+            
+            // Update changes (comparing with previous month)
+            // For demonstration purposes, we'll use random values
+            document.getElementById('totalVoidsChange').innerHTML = `<i class="fas fa-arrow-up mr-1"></i>12%`;
+            document.getElementById('totalValueChange').innerHTML = `<i class="fas fa-arrow-up mr-1"></i>8%`;
+        }
+
+        // Create and update charts
+        let monthlyVoidChart, cashierChart, reasonChart, categoryChart, timeAnalysisChart, comparisonChart;
+        
+        function initCharts() {
+            // Monthly void trend chart
+            const monthlyCtx = document.getElementById('monthlyVoidChart').getContext('2d');
+            monthlyVoidChart = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Jumlah Void',
+                        data: [],
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Cashier chart
+            const cashierCtx = document.getElementById('cashierChart').getContext('2d');
+            cashierChart = new Chart(cashierCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Jumlah Void',
+                        data: [],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(236, 72, 153, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(16, 185, 129, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(236, 72, 153, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(16, 185, 129, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+            
+            // Reason chart
+            const reasonCtx = document.getElementById('reasonChart').getContext('2d');
+            reasonChart = new Chart(reasonCtx, {
+                type: 'pie',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Jumlah Kasus',
+                        data: [],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(249, 115, 22, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(59, 130, 246, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(249, 115, 22, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(59, 130, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+            
+            // Category chart
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            categoryChart = new Chart(categoryCtx, {
+                type: 'polarArea',
+                data: {
+                    labels: ['Makanan', 'Minuman', 'Sembako', 'Lainnya'],
+                    datasets: [{
+                        label: 'Jumlah Void',
+                        data: [],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(236, 72, 153, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(107, 114, 128, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+            
+            // Time Analysis chart
+            const timeCtx = document.getElementById('timeAnalysisChart').getContext('2d');
+            timeAnalysisChart = new Chart(timeCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Jumlah Void',
+                        data: [],
+                        fill: true,
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Comparison chart
+            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(comparisonCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Void', 'Nilai Total', 'Rata-rata Nilai'],
+                    datasets: [
+                        {
+                            label: 'Periode 1',
+                            data: [0, 0, 0],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Periode 2',
+                            data: [0, 0, 0],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateCharts() {
+            if (voids.length === 0) {
+                return;
+            }
+            
+            // Monthly void chart data
+            const monthlyData = {};
+            voids.forEach(item => {
+                const date = new Date(item.tanggal);
+                const monthYear = `${date.toLocaleString('id-ID', { month: 'short' })} ${date.getFullYear()}`;
+                
+                monthlyData[monthYear] = (monthlyData[monthYear] || 0) + 1;
+            });
+            
+            // Sort months chronologically
+            const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
+                const dateA = new Date(a);
+                const dateB = new Date(b);
+                return dateA - dateB;
+            });
+            
+            monthlyVoidChart.data.labels = sortedMonths;
+            monthlyVoidChart.data.datasets[0].data = sortedMonths.map(month => monthlyData[month]);
+            monthlyVoidChart.update();
+            
+            // Cashier chart data
+            const cashierData = {};
+            voids.forEach(item => {
+                cashierData[item.kasir] = (cashierData[item.kasir] || 0) + 1;
+            });
+            
+            const cashierLabels = Object.keys(cashierData);
+            cashierChart.data.labels = cashierLabels;
+            cashierChart.data.datasets[0].data = cashierLabels.map(cashier => cashierData[cashier]);
+            cashierChart.update();
+            
+            // Reason chart data
+            const reasonData = {};
+            voids.forEach(item => {
+                reasonData[item.alasan] = (reasonData[item.alasan] || 0) + 1;
+            });
+            
+            // Get top 5 reasons
+            const sortedReasons = Object.keys(reasonData).sort((a, b) => reasonData[b] - reasonData[a]).slice(0, 5);
+            
+            reasonChart.data.labels = sortedReasons;
+            reasonChart.data.datasets[0].data = sortedReasons.map(reason => reasonData[reason]);
+            reasonChart.update();
+            
+            // Category chart data
+            const categoryData = {
+                'food': 0,
+                'beverage': 0,
+                'grocery': 0,
+                'other': 0
+            };
+            
+            voids.forEach(item => {
+                categoryData[item.category || 'other'] = (categoryData[item.category || 'other']) + 1;
+            });
+            
+            categoryChart.data.datasets[0].data = [
+                categoryData.food,
+                categoryData.beverage,
+                categoryData.grocery,
+                categoryData.other
+            ];
+            categoryChart.update();
+            
+            // Time analysis chart - daily by default
+            updateTimeAnalysisChart('daily');
+            
+            // Update heatmap
+            updateHeatmap();
+        }
+        
+        function updateTimeAnalysisChart(period) {
+            if (voids.length === 0) return;
+            
+            let timeData = {};
+            let format = '';
+            
+            switch(period) {
+                case 'daily':
+                    format = 'd MMM yyyy';
+                    voids.forEach(item => {
+                        const date = new Date(item.tanggal);
+                        const day = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                        timeData[day] = (timeData[day] || 0) + 1;
+                    });
+                    break;
+                case 'weekly':
+                    voids.forEach(item => {
+                        const date = new Date(item.tanggal);
+                        const year = date.getFullYear();
+                        const weekNum = getWeekNumber(date);
+                        const weekLabel = `Minggu ${weekNum}, ${year}`;
+                        timeData[weekLabel] = (timeData[weekLabel] || 0) + 1;
+                    });
+                    break;
+                case 'monthly':
+                    voids.forEach(item => {
+                        const date = new Date(item.tanggal);
+                        const month = date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                        timeData[month] = (timeData[month] || 0) + 1;
+                    });
+                    break;
+            }
+            
+            // Sort chronologically
+            const sortedLabels = Object.keys(timeData).sort((a, b) => {
+                if (period === 'weekly') {
+                    // Extract week numbers for comparison
+                    const weekA = parseInt(a.match(/Minggu (\d+)/)[1]);
+                    const weekB = parseInt(b.match(/Minggu (\d+)/)[1]);
+                    const yearA = parseInt(a.match(/(\d{4})/)[1]);
+                    const yearB = parseInt(b.match(/(\d{4})/)[1]);
+                    
+                    if (yearA !== yearB) return yearA - yearB;
+                    return weekA - weekB;
+                } else {
+                    return new Date(a) - new Date(b);
+                }
+            });
+            
+            timeAnalysisChart.data.labels = sortedLabels;
+            timeAnalysisChart.data.datasets[0].data = sortedLabels.map(label => timeData[label]);
+            timeAnalysisChart.update();
+        }
+        
+        function getWeekNumber(d) {
+            // Copy date so don't modify original
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            // Set to nearest Thursday: current date + 4 - current day number
+            // Make Sunday's day number 7
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            // Get first day of year
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            // Calculate full weeks to nearest Thursday
+            const weekNo = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+            return weekNo;
+        }
+        
+        function updateHeatmap() {
+            const heatmapBody = document.getElementById('heatmapBody');
+            heatmapBody.innerHTML = '';
+            
+            // Initialize data structure for heatmap
+            const heatmapData = {};
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            
+            days.forEach(day => {
+                heatmapData[day] = {
+                    '00-03': 0,
+                    '03-06': 0,
+                    '06-09': 0,
+                    '09-12': 0,
+                    '12-15': 0,
+                    '15-18': 0,
+                    '18-21': 0,
+                    '21-24': 0
+                };
+            });
+            
+            // Fill data
+            voids.forEach(item => {
+                const date = new Date(item.tanggal);
+                const day = days[date.getDay()];
+                const hour = date.getHours();
+                let timeSlot;
+                
+                if (hour >= 0 && hour < 3) timeSlot = '00-03';
+                else if (hour >= 3 && hour < 6) timeSlot = '03-06';
+                else if (hour >= 6 && hour < 9) timeSlot = '06-09';
+                else if (hour >= 9 && hour < 12) timeSlot = '09-12';
+                else if (hour >= 12 && hour < 15) timeSlot = '12-15';
+                else if (hour >= 15 && hour < 18) timeSlot = '15-18';
+                else if (hour >= 18 && hour < 21) timeSlot = '18-21';
+                else timeSlot = '21-24';
+                
+                heatmapData[day][timeSlot]++;
+            });
+            
+            // Find max for color scaling
+            let maxCount = 0;
+            days.forEach(day => {
+                Object.values(heatmapData[day]).forEach(count => {
+                    if (count > maxCount) maxCount = count;
+                });
+            });
+            
+            // Create rows
+            days.forEach(day => {
+                const row = document.createElement('tr');
+                
+                // Add day label
+                const dayCell = document.createElement('th');
+                dayCell.className = 'border p-2 bg-gray-100';
+                dayCell.textContent = day;
+                row.appendChild(dayCell);
+                
+                // Add time slots
+                Object.entries(heatmapData[day]).forEach(([timeSlot, count]) => {
+                    const cell = document.createElement('td');
+                    cell.className = 'border p-2 text-center';
+                    
+                    // Color intensity based on count
+                    const intensity = maxCount > 0 ? count / maxCount : 0;
+                    const r = Math.round(255 - (intensity * 200));
+                    const g = Math.round(255 - (intensity * 100));
+                    const b = Math.round(255);
+                    
+                    cell.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                    cell.textContent = count;
+                    
+                    row.appendChild(cell);
+                });
+                
+                heatmapBody.appendChild(row);
+            });
+        }
+        
+        function compareData() {
+            const period1Start = document.getElementById('period1Start').value;
+            const period1End = document.getElementById('period1End').value;
+            const period2Start = document.getElementById('period2Start').value;
+            const period2End = document.getElementById('period2End').value;
+            
+            if (!period1Start || !period1End || !period2Start || !period2End) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Data Tidak Lengkap',
+                    text: 'Silakan pilih rentang tanggal untuk kedua periode.',
+                    confirmButtonColor: '#10b981'
+                });
+                return;
+            }
+            
+            // Filter data for both periods
+            const period1Data = voids.filter(item => {
+                const date = new Date(item.tanggal);
+                return date >= new Date(period1Start) && date <= new Date(period1End + ' 23:59:59');
+            });
+            
+            const period2Data = voids.filter(item => {
+                const date = new Date(item.tanggal);
+                return date >= new Date(period2Start) && date <= new Date(period2End + ' 23:59:59');
+            });
+            
+            // Calculate metrics
+            const period1Count = period1Data.length;
+            const period2Count = period2Data.length;
+            
+            const period1Total = period1Data.reduce((sum, item) => sum + item.total, 0);
+            const period2Total = period2Data.reduce((sum, item) => sum + item.total, 0);
+            
+            const period1Avg = period1Count > 0 ? period1Total / period1Count : 0;
+            const period2Avg = period2Count > 0 ? period2Total / period2Count : 0;
+            
+            // Update chart
+            comparisonChart.data.datasets[0].label = `${period1Start} - ${period1End}`;
+            comparisonChart.data.datasets[1].label = `${period2Start} - ${period2End}`;
+            
+            comparisonChart.data.datasets[0].data = [period1Count, period1Total, period1Avg];
+            comparisonChart.data.datasets[1].data = [period2Count, period2Total, period2Avg];
+            
+            comparisonChart.update();
+        }
+        
+// Export chart
+let selectedChartType = 'monthly';
+
+function selectChart(type) {
+    selectedChartType = type;
+    // Highlight selected chart option
+    document.querySelectorAll('#exportChartModal .border').forEach(el => {
+        el.classList.remove('bg-emerald-50', 'border-emerald-500');
+        el.classList.add('hover:bg-gray-50');
+    });
+
+    const selectedEl = document.querySelector(`#exportChartModal [onclick="selectChart('${type}')"]`);
+    selectedEl.classList.add('bg-emerald-50', 'border-emerald-500');
+    selectedEl.classList.remove('hover:bg-gray-50');
+}
+
+// Fungsi untuk memastikan canvas grafik selesai dirender
+function ensureCanvasRendered(chartInstance, callback) {
+    if (!chartInstance || !chartInstance.canvas) {
+        throw new Error('Instance grafik tidak valid.');
+    }
+
+    // Pastikan grafik diperbarui
+    chartInstance.update();
+    chartInstance.resize(); // Pastikan ukuran canvas sesuai
+
+    // Tambahkan delay untuk memastikan rendering selesai
+    setTimeout(() => {
+        const canvas = chartInstance.canvas;
+        if (!canvas || canvas.width === 0 || canvas.height === 0) {
+            throw new Error('Canvas grafik tidak memiliki dimensi yang valid.');
+        }
+        callback();
+    }, 200); // Delay lebih lama untuk memastikan rendering
+}
+
+// Fungsi untuk mengonversi canvas ke Base64 dengan validasi
+function getCanvasBase64(chartInstance, format = 'image/png') {
+    const canvas = chartInstance.canvas;
+    if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas grafik tidak valid atau kosong.');
+    }
+
+    try {
+        const base64 = canvas.toDataURL(format);
+        if (!base64 || base64.length < 100) {
+            throw new Error('Data Base64 tidak valid atau terlalu pendek.');
+        }
+        return base64;
+    } catch (error) {
+        throw new Error('Gagal mengonversi canvas ke Base64: ' + error.message);
+    }
+}
+
+// Fungsi untuk memastikan tab yang berisi grafik aktif
+function ensureTabActive(chartType) {
+    const tabMap = {
+        monthly: 'tabStats',
+        cashier: 'tabStats',
+        reason: 'tabStats',
+        category: 'tabStats'
+    };
+
+    const targetTab = tabMap[chartType];
+    if (!targetTab) return;
+
+    const tabButton = document.getElementById(targetTab);
+    if (!tabButton.classList.contains('active')) {
+        tabButton.click(); // Aktifkan tab untuk memicu rendering
+        // Tunggu sebentar untuk memastikan tab dirender
+        return new Promise(resolve => setTimeout(resolve, 300));
+    }
+    return Promise.resolve();
+}
+
+function downloadChart() {
+    let chartInstance;
+    let filename;
+
+    // Pilih instance grafik berdasarkan jenis yang dipilih
+    switch (selectedChartType) {
+        case 'monthly':
+            chartInstance = monthlyVoidChart;
+            filename = 'void_bulanan';
+            break;
+        case 'cashier':
+            chartInstance = cashierChart;
+            filename = 'performa_kasir';
+            break;
+        case 'reason':
+            chartInstance = reasonChart;
+            filename = 'alasan_void';
+            break;
+        case 'category':
+            chartInstance = categoryChart;
+            filename = 'kategori_void';
+            break;
+        default:
+            Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan',
+                text: 'Jenis grafik tidak valid.',
+                confirmButtonColor: '#10b981'
+            });
+            return;
+    }
+
+    // Validasi jika grafik tidak tersedia
+    if (!chartInstance || !chartInstance.canvas) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan',
+            text: 'Grafik tidak tersedia untuk diekspor.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+
+    // Validasi jika data kosong
+    if (!voids || voids.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Ada Data',
+            text: 'Tidak ada data void untuk menghasilkan grafik.',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+
+    // Tampilkan animasi loading
+    document.body.classList.add('loading');
+    document.getElementById('download-animation').style.display = 'block';
+
+    // Pastikan tab aktif untuk memicu rendering
+    ensureTabActive(selectedChartType).then(() => {
+        // Pastikan canvas selesai dirender
+        try {
+            ensureCanvasRendered(chartInstance, () => {
+                const format = document.getElementById('exportFormat').value;
+
+                try {
+                    if (format === 'pdf') {
+                        // Ekspor sebagai PDF menggunakan jsPDF
+                        const { jsPDF } = window.jspdf;
+                        const canvas = chartInstance.canvas;
+                        const imgData = getCanvasBase64(chartInstance, 'image/png');
+
+                        // Hitung rasio aspek untuk menyesuaikan ukuran
+                        const imgWidth = canvas.width;
+                        const imgHeight = canvas.height;
+                        const pdfWidth = 595; // A4 landscape width in pixels at 72 DPI
+                        const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
+
+                        const doc = new jsPDF({
+                            orientation: 'landscape',
+                            unit: 'px',
+                            format: [pdfWidth, pdfHeight]
+                        });
+
+                        // Tambahkan gambar ke PDF
+                        doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                        doc.save(`${filename}.pdf`);
+                    } else {
+                        // Ekspor sebagai PNG atau JPG
+                        const mimeType = format === 'jpg' ? 'image/jpeg' : 'image/png';
+                        const chartURL = getCanvasBase64(chartInstance, mimeType);
+
+                        // Buat link untuk download
+                        const link = document.createElement('a');
+                        link.href = chartURL;
+                        link.download = `${filename}.${format}`;
+                        link.click();
+                    }
+
+                    // Tutup modal dan tampilkan notifikasi sukses
+                    closeExportModal();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: `Grafik telah berhasil diunduh sebagai ${format.toUpperCase()}.`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } catch (error) {
+                    console.error('Error during chart export:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Kesalahan',
+                        text: 'Terjadi kesalahan saat mengunduh grafik: ' + error.message,
+                        confirmButtonColor: '#10b981'
+                    });
+                } finally {
+                    // Sembunyikan animasi loading
+                    document.body.classList.remove('loading');
+                    document.getElementById('download-animation').style.display = 'none';
+                }
+            });
+        } catch (error) {
+            console.error('Error ensuring canvas rendered:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan',
+                text: 'Gagal mempersiapkan grafik untuk ekspor: ' + error.message,
+                confirmButtonColor: '#10b981'
+            });
+            document.body.classList.remove('loading');
+            document.getElementById('download-animation').style.display = 'none';
+        }
+    });
+}
+        // Toggle dark/light theme
+        let darkMode = false;
+        function toggleTheme() {
+            darkMode = !darkMode;
+            const body = document.body;
+            const themeBtn = document.getElementById('toggleTheme');
+            
+            if (darkMode) {
+                body.classList.add('dark');
+                body.style.background = 'linear-gradient(to bottom, #1f2937, #111827)';
+                body.style.color = '#f3f4f6';
+                themeBtn.innerHTML = '<i class="fas fa-sun text-xl"></i>';
+                
+                // Update other elements for dark mode
+                document.querySelectorAll('.bg-white').forEach(el => {
+                    el.classList.remove('bg-white');
+                    el.classList.add('bg-gray-800');
+                });
+                
+                document.querySelectorAll('.text-gray-900').forEach(el => {
+                    el.classList.remove('text-gray-900');
+                    el.classList.add('text-gray-100');
+                });
+                
+                document.querySelectorAll('.text-gray-700').forEach(el => {
+                    el.classList.remove('text-gray-700');
+                    el.classList.add('text-gray-300');
+                });
+                
+                document.querySelectorAll('.text-gray-600').forEach(el => {
+                    el.classList.remove('text-gray-600');
+                    el.classList.add('text-gray-400');
+                });
+                
+                document.querySelectorAll('.border').forEach(el => {
+                    el.classList.add('border-gray-700');
+                });
+                
+                // Update table styles
+                document.querySelector('.table-header').style.background = 'linear-gradient(to right, #065f46, #047857)';
+            } else {
+                body.classList.remove('dark');
+                body.style.background = 'linear-gradient(to bottom, #f3f4f6, #e5e7eb)';
+                body.style.color = '';
+                themeBtn.innerHTML = '<i class="fas fa-moon text-xl"></i>';
+                
+                // Restore light mode
+                document.querySelectorAll('.bg-gray-800').forEach(el => {
+                    el.classList.remove('bg-gray-800');
+                    el.classList.add('bg-white');
+                });
+                
+                document.querySelectorAll('.text-gray-100').forEach(el => {
+                    el.classList.remove('text-gray-100');
+                    el.classList.add('text-gray-900');
+                });
+                
+                document.querySelectorAll('.text-gray-300').forEach(el => {
+                    el.classList.remove('text-gray-300');
+                    el.classList.add('text-gray-700');
+                });
+                
+                document.querySelectorAll('.text-gray-400').forEach(el => {
+                    el.classList.remove('text-gray-400');
+                    el.classList.add('text-gray-600');
+                });
+                
+                document.querySelectorAll('.border-gray-700').forEach(el => {
+                    el.classList.remove('border-gray-700');
+                });
+                
+                // Restore table styles
+                document.querySelector('.table-header').style.background = 'linear-gradient(to right, #10b981, #059669)';
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate sample data if needed
+            generateSampleData();
+            
+            // Initialize data
+            loadVoidData();
+            
+            // Initialize charts
+            initCharts();
+            updateCharts();
+            
+            // Tab navigation
+            document.getElementById('tabData').addEventListener('click', function() {
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.getElementById('dataContent').classList.remove('hidden');
+                document.getElementById('statsContent').classList.add('hidden');
+                document.getElementById('visualizationContent').classList.add('hidden');
+            });
+            
+            document.getElementById('tabStats').addEventListener('click', function() {
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.getElementById('dataContent').classList.add('hidden');
+                document.getElementById('statsContent').classList.remove('hidden');
+                document.getElementById('visualizationContent').classList.add('hidden');
+                
+                // Resize charts to fit container
+                setTimeout(() => {
+                    monthlyVoidChart.resize();
+                    cashierChart.resize();
+                    reasonChart.resize();
+                    categoryChart.resize();
+                }, 10);
+            });
+            
+            document.getElementById('tabVisualization').addEventListener('click', function() {
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.getElementById('dataContent').classList.add('hidden');
+                document.getElementById('statsContent').classList.add('hidden');
+                document.getElementById('visualizationContent').classList.remove('hidden');
+                
+                // Resize charts
+                setTimeout(() => {
+                    timeAnalysisChart.resize();
+                    comparisonChart.resize();
+                }, 10);
+            });
+            
+            // Time period buttons
+            document.querySelectorAll('.time-period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.time-period-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-emerald-100', 'text-emerald-700');
+                        b.classList.add('bg-gray-100', 'text-gray-700');
+                    });
+                    
+                    this.classList.remove('bg-gray-100', 'text-gray-700');
+                    this.classList.add('active', 'bg-emerald-100', 'text-emerald-700');
+                    
+                    updateTimeAnalysisChart(this.dataset.period);
+                });
+            });
+            
+            // Form submission for new/edit void
+            document.getElementById('voidForm').addEventListener('submit', saveVoidData);
+            
+            // Add void button
+            document.getElementById('addVoidBtn').addEventListener('click', showAddVoidModal);
+            
+            // Compare button
+            document.getElementById('compareBtn').addEventListener('click', compareData);
+            
+            // Export chart button
+            document.getElementById('exportChartBtn').addEventListener('click', function() {
+                document.getElementById('exportChartModal').classList.remove('hidden');
+                selectChart('monthly');
+            });
+            
+            // Download chart button
+            document.getElementById('downloadChartBtn').addEventListener('click', downloadChart);
+            
+            // Theme toggle
+            document.getElementById('toggleTheme').addEventListener('click', toggleTheme);
+            
+            // Close modal on outside click
+            document.getElementById('voidModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            
+            document.getElementById('addEditVoidModal').addEventListener('click', function(e) {
+                if (e.target === this) closeAddEditModal();
+            });
+            
+            document.getElementById('exportChartModal').addEventListener('click', function(e) {
+                if (e.target === this) closeExportModal();
+            });
+            
+            // Filter change events
+            document.getElementById('searchInput').addEventListener('input', () => { currentPage = 1; loadVoidData(); });
+            document.getElementById('startDateFilter').addEventListener('change', () => { currentPage = 1; loadVoidData(); });
+            document.getElementById('endDateFilter').addEventListener('change', () => { currentPage = 1; loadVoidData(); });
+            document.getElementById('kasirFilter').addEventListener('change', () => { currentPage = 1; loadVoidData(); });
+            document.getElementById('categoryFilter').addEventListener('change', () => { currentPage = 1; loadVoidData(); });
+        });
+    </script>
+</body>
+</html>
