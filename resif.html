@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <title>Penerimaan Barang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #34c759;
+            --accent-color: #ea4335;
+            --background-color: #ffffff;
+            --text-color: #202124;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            --input-border: #dadce0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), #ffffff);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 32px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .btn-kembali {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .btn-kembali:hover {
+            background: rgba(26, 115, 232, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn button {
+            background: linear-gradient(135deg, var(--primary-color), #174ea6);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn button:active {
+            transform: scale(0.98);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        td {
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(26, 115, 232, 0.2);
+            outline: none;
+        }
+
+        input[readonly] {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        button.btn-danger {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button.btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        #progressContainer {
+            background: #e8eaed;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        #progressBar {
+            background: var(--secondary-color);
+            border-radius: 8px;
+            transition: width 0.3s ease;
+        }
+
+        .grand-total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 16px;
+            color: var(--text-color);
+        }
+
+        .swal2-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        .swal2-table th, .swal2-table td {
+            padding: 12px;
+            border: 1px solid #e8eaed;
+            text-align: left;
+        }
+
+        .swal2-table th {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .receipt-history-container {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .summary-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            flex: 1;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-label {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .filters-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .filter-select {
+            padding: 8px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .history-table-container, .stock-table-container {
+            margin-bottom: 24px;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 24px;
+        }
+
+        .stock-level {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .stock-level-low {
+            background: #fce8e6;
+            color: var(--accent-color);
+        }
+
+        .stock-level-medium {
+            background: #fef7e6;
+            color: #f4b400;
+        }
+
+        .stock-level-high {
+            background: #e6f4ea;
+            color: var(--secondary-color);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .btn {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn button {
+                width: 100%;
+            }
+
+            th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            .summary-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="btn-kembali" onclick="window.location.href='barang.html'">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        <h1>Penerimaan Barang</h1>
+        
+        <div class="btn">
+            <button onclick="tambahBaris()"><i class="fas fa-plus"></i> Tambah Baris</button>
+            <button onclick="simpanPenerimaan()"><i class="fas fa-save"></i> Simpan Penerimaan</button>
+            <button onclick="uploadCSV()"><i class="fas fa-upload"></i> Upload Data</button>
+            <button onclick="hitungTotalKeseluruhan()"><i class="fas fa-calculator"></i> Hitung Total</button>
+        </div>
+
+        <div id="progressContainer" style="display: none;">
+            <div id="progressBar">0%</div>
+        </div>
+
+        <table id="tabelPenerimaan">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Kode Barang</th>
+                    <th>Nama Barang</th>
+                    <th>Kategori</th>
+                    <th>Kode Toko</th>
+                    <th>Jumlah Diterima</th>
+                    <th>Harga Beli</th>
+                    <th>Harga Jual</th>
+                    <th>Total</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="bodyPenerimaan">
+                <!-- Baris akan ditambahkan secara dinamis -->
+            </tbody>
+        </table>
+
+        <div class="grand-total">
+            <strong>Grand Total: <span id="grandTotal">Rp 0</span></strong>
+        </div>
+
+        <div class="btn">
+            <button onclick="tampilkanRiwayatPenerimaan()"><i class="fas fa-history"></i> Lihat Riwayat Penerimaan</button>
+            <button onclick="tampilkanStok()"><i class="fas fa-boxes"></i> Lihat Stok Barang</button>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script>
+        function tambahBaris() {
+    Swal.fire({
+        title: 'Tambah Baris Penerimaan',
+        html: `
+            <div style="text-align: left; padding: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #202124;">Jumlah Baris</label>
+                <input id="jumlahBaris" type="number" min="1" step="1" class="swal2-input" 
+                    style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #dadce0; 
+                    font-size: 14px; transition: border-color 0.3s;" 
+                    placeholder="Masukkan jumlah baris">
+                <div style="margin-top: 16px; font-size: 12px; color: #5f6368;">
+                    <i class="fas fa-info-circle" style="margin-right: 4px;"></i>
+                    Masukkan jumlah baris yang ingin ditambahkan (minimal 1 baris)
+                </div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-plus"></i> Tambah',
+        cancelButtonText: '<i class="fas fa-times"></i> Batal',
+        buttonsStyling: false,
+        customClass: {
+            confirmButton: 'swal2-confirm btn btn-primary',
+            cancelButton: 'swal2-cancel btn btn-danger',
+            popup: 'swal2-popup custom-popup'
+        },
+        didRender: () => {
+            // Custom styles for buttons
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .swal2-confirm.btn-primary {
+                    background: linear-gradient(135deg, #1a73e8, #174ea6);
+                    color: white;
+                    padding: 10px 24px;
+                    border-radius: 50px;
+                    border: none;
+                    font-size: 15px;
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                    margin-right: 8px;
+                }
+                .swal2-confirm.btn-primary:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 20px rgba(26, 115, 232, 0.3);
+                }
+                .swal2-cancel.btn-danger {
+                    background: #ea4335;
+                    color: white;
+                    padding: 10px 24px;
+                    border-radius: 50px;
+                    border: none;
+                    font-size: 15px;
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                }
+                .swal2-cancel.btn-danger:hover {
+                    background: #d32f2f;
+                    transform: translateY(-2px);
+                }
+                .swal2-popup.custom-popup {
+                    border-radius: 12px;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+                    padding: 24px;
+                }
+                .swal2-title {
+                    font-size: 24px;
+                    font-weight: 600;
+                    color: #202124;
+                    margin-bottom: 16px;
+                }
+                input:focus {
+                    border-color: #1a73e8 !important;
+                    box-shadow: 0 0 8px rgba(26, 115, 232, 0.2) !important;
+                    outline: none;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Focus on input
+            document.getElementById('jumlahBaris').focus();
+        },
+        inputValidator: (value) => {
+            if (!value || value < 1) {
+                return 'Silakan masukkan jumlah baris yang valid';
+            }
+        },
+        preConfirm: () => {
+            const jumlahBaris = parseInt(document.getElementById('jumlahBaris').value, 10);
+            if (isNaN(jumlahBaris) || jumlahBaris < 1) {
+                Swal.showValidationMessage('Jumlah baris harus valid');
+                return false;
+            }
+            return jumlahBaris;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const jumlahBaris = result.value;
+            const tbody = document.getElementById('bodyPenerimaan');
+
+            for (let i = 0; i < jumlahBaris; i++) {
+                const newRow = tbody.insertRow();
+
+                // Kolom Tanggal
+                const cellTanggal = newRow.insertCell(0);
+                const tanggalInput = document.createElement('input');
+                tanggalInput.type = 'date';
+                tanggalInput.value = new Date().toISOString().split('T')[0];
+                cellTanggal.appendChild(tanggalInput);
+
+                // Kolom Kode Barang dengan Autocomplete
+                const cellKode = newRow.insertCell(1);
+                const kodeInput = document.createElement('input');
+                kodeInput.type = 'text';
+                kodeInput.placeholder = 'Kode Barang';
+                kodeInput.list = 'kodeBarangList'; // Hubungkan dengan datalist untuk autocomplete
+                kodeInput.addEventListener('change', function() {
+                    cariAtauTambahBarang(this);
+                });
+                cellKode.appendChild(kodeInput);
+
+                // Kolom Nama Barang
+                const cellNama = newRow.insertCell(2);
+                const namaInput = document.createElement('input');
+                namaInput.type = 'text';
+                namaInput.placeholder = 'Nama Barang';
+                cellNama.appendChild(namaInput);
+
+                // Kolom Kategori
+                const cellKategori = newRow.insertCell(3);
+                const kategoriInput = document.createElement('select');
+                const kategoriOptions = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7'];
+                kategoriOptions.forEach(kategori => {
+                    const option = document.createElement('option');
+                    option.value = kategori;
+                    option.text = kategori;
+                    kategoriInput.appendChild(option);
+                });
+                cellKategori.appendChild(kategoriInput);
+
+                // Kolom Kode Toko
+                const cellKodeToko = newRow.insertCell(4);
+                const kodeTokoInput = document.createElement('input');
+                kodeTokoInput.type = 'text';
+                kodeTokoInput.placeholder = 'Kode Toko';
+                cellKodeToko.appendChild(kodeTokoInput);
+
+                // Kolom Jumlah Diterima
+                const cellJumlah = newRow.insertCell(5);
+                const jumlahInput = document.createElement('input');
+                jumlahInput.type = 'number';
+                jumlahInput.min = '1';
+                jumlahInput.placeholder = 'Jumlah';
+                jumlahInput.addEventListener('input', hitungTotal);
+                cellJumlah.appendChild(jumlahInput);
+
+                // Kolom Harga Beli
+                const cellHargaBeli = newRow.insertCell(6);
+                const hargaBeliInput = document.createElement('input');
+                hargaBeliInput.type = 'number';
+                hargaBeliInput.min = '0';
+                hargaBeliInput.placeholder = 'Harga Beli';
+                hargaBeliInput.addEventListener('input', hitungTotal);
+                cellHargaBeli.appendChild(hargaBeliInput);
+
+                // Kolom Harga Jual
+                const cellHargaJual = newRow.insertCell(7);
+                const hargaJualInput = document.createElement('input');
+                hargaJualInput.type = 'number';
+                hargaJualInput.min = '0';
+                hargaJualInput.placeholder = 'Harga Jual';
+                hargaJualInput.addEventListener('input', hitungTotal);
+                cellHargaJual.appendChild(hargaJualInput);
+
+                // Kolom Total
+                const cellTotal = newRow.insertCell(8);
+                const totalInput = document.createElement('input');
+                totalInput.type = 'number';
+                totalInput.readOnly = true;
+                totalInput.placeholder = 'Total';
+                cellTotal.appendChild(totalInput);
+
+                // Kolom Aksi (Hapus)
+                const cellAksi = newRow.insertCell(9);
+                const hapusBtn = document.createElement('button');
+                hapusBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                hapusBtn.classList.add('btn-danger');
+                hapusBtn.onclick = function() {
+                    tbody.removeChild(newRow);
+                    hitungGrandTotal();
+                };
+                cellAksi.appendChild(hapusBtn);
+            }
+
+            // Tambahkan datalist untuk autocomplete kode barang
+            let datalist = document.getElementById('kodeBarangList');
+            if (!datalist) {
+                datalist = document.createElement('datalist');
+                datalist.id = 'kodeBarangList';
+                document.body.appendChild(datalist);
+            }
+            const barang = JSON.parse(localStorage.getItem('barang')) || [];
+            datalist.innerHTML = barang.map(item => `<option value="${item.kode}">${item.nama}</option>`).join('');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: `${jumlahBaris} baris telah ditambahkan`,
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+    });
+}
+
+        function cariAtauTambahBarang(kodeInput) {
+    const barang = JSON.parse(localStorage.getItem('barang')) || [];
+    const barangDitemukan = barang.find(item => item.kode === kodeInput.value);
+
+    const row = kodeInput.closest('tr');
+    const namaInput = row.cells[2].querySelector('input');
+    const kategoriInput = row.cells[3].querySelector('select');
+    const kodeTokoInput = row.cells[4].querySelector('input');
+    const jumlahInput = row.cells[5].querySelector('input');
+    const hargaBeliInput = row.cells[6].querySelector('input');
+    const hargaJualInput = row.cells[7].querySelector('input');
+
+    if (barangDitemukan) {
+        // Isi otomatis data barang yang ditemukan
+        namaInput.value = barangDitemukan.nama;
+        kategoriInput.value = barangDitemukan.kategori;
+        kodeTokoInput.value = barangDitemukan.kodeToko;
+        hargaBeliInput.value = barangDitemukan.hargaBeli;
+        hargaJualInput.value = barangDitemukan.hargaJual;
+        jumlahInput.value = jumlahInput.value || 1; // Default jumlah 1 jika kosong
+        hitungTotal({ target: hargaJualInput });
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Barang Ditemukan',
+            text: `Data untuk ${barangDitemukan.nama} telah diisi otomatis.`,
+            timer: 1500,
+            showConfirmButton: false,
+            customClass: {
+                popup: 'swal2-popup custom-popup'
+            }
+        });
+    } else {
+        // Dialog konfirmasi untuk menambahkan barang baru
+        Swal.fire({
+            title: 'Barang Tidak Ditemukan',
+            text: `Kode barang ${kodeInput.value} tidak ada di database. Tambahkan barang baru?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-plus"></i> Tambah Barang',
+            cancelButtonText: '<i class="fas fa-times"></i> Batal',
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'swal2-confirm btn btn-primary',
+                cancelButton: 'swal2-cancel btn btn-danger',
+                popup: 'swal2-popup custom-popup'
+            },
+            didRender: () => {
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    .swal2-confirm.btn-primary {
+                        background: linear-gradient(135deg, var(--primary-color), #174ea6);
+                        color: white;
+                        padding: 12px 24px;
+                        border-radius: 50px;
+                        border: none;
+                        font-size: 15px;
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                        margin-right: 8px;
+                    }
+                    .swal2-confirm.btn-primary:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 20px rgba(26, 115, 232, 0.3);
+                    }
+                    .swal2-cancel.btn-danger {
+                        background: var(--accent-color);
+                        color: white！
+
+                        padding: 12px 24px;
+                        border-radius: 50px;
+                        border: none;
+                        font-size: 15px;
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                    }
+                    .swal2-cancel.btn-danger:hover {
+                        background: #d32f2f;
+                        transform: translateY(-2px);
+                    }
+                    .swal2-popup.custom-popup {
+                        border-radius: var(--border-radius);
+                        box-shadow: var(--box-shadow);
+                        padding: 32px;
+                        max-width: 600px;
+                    }
+                    .swal2-title {
+                        font-size: 24px;
+                        font-weight: 600;
+                        color: var(--text-color);
+                        margin-bottom: 16px;
+                    }
+                    .form-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 16px;
+                    }
+                    .input-group {
+                        margin-bottom: 16px;
+                    }
+                    .input-group.full-width {
+                        grid-column: 1 / -1;
+                    }
+                    .input-label {
+                        display: flex;
+                        align-items: center;
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: var(--text-color);
+                        margin-bottom: 8px;
+                    }
+                    .input-label .fas {
+                        margin-right: 8px;
+                        color: #5f6368;
+                    }
+                    .input-wrapper {
+                        position: relative;
+                    }
+                    .swal2-input, .swal2-select {
+                        width: 100%;
+                        padding: 10px;
+                        border: 2px solid var(--input-border) !important;
+                        border-radius: 8px !important;
+                        font-size: 14px !important;
+                        transition: border-color 0.3s !important;
+                    }
+                    .swal2-input:focus, .swal2-select:focus {
+                        border-color: var(--primary-color) !important;
+                        box-shadow: 0 0 8px rgba(26, 115, 232, 0.2) !important;
+                        outline: none;
+                    }
+                    .swal2-input[readonly] {
+                        background: #f5f5f5;
+                        cursor: not-allowed;
+                    }
+                    .error-message {
+                        color: var(--accent-color);
+                        font-size: 12px;
+                        margin-top: 4px;
+                        display: none;
+                    }
+                    .input-error .swal2-input, .input-error .swal2-select {
+                        border-color: var(--accent-color) !important;
+                    }
+                    .input-valid .swal2-input, .input-valid .swal2-select {
+                        border-color: var(--secondary-color) !important;
+                    }
+                    .tooltip {
+                        position: relative;
+                        margin-left: 8px;
+                        cursor: help;
+                    }
+                    .tooltip .tooltip-text {
+                        visibility: hidden;
+                        width: 160px;
+                        background: #202 Missouri;
+                        color: white;
+                        padding: 8px;
+                        border-radius: 4px;
+                        position: absolute;
+                        z-index: 1000;
+                        font-size: 12px;
+                        text-align: left;
+                        bottom: 100%;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        opacity: 0;
+                        transition: opacity 0.2s;
+                    }
+                    .tooltip:hover .tooltip-text {
+                        visibility: visible;
+                        opacity: 1;
+                    }
+                    @media (max-width: 480px) {
+                        .form-grid {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const plu = kodeInput.value.slice(-4);
+                Swal.fire({
+                    title: 'Tambah Barang Baru',
+                    html: `
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label class="input-label"><i class="fas fa-barcode"></i> Kode Barang</label>
+                                <div class="input-wrapper">
+                                    <input id="kodeBarang" class="swal2-input" value="${kodeInput.value}" readonly>
+                                </div>
+                                <div class="error-message" id="kodeBarang-error"></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label"><i class="fas fa-box"></i> Nama Barang
+                                    <span class="tooltip"><i class="fas fa-info-circle"></i>
+                                        <span class="tooltip-text">Masukkan nama barang yang jelas dan deskriptif</span>
+                                    </span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <input id="namaBarang" class="swal2-input" placeholder="Masukkan nama barang">
+                                </div>
+                                <div class="error-message" id="namaBarang-error"></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label"><i class="fas fa-list"></i> Kategori</label>
+                                <select id="kategoriBarang" class="swal2-select">
+                                    ${['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7']
+                                        .map(k => `<option value="${k}">${k}</option>`).join('')}
+                                </select>
+                                <div class="error-message" id="kategoriBarang-error"></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label"><i class="fas fa-store"></i> Kode Toko
+                                    <span class="tooltip"><i class="fas fa-info-circle"></i>
+                                        <span class="tooltip-text">Kode alfanumerik untuk toko</span>
+                                    </span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <input id="kodeToko" class="swal2-input" placeholder="Masukkan kode toko">
+                                </div>
+                                <div class="error-message" id="kodeToko-error"></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label"><i class="fas fa-cubes"></i> Jumlah
+                                    <span class="tooltip"><i class="fas fa-info-circle"></i>
+                                        <span class="tooltip-text">Jumlah barang yang diterima</span>
+                                    </span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <input id="jumlah" type="number" class="swal2-input" placeholder="Masukkan jumlah" min="1">
+                                </div>
+                                <div class="error-message" id="jumlah-error"></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label"><i class="fas fa-money-bill"></i> Harga Beli (Rp)</label>
+                                <div class="input-wrapper">
+                                    <input id="hargaBeli" type="number" class="swal2-input" placeholder="Masukkan harga beli" min="0">
+                                </div>
+                                <div class="error-message" id="hargaBeli-error"></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label"><i class="fas fa-tags"></i> Harga Jual (Rp)</label>
+                                <div class="input-wrapper">
+                                    <input id="hargaJual" type="number" class="swal2-input" placeholder="Masukkan harga jual" min="0">
+                                </div>
+                                <div class="error-message" id="hargaJual-error"></div>
+                            </div>
+                            <div class="input-group full-width">
+                                <label class="input-label"><i class="fas fa-key"></i> PLU (Auto-generated)</label>
+                                <div class="input-wrapper">
+                                    <input id="plu" class="swal2-input" value="${plu}" readonly>
+                                </div>
+                                <div class="error-message" id="plu-error"></div>
+                            </div>
+                        </div>
+                    `,
+                    focusConfirm: false,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-save"></i> Simpan',
+                    cancelButtonText: '<i class="fas fa-times"></i> Batal',
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'swal2-confirm btn btn-primary',
+                        cancelButton: 'swal2-cancel btn btn-danger',
+                        popup: 'swal2-popup custom-popup'
+                    },
+                    preConfirm: () => {
+                        const kodeBarang = document.getElementById('kodeBarang').value;
+                        const namaBarang = document.getElementById('namaBarang').value.trim();
+                        const kategoriBarang = document.getElementById('kategoriBarang').value;
+                        const kodeToko = document.getElementById('kodeToko').value.trim();
+                        const jumlah = parseInt(document.getElementById('jumlah').value);
+                        const hargaBeli = parseFloat(document.getElementById('hargaBeli').value);
+                        const hargaJual = parseFloat(document.getElementById('hargaJual').value);
+                        const plu = document.getElementById('plu').value;
+
+                        // Validasi input
+                        const errors = [];
+                        if (!namaBarang) {
+                            errors.push('Nama barang harus diisi');
+                            document.getElementById('namaBarang-error').textContent = 'Nama barang harus diisi';
+                            document.getElementById('namaBarang-error').style.display = 'block';
+                            document.getElementById('namaBarang').parentElement.classList.add('input-error');
+                        } else {
+                            document.getElementById('namaBarang-error').style.display = 'none';
+                            document.getElementById('namaBarang').parentElement.classList.remove('input-error');
+                            document.getElementById('namaBarang').parentElement.classList.add('input-valid');
+                        }
+                        if (!kodeToko || !/^[a-zA-Z0-9]+$/.test(kodeToko)) {
+                            errors.push('Kode toko harus alfanumerik');
+                            document.getElementById('kodeToko-error').textContent = 'Kode toko harus alfanumerik';
+                            document.getElementById('kodeToko-error').style.display = 'block';
+                            document.getElementById('kodeToko').parentElement.classList.add('input-error');
+                        } else {
+                            document.getElementById('kodeToko-error').style.display = 'none';
+                            document.getElementById('kodeToko').parentElement.classList.remove('input-error');
+                            document.getElementById('kodeToko').parentElement.classList.add('input-valid');
+                        }
+                        if (isNaN(jumlah) || jumlah < 1) {
+                            errors.push('Jumlah harus lebih dari 0');
+                            document.getElementById('jumlah-error').textContent = 'Jumlah harus lebih dari 0';
+                            document.getElementById('jumlah-error').style.display = 'block';
+                            document.getElementById('jumlah').parentElement.classList.add('input-error');
+                        } else {
+                            document.getElementById('jumlah-error').style.display = 'none';
+                            document.getElementById('jumlah').parentElement.classList.remove('input-error');
+                            document.getElementById('jumlah').parentElement.classList.add('input-valid');
+                        }
+                        if (isNaN(hargaBeli) || hargaBeli < 0) {
+                            errors.push('Harga beli harus valid');
+                            document.getElementById('hargaBeli-error').textContent = 'Harga beli harus valid';
+                            document.getElementById('hargaBeli-error').style.display = 'block';
+                            document.getElementById('hargaBeli').parentElement.classList.add('input-error');
+                        } else {
+                            document.getElementById('hargaBeli-error').style.display = 'none';
+                            document.getElementById('hargaBeli').parentElement.classList.remove('input-error');
+                            document.getElementById('hargaBeli').parentElement.classList.add('input-valid');
+                        }
+                        if (isNaN(hargaJual) || hargaJual < 0) {
+                            errors.push('Harga jual harus valid');
+                            document.getElementById('hargaJual-error').textContent = 'Harga jual harus valid';
+                            document.getElementById('hargaJual-error').style.display = 'block';
+                            document.getElementById('hargaJual').parentElement.classList.add('input-error');
+                        } else {
+                            document.getElementById('hargaJual-error').style.display = 'none';
+                            document.getElementById('hargaJual').parentElement.classList.remove('input-error');
+                            document.getElementById('hargaJual').parentElement.classList.add('input-valid');
+                        }
+                        if (hargaJual < hargaBeli) {
+                            errors.push('Harga jual tidak boleh lebih kecil dari harga beli');
+                            document.getElementById('hargaJual-error').textContent = 'Harga jual tidak boleh lebih kecil dari harga beli';
+                            document.getElementById('hargaJual-error').style.display = 'block';
+                            document.getElementById('hargaJual').parentElement.classList.add('input-error');
+                        }
+
+                        if (errors.length > 0) {
+                            Swal.showValidationMessage('Periksa kembali input Anda');
+                            return false;
+                        }
+
+                        return { kodeBarang, namaBarang, kategoriBarang, kodeToko, jumlah, hargaBeli, hargaJual, plu };
+                    },
+                    didRender: () => {
+                        // Fokus pada input pertama
+                        document.getElementById('namaBarang').focus();
+
+                        // Validasi real-time
+                        const inputs = ['namaBarang', 'kodeToko', 'jumlah', 'hargaBeli', 'hargaJual'];
+                        inputs.forEach(id => {
+                            document.getElementById(id).addEventListener('input', () => {
+                                const value = id === 'namaBarang' || id === 'kodeToko' 
+                                    ? document.getElementById(id).value.trim()
+                                    : parseFloat(document.getElementById(id).value);
+                                const errorElement = document.getElementById(`${id}-error`);
+                                const inputElement = document.getElementById(id);
+
+                                if (id === 'namaBarang' && !value) {
+                                    errorElement.textContent = 'Nama barang harus diisi';
+                                    errorElement.style.display = 'block';
+                                    inputElement.parentElement.classList.add('input-error');
+                                    inputElement.parentElement.classList.remove('input-valid');
+                                } else if (id === 'kodeToko' && (!value || !/^[a-zA-Z0-9]+$/.test(value))) {
+                                    errorElement.textContent = 'Kode toko harus alfanumerik';
+                                    errorElement.style.display = 'block';
+                                    inputElement.parentElement.classList.add('input-error');
+                                    inputElement.parentElement.classList.remove('input-valid');
+                                } else if (id === 'jumlah' && (isNaN(value) || value < 1)) {
+                                    errorElement.textContent = 'Jumlah harus lebih dari 0';
+                                    errorElement.style.display = 'block';
+                                    inputElement.parentElement.classList.add('input-error');
+                                    inputElement.parentElement.classList.remove('input-valid');
+                                } else if (id === 'hargaBeli' && (isNaN(value) || value < 0)) {
+                                    errorElement.textContent = 'Harga beli harus valid';
+                                    errorElement.style.display = 'block';
+                                    inputElement.parentElement.classList.add('input-error');
+                                    inputElement.parentElement.classList.remove('input-valid');
+                                } else if (id === 'hargaJual') {
+                                    const hargaBeli = parseFloat(document.getElementById('hargaBeli').value);
+                                    if (isNaN(value) || value < 0) {
+                                        errorElement.textContent = 'Harga jual harus valid';
+                                        errorElement.style.display = 'block';
+                                        inputElement.parentElement.classList.add('input-error');
+                                        inputElement.parentElement.classList.remove('input-valid');
+                                    } else if (value < hargaBeli) {
+                                        errorElement.textContent = 'Harga jual tidak boleh lebih kecil dari harga beli';
+                                        errorElement.style.display = 'block';
+                                        inputElement.parentElement.classList.add('input-error');
+                                        inputElement.parentElement.classList.remove('input-valid');
+                                    } else {
+                                        errorElement.style.display = 'none';
+                                        inputElement.parentElement.classList.remove('input-error');
+                                        inputElement.parentElement.classList.add('input-valid');
+                                    }
+                                } else {
+                                    errorElement.style.display = 'none';
+                                    inputElement.parentElement.classList.remove('input-error');
+                                    inputElement.parentElement.classList.add('input-valid');
+                                }
+                            });
+                        });
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const { kodeBarang, namaBarang, kategoriBarang, kodeToko, jumlah, hargaBeli, hargaJual, plu } = result.value;
+
+                        // Simpan barang baru ke localStorage
+                        const newBarang = {
+                            kode: kodeBarang,
+                            nama: namaBarang,
+                            kategori: kategoriBarang,
+                            kodeToko: kodeToko,
+                            plu: plu,
+                            stok: jumlah,
+                            hargaBeli: hargaBeli,
+                            hargaJual: hargaJual,
+                            terjual: 0
+                        };
+
+                        let barang = JSON.parse(localStorage.getItem('barang')) || [];
+                        barang.push(newBarang);
+                        localStorage.setItem('barang', JSON.stringify(barang));
+
+                        // Isi otomatis field di tabel
+                        namaInput.value = namaBarang;
+                        kategoriInput.value = kategoriBarang;
+                        kodeTokoInput.value = kodeToko;
+                        jumlahInput.value = jumlah;
+                        hargaBeliInput.value = hargaBeli;
+                        hargaJualInput.value = hargaJual;
+                        hitungTotal({ target: hargaBeliInput });
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: `Barang ${namaBarang} telah ditambahkan`,
+                            timer: 1500,
+                            showConfirmButton: false,
+                            customClass: {
+                                popup: 'swal2-popup custom-popup'
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+}
+        function hitungTotal(event) {
+            const input = event.target;
+            const row = input.closest('tr');
+            
+            const jumlah = parseFloat(row.cells[5].querySelector('input').value) || 0;
+            const hargaBeli = parseFloat(row.cells[6].querySelector('input').value) || 0;
+            
+            row.cells[8].querySelector('input').value = jumlah * hargaBeli;
+            hitungGrandTotal();
+        }
+
+        function simpanPenerimaan() {
+            const tbody = document.getElementById('bodyPenerimaan');
+            const rows = tbody.rows;
+            const penerimaanBarang = [];
+            
+            let isValid = true;
+            const errorMessages = [];
+
+            for (let row of rows) {
+                const tanggal = row.cells[0].querySelector('input').value;
+                const kodeBarang = row.cells[1].querySelector('input').value;
+                const namaBarang = row.cells[2].querySelector('input').value;
+                const kategori = row.cells[3].querySelector('select').value;
+                const kodeToko = row.cells[4].querySelector('input').value;
+                const jumlah = parseFloat(row.cells[5].querySelector('input').value) || 0;
+                const hargaBeli = parseFloat(row.cells[6].querySelector('input').value) || 0;
+                const hargaJual = parseFloat(row.cells[7].querySelector('input').value) || 0;
+                const total = parseFloat(row.cells[8].querySelector('input').value) || 0;
+
+                if (!tanggal) {
+                    isValid = false;
+                    errorMessages.push("Tanggal harus diisi");
+                }
+                if (!kodeBarang) {
+                    isValid = false;
+                    errorMessages.push("Kode Barang harus diisi");
+                }
+                if (jumlah <= 0) {
+                    isValid = false;
+                    errorMessages.push("Jumlah barang harus lebih dari 0");
+                }
+                if (hargaBeli <= 0) {
+                    isValid = false;
+                    errorMessages.push("Harga beli harus lebih dari 0");
+                }
+            }
+
+            if (!isValid) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan Input',
+                    html: errorMessages.map(msg => `<p>${msg}</p>`).join(''),
+                    confirmButtonText: 'Perbaiki'
+                });
+                return;
+            }
+
+            for (let row of rows) {
+                const tanggal = row.cells[0].querySelector('input').value;
+                const kodeBarang = row.cells[1].querySelector('input').value;
+                const namaBarang = row.cells[2].querySelector('input').value;
+                const kategori = row.cells[3].querySelector('select').value;
+                const kodeToko = row.cells[4].querySelector('input').value;
+                const jumlah = parseFloat(row.cells[5].querySelector('input').value) || 0;
+                const hargaBeli = parseFloat(row.cells[6].querySelector('input').value) || 0;
+                const hargaJual = parseFloat(row.cells[7].querySelector('input').value) || 0;
+                const total = parseFloat(row.cells[8].querySelector('input').value) || 0;
+
+                if (kodeBarang && jumlah > 0) {
+                    let barang = JSON.parse(localStorage.getItem('barang')) || [];
+                    const barangIndex = barang.findIndex(item => item.kode === kodeBarang);
+
+                    if (barangIndex !== -1) {
+                        barang[barangIndex].stok += jumlah;
+                        barang[barangIndex].kodeToko = kodeToko;
+                        barang[barangIndex].hargaBeli = hargaBeli;
+                        barang[barangIndex].hargaJual = hargaJual;
+                    } else {
+                        barang.push({
+                            kode: kodeBarang,
+                            nama: namaBarang,
+                            kategori: kategori,
+                            kodeToko: kodeToko,
+                            stok: jumlah,
+                            hargaBeli: hargaBeli,
+                            hargaJual: hargaJual,
+                            terjual: 0
+                        });
+                    }
+                    localStorage.setItem('barang', JSON.stringify(barang));
+
+                    penerimaanBarang.push({
+                        tanggal, 
+                        kodeBarang, 
+                        namaBarang, 
+                        kategori, 
+                        kodeToko, 
+                        jumlah, 
+                        hargaBeli, 
+                        hargaJual,
+                        total
+                    });
+                }
+            }
+
+            const riwayatPenerimaan = JSON.parse(localStorage.getItem('penerimaanBarang')) || [];
+            riwayatPenerimaan.push(...penerimaanBarang);
+            localStorage.setItem('penerimaanBarang', JSON.stringify(riwayatPenerimaan));
+
+            const totalBaris = penerimaanBarang.length;
+            const totalBarang = penerimaanBarang.reduce((sum, item) => sum + item.jumlah, 0);
+            const totalNominal = penerimaanBarang.reduce((sum, item) => sum + item.total, 0);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Penerimaan Barang Berhasil',
+                html: `
+                    <table class="swal2-table">
+                        <tr>
+                            <th>Total Baris</th>
+                            <td>${totalBaris}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Barang</th>
+                            <td>${totalBarang.toLocaleString()}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Nominal</th>
+                            <td>Rp ${totalNominal.toLocaleString()}</td>
+                        </tr>
+                    </table>
+                `,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                tbody.innerHTML = '';
+                tambahBaris();
+                hitungGrandTotal();
+            });
+        }
+
+        function tampilkanRiwayatPenerimaan() {
+            const riwayat = JSON.parse(localStorage.getItem('penerimaanBarang')) || [];
+            
+            if (window.riwayatChartInstance) {
+                window.riwayatChartInstance.destroy();
+                window.riwayatChartInstance = null;
+            }
+
+            Swal.fire({
+                title: 'Riwayat Penerimaan Barang',
+                html: `
+                    <div class="receipt-history-container">
+                        <div class="summary-container">
+                            <div class="summary-card">
+                                <div class="summary-label">Total Penerimaan</div>
+                                <div class="summary-value">Rp ${riwayat.reduce((sum, item) => sum + item.total, 0).toLocaleString()}</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-label">Total Barang</div>
+                                <div class="summary-value">${riwayat.reduce((sum, item) => sum + item.jumlah, 0).toLocaleString()}</div>
+                            </div>
+                            <div class="summary-card">
+                                <div class="summary-label">Unique Items</div>
+                                <div class="summary-value">${new Set(riwayat.map(item => item.kodeBarang)).size}</div>
+                            </div>
+                        </div>
+
+                        <div class="filters-container">
+                            <div class="filter-item">
+                                <span class="filter-label">Filter by Date:</span>
+                                <select class="filter-select" id="dateFilter">
+                                    <option value="all">All Time</option>
+                                    <option value="today">Today</option>
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <span class="filter-label">Sort By:</span>
+                                <select class="filter-select" id="sortFilter">
+                                    <option value="date-desc">Date (Newest)</option>
+                                    <option value="date-asc">Date (Oldest)</option>
+                                    <option value="amount-desc">Amount (Highest)</option>
+                                    <option value="amount-asc">Amount (Lowest)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="history-table-container">
+                            <table id="riwayatTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Kode Barang</th>
+                                        <th>Nama Barang</th>
+                                        <th>Jumlah</th>
+                                        <th>Total (Rp)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="riwayatTableBody"></tbody>
+                            </table>
+                            </div>
+
+                        <div class="chart-container">
+                            <canvas id="riwayatChart"></canvas>
+                        </div>
+                    </div>
+                `,
+                width: '90%',
+                padding: '0',
+                showConfirmButton: true,
+                confirmButtonText: '<i class="fas fa-file-excel"></i> Export Excel',
+                showCancelButton: true,
+                cancelButtonText: 'Tutup',
+                didRender: () => {
+                    const tbody = document.getElementById('riwayatTableBody');
+                    
+                    riwayat.forEach(item => {
+                        const row = tbody.insertRow();
+                        const date = new Date(item.tanggal);
+                        
+                        row.insertCell(0).textContent = date.toLocaleDateString('id-ID', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        row.insertCell(1).textContent = item.kodeBarang;
+                        row.insertCell(2).textContent = item.namaBarang;
+                        row.insertCell(3).textContent = item.jumlah.toLocaleString();
+                        row.insertCell(4).textContent = item.total.toLocaleString();
+                    });
+
+                    window.riwayatChartInstance = createRiwayatChart(riwayat);
+
+                    document.getElementById('dateFilter').addEventListener('change', () => filterData(riwayat));
+                    document.getElementById('sortFilter').addEventListener('change', () => filterData(riwayat));
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    exportToExcel(riwayat, 'Riwayat_Penerimaan_Barang');
+                }
+            });
+        }
+
+        function createRiwayatChart(data) {
+            const ctx = document.getElementById('riwayatChart').getContext('2d');
+
+            const monthlyData = data.reduce((acc, item) => {
+                const month = new Date(item.tanggal).toLocaleString('default', { month: 'long' });
+                acc[month] = (acc[month] || 0) + item.total;
+                return acc;
+            }, {});
+
+            return new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(monthlyData),
+                    datasets: [{
+                        label: 'Total Penerimaan per Bulan',
+                        data: Object.values(monthlyData),
+                        backgroundColor: 'rgba(26, 115, 232, 0.8)',
+                        borderColor: 'rgba(26, 115, 232, 1)',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        hoverBackgroundColor: 'rgba(26, 115, 232, 0.9)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Rp ' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function filterData(originalData) {
+            const dateFilter = document.getElementById('dateFilter').value;
+            const sortFilter = document.getElementById('sortFilter').value;
+            const tbody = document.getElementById('riwayatTableBody');
+
+            let filteredData = originalData.filter(item => {
+                const itemDate = new Date(item.tanggal);
+                const today = new Date();
+                
+                switch(dateFilter) {
+                    case 'today':
+                        return itemDate.toDateString() === today.toDateString();
+                    case 'week':
+                        const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+                        const endOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 6);
+                        return itemDate >= startOfWeek && itemDate <= endOfWeek;
+                    case 'month':
+                        return itemDate.getMonth() === today.getMonth() && 
+                               itemDate.getFullYear() === today.getFullYear();
+                    default:
+                        return true;
+                }
+            });
+
+            switch(sortFilter) {
+                case 'date-desc':
+                    filteredData.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                    break;
+                case 'date-asc':
+                    filteredData.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+                    break;
+                case 'amount-desc':
+                    filteredData.sort((a, b) => b.total - a.total);
+                    break;
+                case 'amount-asc':
+                    filteredData.sort((a, b) => a.total - b.total);
+                    break;
+            }
+
+            tbody.innerHTML = '';
+
+            filteredData.forEach(item => {
+                const row = tbody.insertRow();
+                const date = new Date(item.tanggal);
+                
+                row.insertCell(0).textContent = date.toLocaleDateString('id-ID', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                row.insertCell(1).textContent = item.kodeBarang;
+                row.insertCell(2).textContent = item.namaBarang;
+                row.insertCell(3).textContent = item.jumlah.toLocaleString();
+                row.insertCell(4).textContent = item.total.toLocaleString();
+            });
+
+            const totalPenerimaan = filteredData.reduce((sum, item) => sum + item.total, 0);
+            const totalBarang = filteredData.reduce((sum, item) => sum + item.jumlah, 0);
+            const uniqueBarang = new Set(filteredData.map(item => item.kodeBarang)).size;
+
+            document.querySelector('.summary-card:nth-child(1) .summary-value').textContent = 
+                `Rp ${totalPenerimaan.toLocaleString()}`;
+            document.querySelector('.summary-card:nth-child(2) .summary-value').textContent = 
+                totalBarang.toLocaleString();
+            document.querySelector('.summary-card:nth-child(3) .summary-value').textContent = 
+                uniqueBarang;
+
+            if (window.riwayatChartInstance) {
+                window.riwayatChartInstance.destroy();
+            }
+            window.riwayatChartInstance = createRiwayatChart(filteredData);
+        }
+
+        function exportToExcel(data, filename) {
+    const zip = new JSZip();
+    
+    // 1. Data Barang (Stok)
+    const barang = JSON.parse(localStorage.getItem('barang')) || [];
+    const barangData = barang.map(item => ({
+        Kode: item.kode,
+        Nama: item.nama,
+        Kategori: item.kategori,
+        KodeToko: item.kodeToko,
+        PLU: item.plu || '',
+        Stok: item.stok,
+        HargaBeli: item.hargaBeli,
+        HargaJual: item.hargaJual,
+        Terjual: item.terjual || 0,
+        StatusStok: item.stok <= 10 ? 'Rendah' : item.stok <= 50 ? 'Sedang' : 'Tinggi'
+    }));
+    
+    const barangWorksheet = XLSX.utils.json_to_sheet(barangData);
+    const barangWorkbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(barangWorkbook, barangWorksheet, 'Stok_Barang');
+    
+    // 2. Data Riwayat Penerimaan
+    const riwayatData = data.map(item => ({
+        Tanggal: new Date(item.tanggal).toLocaleDateString('id-ID'),
+        KodeBarang: item.kodeBarang,
+        NamaBarang: item.namaBarang,
+        Kategori: item.kategori,
+        KodeToko: item.kodeToko,
+        Jumlah: item.jumlah,
+        HargaBeli: item.hargaBeli,
+        HargaJual: item.hargaJual,
+        Total: item.total
+    }));
+    
+    const riwayatWorksheet = XLSX.utils.json_to_sheet(riwayatData);
+    const riwayatWorkbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(riwayatWorkbook, riwayatWorksheet, 'Riwayat_Penerimaan');
+    
+    // 3. Ringkasan (Summary)
+    const totalPenerimaan = data.reduce((sum, item) => sum + item.total, 0);
+    const totalBarang = data.reduce((sum, item) => sum + item.jumlah, 0);
+    const uniqueBarang = new Set(data.map(item => item.kodeBarang)).size;
+    const summaryData = [
+        { Keterangan: 'Total Penerimaan (Rp)', Nilai: totalPenerimaan },
+        { Keterangan: 'Total Barang', Nilai: totalBarang },
+        { Keterangan: 'Jumlah Barang Unik', Nilai: uniqueBarang },
+        { Keterangan: 'Total Stok Saat Ini', Nilai: barang.reduce((sum, item) => sum + item.stok, 0) },
+        { Keterangan: 'Total Nilai Stok (Rp)', Nilai: barang.reduce((sum, item) => sum + (item.stok * item.hargaBeli), 0) }
+    ];
+    
+    const summaryWorksheet = XLSX.utils.json_to_sheet(summaryData);
+    const summaryWorkbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(summaryWorkbook, summaryWorksheet, 'Ringkasan');
+    
+    // 4. Konversi workbook ke binary
+    const barangExcelBuffer = XLSX.write(barangWorkbook, { bookType: 'xlsx', type: 'array' });
+    const riwayatExcelBuffer = XLSX.write(riwayatWorkbook, { bookType: 'xlsx', type: 'array' });
+    const summaryExcelBuffer = XLSX.write(summaryWorkbook, { bookType: 'xlsx', type: 'array' });
+    
+    // 5. Tambahkan file Excel ke ZIP
+    const timestamp = new Date().toISOString().split('T')[0];
+    zip.file(`Stok_Barang_${timestamp}.xlsx`, barangExcelBuffer);
+    zip.file(`Riwayat_Penerimaan_${timestamp}.xlsx`, riwayatExcelBuffer);
+    zip.file(`Ringkasan_${timestamp}.xlsx`, summaryExcelBuffer);
+    
+    // 6. Generate dan simpan file ZIP
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
+        saveAs(content, `${filename}_${timestamp}.zip`);
+    });
+}
+
+        function tampilkanStok() {
+            const barang = JSON.parse(localStorage.getItem('barang')) || [];
+            
+            Swal.fire({
+                title: 'Stok Barang',
+                html: `
+                    <div class="stock-table-container">
+                        <table id="stokTable">
+                            <thead>
+                                <tr>
+                                    <th>Kode</th>
+                                    <th>Nama</th>
+                                    <th>Kategori</th>
+                                    <th>Stok</th>
+                                    <th>Harga Beli</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stokTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="stokChart"></canvas>
+                        <div class="chart-js-legend" id="chartLegend"></div>
+                    </div>
+                `,
+                didRender: () => {
+                    const tbody = document.getElementById('stokTableBody');
+                    const ctx = document.getElementById('stokChart').getContext('2d');
+                    
+                    barang.forEach(item => {
+                        const row = tbody.insertRow();
+                        row.insertCell(0).textContent = item.kode;
+                        row.insertCell(1).textContent = item.nama;
+                        row.insertCell(2).textContent = item.kategori;
+                        
+                        const stokCell = row.insertCell(3);
+                        stokCell.textContent = item.stok.toLocaleString();
+                        stokCell.style.textAlign = 'right';
+                        
+                        const hargaCell = row.insertCell(4);
+                        hargaCell.textContent = `Rp ${item.hargaBeli.toLocaleString()}`;
+                        hargaCell.style.textAlign = 'right';
+                        
+                        const statusCell = row.insertCell(5);
+                        const stockLevel = item.stok <= 10 ? 'low' : item.stok <= 50 ? 'medium' : 'high';
+                        const statusText = stockLevel === 'low' ? 'Rendah' : stockLevel === 'medium' ? 'Sedang' : 'Tinggi';
+                        statusCell.innerHTML = `<span class="stock-level stock-level-${stockLevel}">${statusText}</span>`;
+                    });
+
+                    const stokData = barang.filter(b => b.stok > 0);
+                    const backgroundColors = [
+                        '#1a73e8', '#34c759', '#f4b400', '#ea4335', '#9b59b6',
+                        '#8ab4f8', '#d32f2f', '#455a64', '#16a085', '#c0392b'
+                    ];
+
+                    const chart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: stokData.map(b => b.nama),
+                            datasets: [{
+                                data: stokData.map(b => b.stok),
+                                backgroundColor: backgroundColors,
+                                borderWidth: 2,
+                                borderColor: '#fff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((value / total) * 100).toFixed(1);
+                                            return `${label}: ${value.toLocaleString()} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    const legendContainer = document.getElementById('chartLegend');
+                    stokData.forEach((item, index) => {
+                        const legendItem = document.createElement('div');
+                        legendItem.className = 'legend-item';
+                        legendItem.innerHTML = `
+                            <span class="legend-color" style="background: ${backgroundColors[index]}"></span>
+                            <span>${item.nama} (${item.stok})</span>
+                        `;
+                        legendContainer.appendChild(legendItem);
+                    });
+                },
+                width: '80%',
+                showConfirmButton: true,
+                confirmButtonText: 'Export Excel',
+                showCancelButton: true,
+                cancelButtonText: 'Tutup'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    exportToExcel(barang, 'Stok_Barang');
+                }
+            });
+        }
+
+        function uploadCSV() {
+            let progressContainer = document.getElementById('progressContainer');
+            if (!progressContainer) {
+                progressContainer = document.createElement('div');
+                progressContainer.id = 'progressContainer';
+                progressContainer.style.width = '100%';
+                progressContainer.style.marginTop = '10px';
+                progressContainer.style.marginBottom = '10px';
+                progressContainer.style.display = 'none';
+                
+                const progressBar = document.createElement('div');
+                progressBar.id = 'progressBar';
+                progressBar.style.width = '0%';
+                progressBar.style.height = '20px';
+                progressBar.style.backgroundColor = '#4CAF50';
+                progressBar.style.textAlign = 'center';
+                progressBar.style.lineHeight = '20px';
+                progressBar.style.color = 'white';
+                progressBar.style.transition = 'width 0.3s';
+                
+                progressContainer.appendChild(progressBar);
+                
+                const parentElement = document.querySelector('table').parentNode;
+                parentElement.insertBefore(progressContainer, document.querySelector('table'));
+            }
+
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                
+                if (!file) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'File Tidak Dipilih',
+                        text: 'Silakan pilih file CSV untuk diupload.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+                
+                if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Format File Salah',
+                        text: 'File harus berformat CSV.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                progressContainer.style.display = 'block';
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = '0%';
+                progressBar.textContent = '0%';
+
+                const reader = new FileReader();
+                
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += 5;
+                        progressBar.style.width = progress + '%';
+                        progressBar.textContent = progress + '%';
+                    }
+                }, 100);
+                
+                reader.onload = (e) => {
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '90%';
+                    progressBar.textContent = '90%';
+                    
+                    try {
+                        const text = e.target.result;
+                        if (!text || text.trim() === '') {
+                            throw new Error('File CSV kosong atau tidak valid.');
+                        }
+                        
+                        const rows = text.split(/\r?\n/).filter(row => row.trim() !== '').map(row => {
+                            if (row.includes('"')) {
+                                const result = [];
+                                let inQuote = false;
+                                let currentValue = '';
+                                
+                                for (let i = 0; i < row.length; i++) {
+                                    const char = row[i];
+                                    
+                                    if (char === '"') {
+                                        inQuote = !inQuote;
+                                    } else if (char === ',' && !inQuote) {
+                                        result.push(currentValue);
+                                        currentValue = '';
+                                    } else {
+                                        currentValue += char;
+                                    }
+                                }
+                                
+                                result.push(currentValue);
+                                return result;
+                            } else {
+                                return row.split(',');
+                            }
+                        });
+                        
+                        const tbody = document.getElementById('bodyPenerimaan');
+                        const barang = JSON.parse(localStorage.getItem('barang')) || [];
+                        
+                        let successCount = 0;
+                        let errorCount = 0;
+                        const errorItems = [];
+                        
+                        for (let i = 0; i < rows.length; i++) {
+                            const row = rows[i];
+                            
+                            if (row.length >= 2) {
+                                const kodeBarang = row[0].trim();
+                                const jumlahDiterima = parseInt(row[1].trim(), 10);
+                                
+                                const barangDitemukan = barang.find(item => item.kode === kodeBarang);
+                                
+                                if (barangDitemukan && kodeBarang && !isNaN(jumlahDiterima)) {
+                                    const newRow = tbody.insertRow();
+                                    
+                                    const cellTanggal = newRow.insertCell(0);
+                                    const tanggalInput = document.createElement('input');
+                                    tanggalInput.type = 'date';
+                                    tanggalInput.value = new Date().toISOString().split('T')[0];
+                                    cellTanggal.appendChild(tanggalInput);
+                                    
+                                    const cellKode = newRow.insertCell(1);
+                                    const kodeInput = document.createElement('input');
+                                    kodeInput.type = 'text';
+                                    kodeInput.value = kodeBarang;
+                                    kodeInput.readOnly = true;
+                                    cellKode.appendChild(kodeInput);
+                                    
+                                    const cellNama = newRow.insertCell(2);
+                                    const namaInput = document.createElement('input');
+                                    namaInput.type = 'text';
+                                    namaInput.value = barangDitemukan.nama;
+                                    cellNama.appendChild(namaInput);
+                                    
+                                    const cellKategori = newRow.insertCell(3);
+                                    const kategoriInput = document.createElement('select');
+                                    const kategoriOptions = ['A1', 'A2', 'A3', 'A4', 'A5', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7'];
+                                    kategoriOptions.forEach(kategori => {
+                                        const option = document.createElement('option');
+                                        option.value = kategori;
+                                        option.text = kategori;
+                                        if (kategori === barangDitemukan.kategori) {
+                                            option.selected = true;
+                                        }
+                                        kategoriInput.appendChild(option);
+                                    });
+                                    cellKategori.appendChild(kategoriInput);
+                                    
+                                    const cellKodeToko = newRow.insertCell(4);
+                                    const kodeTokoInput = document.createElement('input');
+                                    kodeTokoInput.type = 'text';
+                                    kodeTokoInput.value = barangDitemukan.kodeToko;
+                                    kodeTokoInput.readOnly = true;
+                                    cellKodeToko.appendChild(kodeTokoInput);
+                                    
+                                    const cellJumlah = newRow.insertCell(5);
+                                    const jumlahInput = document.createElement('input');
+                                    jumlahInput.type = 'number';
+                                    jumlahInput.value = jumlahDiterima;
+                                    jumlahInput.min = '1';
+                                    jumlahInput.addEventListener('input', hitungTotal);
+                                    cellJumlah.appendChild(jumlahInput);
+                                    
+                                    const cellHargaBeli = newRow.insertCell(6);
+                                    const hargaBeliInput = document.createElement('input');
+                                    hargaBeliInput.type = 'number';
+                                    hargaBeliInput.value = barangDitemukan.hargaBeli;
+                                    hargaBeliInput.addEventListener('input', hitungTotal);
+                                    cellHargaBeli.appendChild(hargaBeliInput);
+                                    
+                                    const cellHargaJual = newRow.insertCell(7);
+                                    const hargaJualInput = document.createElement('input');
+                                    hargaJualInput.type = 'number';
+                                    hargaJualInput.value = barangDitemukan.hargaJual;
+                                    hargaJualInput.addEventListener('input', hitungTotal);
+                                    cellHargaJual.appendChild(hargaJualInput);
+                                    
+                                    const cellTotal = newRow.insertCell(8);
+                                    const totalInput = document.createElement('input');
+                                    totalInput.type = 'number';
+                                    totalInput.readOnly = true;
+                                    totalInput.value = barangDitemukan.hargaBeli * jumlahDiterima;
+                                    cellTotal.appendChild(totalInput);
+                                    
+                                    const cellAksi = newRow.insertCell(9);
+                                    const hapusBtn = document.createElement('button');
+                                    hapusBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                                    hapusBtn.classList.add('btn-danger');
+                                    hapusBtn.onclick = function() {
+                                        tbody.removeChild(newRow);
+                                        hitungGrandTotal();
+                                    };
+                                    cellAksi.appendChild(hapusBtn);
+                                    
+                                    successCount++;
+                                } else {
+                                    errorCount++;
+                                    errorItems.push({
+                                        kodeBarang,
+                                        jumlahDiterima,
+                                        error: !barangDitemukan ? 'Kode barang tidak ditemukan' : 'Format jumlah tidak valid'
+                                    });
+                                }
+                            } else {
+                                errorCount++;
+                                errorItems.push({
+                                    row: i + 1,
+                                    error: 'Format baris tidak valid (kurang dari 2 kolom)'
+                                });
+                            }
+                            
+                            const currentProgress = 90 + ((i + 1) / rows.length) * 10;
+                            progressBar.style.width = currentProgress + '%';
+                            progressBar.textContent = Math.round(currentProgress) + '%';
+                        }
+                        
+                        progressBar.style.width = '100%';
+                        progressBar.textContent = '100%';
+                        
+                        hitungGrandTotal();
+                        
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                            
+                            let resultMessage = `${successCount} item berhasil ditambahkan.`;
+                            
+                            if (errorCount > 0) {
+                                resultMessage += `\n${errorCount} item gagal diproses.`;
+                                console.log('Error items:', errorItems);
+                                
+                                let errorDetails = '';
+                                errorItems.slice(0, 5).forEach((item, index) => {
+                                    if (item.kodeBarang) {
+                                        errorDetails += `\n${index + 1}. Kode: ${item.kodeBarang} - ${item.error}`;
+                                    } else {
+                                        errorDetails += `\n${index + 1}. Baris ${item.row} - ${item.error}`;
+                                    }
+                                });
+                                
+                                if (errorItems.length > 5) {
+                                    errorDetails += `\n... dan ${errorItems.length - 5} error lainnya.`;
+                                }
+                                
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Upload Selesai dengan Peringatan',
+                                    html: resultMessage.replace(/\n/g, '<br>') + '<br><br><strong>Detail Error:</strong><pre>' + errorDetails + '</pre>',
+                                    confirmButtonText: 'OK'
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Upload Selesai',
+                                    text: resultMessage,
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        }, 1000);
+                    } catch (error) {
+                        clearInterval(progressInterval);
+                        progressContainer.style.display = 'none';
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error Saat Memproses File',
+                            text: error.message || 'Terjadi kesalahan saat memproses file CSV.',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        console.error('CSV processing error:', error);
+                    }
+                };
+                
+                reader.onerror = (error) => {
+                    clearInterval(progressInterval);
+                    progressContainer.style.display = 'none';
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Saat Membaca File',
+                        text: 'Terjadi kesalahan saat membaca file CSV.',
+                        confirmButtonText: 'OK'
+                    });
+                    
+                    console.error('FileReader error:', error);
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        function hitungGrandTotal() {
+            const rows = document.getElementById('bodyPenerimaan').rows;
+            let grandTotal = 0;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const totalInput = rows[i].cells[8].querySelector('input');
+                grandTotal += parseFloat(totalInput.value) || 0;
+            }
+            
+            const grandTotalElement = document.getElementById('grandTotal');
+            grandTotalElement.textContent = 'Rp ' + grandTotal.toLocaleString('id-ID');
+        }
+
+        function hitungTotalKeseluruhan() {
+            const tbody = document.getElementById('bodyPenerimaan');
+            const rows = tbody.rows;
+            
+            let totalBaris = rows.length;
+            let totalBarang = 0;
+            let totalNominal = 0;
+
+            for (let row of rows) {
+                const jumlahInput = row.cells[5].querySelector('input');
+                const totalInput = row.cells[8].querySelector('input');
+
+                const jumlah = parseFloat(jumlahInput.value) || 0;
+                const total = parseFloat(totalInput.value) || 0;
+
+                totalBarang += jumlah;
+                totalNominal += total;
+            }
+
+            Swal.fire({
+                title: 'Ringkasan Penerimaan Barang',
+                html: `
+                    <table class="swal2-table">
+                        <tr>
+                            <th>Total Baris</th>
+                            <td>${totalBaris}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Barang</th>
+                            <td>${totalBarang.toLocaleString()}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Nominal</th>
+                            <td>Rp ${totalNominal.toLocaleString()}</td>
+                        </tr>
+                    </table>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Tutup'
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            tambahBaris();
+            hitungGrandTotal();
+        });
+    </script>
+</body>
+</html>
