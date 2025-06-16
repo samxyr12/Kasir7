@@ -1071,9 +1071,8 @@ function lanjutkanPembayaran(member) {
     const popupElement = document.getElementById('popup');
     const totalBayarElement = document.getElementById('totalBayar');
     const totalBayarQRISElement = document.getElementById('totalBayarQRIS');
-    const voucherStatusElement = document.getElementById('voucherStatus');
 
-    if (!popupElement || !totalBayarElement || !totalBayarQRISElement || !voucherStatusElement) {
+    if (!popupElement || !totalBayarElement || !totalBayarQRISElement) {
         console.error('Elemen popup pembayaran tidak ditemukan');
         Swal.fire({
             icon: 'error',
@@ -1092,22 +1091,6 @@ function lanjutkanPembayaran(member) {
 
     // Tampilkan popup pembayaran
     popupElement.style.display = 'flex';
-
-    // Apply voucher if already applied
-    const appliedVoucher = JSON.parse(localStorage.getItem('appliedVoucher'));
-    let voucher = null;
-    if (appliedVoucher && appliedVoucher.finalTotal !== undefined) {
-        totalAkhir = appliedVoucher.finalTotal;
-        voucher = {
-            code: appliedVoucher.code,
-            discount: appliedVoucher.discount,
-            type: appliedVoucher.type,
-            value: appliedVoucher.value
-        };
-        voucherStatusElement.innerHTML = `<span style="color: green;">Voucher ${appliedVoucher.code} diterapkan! Diskon: ${formatRupiah(appliedVoucher.discount)}</span>`;
-    } else {
-        voucherStatusElement.innerHTML = '<span style="color: #64748b;">Tidak ada voucher diterapkan</span>';
-    }
 
     // Validate total
     if (totalAkhir < 0) {
@@ -1200,7 +1183,7 @@ function lanjutkanPembayaran(member) {
                     <div style="margin-top: 10px; padding: 8px; background-color: #fffbeb; border-radius: 8px; border-left: 3px solid #f59e0b;">
                         <div style="font-size: 13px; color: #92400e;">
                             <i class="fas fa-info-circle" style="margin-right: 5px;"></i>
-                            Transaksi ini tidak akan mendapatkan poin atau voucher. Member dapat memperoleh poin hingga 3% dari total belanja dan voucher otomatis.
+                            Transaksi ini tidak akan mendapatkan poin. Member dapat memperoleh poin hingga 3% dari total belanja.
                         </div>
                     </div>
                 </div>
@@ -1224,128 +1207,136 @@ function lanjutkanPembayaran(member) {
     }
 
     // Setup event listener untuk konfirmasi pembayaran
-    setupKonfirmasiPembayaran(totalAkhir, keranjang, member, voucher);
+    setupKonfirmasiPembayaran(totalAkhir, keranjang, member);
 }
 
 // Fungsi untuk setup event listener konfirmasi pembayaran
-function setupKonfirmasiPembayaran(totalAkhir, keranjang, member, voucher) {
-    const btnKonfirmasiCash = document.getElementById('konfirmasiCash');
-    const btnKonfirmasiQRIS = document.getElementById('konfirmasiQRIS');
+function setupKonfirmasiPembayaran(totalAkhir, keranjang, member) {
+    // Catatan: ID tombol konfirmasi di HTML tidak sesuai, gunakan tombol 'process-btn'
+    const processButtons = document.querySelectorAll('.process-btn');
 
     const idTransaksi = 'TRX-' + Date.now();
     const memberId = member ? member.id : null;
     const poin = member ? hitungPoin(totalAkhir) : 0;
 
-    if (btnKonfirmasiCash) {
-        btnKonfirmasiCash.addEventListener('click', () => {
-            const nominalCash = parseInt(document.getElementById('nominalCash').value) || 0;
-            const kembalian = nominalCash - totalAkhir;
+    processButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const metode = button.closest('.payment-section').id === 'metodeCash' ? 'Cash' : 'QRIS';
 
-            if (nominalCash < totalAkhir) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Nominal Kurang',
-                    text: 'Nominal yang dimasukkan kurang dari total bayar.',
-                    confirmButtonColor: '#ff6b6b',
-                });
-                return;
-            }
+            if (metode === 'Cash') {
+                const nominalCash = parseInt(document.getElementById('nominalCash').value) || 0;
+                const kembalian = nominalCash - totalAkhir;
 
-            // Simpan transaksi
-            const success = simpanTransaksi(
-                'Cash',
-                totalAkhir,
-                kembalian,
-                idTransaksi,
-                keranjang.map(item => ({
-                    kode: item.kodeBarang,
-                    nama: item.namaBarang,
-                    jumlah: item.jumlah,
-                    harga: item.hargaJual,
-                    total: item.total,
-                    potongan: item.potongan || 0
-                })),
-                memberId,
-                poin,
-                nominalCash,
-                voucher
-            );
+                if (nominalCash < totalAkhir) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Nominal Kurang',
+                        text: 'Nominal yang dimasukkan kurang dari total bayar.',
+                        confirmButtonColor: '#ff6b6b',
+                    });
+                    return;
+                }
 
-            if (success) {
-                // Tutup popup
-                document.getElementById('popup').style.display = 'none';
-                // Bersihkan keranjang dan voucher
-                localStorage.removeItem('keranjang');
-                localStorage.removeItem('appliedVoucher');
-                localStorage.removeItem('memberTransaksi');
+                // Simpan transaksi
+                const success = simpanTransaksi(
+                    'Cash',
+                    totalAkhir,
+                    kembalian,
+                    idTransaksi,
+                    keranjang.map(item => ({
+                        kode: item.kodeBarang,
+                        nama: item.namaBarang,
+                        jumlah: item.jumlah,
+                        harga: item.hargaJual,
+                        total: item.total,
+                        potongan: item.potongan || 0
+                    })),
+                    memberId,
+                    poin,
+                    nominalCash
+                );
 
-                // Tampilkan notifikasi sukses
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Transaksi Berhasil',
-                    text: `Transaksi ${idTransaksi} telah disimpan.`,
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menyimpan Transaksi',
-                    text: 'Terjadi kesalahan saat menyimpan transaksi.',
-                    confirmButtonColor: '#ff6b6b',
-                });
+                if (success) {
+                    // Tutup popup
+                    document.getElementById('popup').style.display = 'none';
+                    // Bersihkan keranjang dan member
+                    localStorage.removeItem('keranjang');
+                    localStorage.removeItem('memberTransaksi');
+
+                    // Tampilkan notifikasi sukses
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Transaksi Berhasil',
+                        text: `Transaksi ${idTransaksi} telah disimpan.`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Menyimpan Transaksi',
+                        text: 'Terjadi kesalahan saat menyimpan transaksi.',
+                        confirmButtonColor: '#ff6b6b',
+                    });
+                }
+            } else if (metode === 'QRIS') {
+                // Validasi checkbox untuk QRIS
+                const checkbox = document.getElementById('checkbox');
+                if (!checkbox.checked) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Persetujuan Diperlukan',
+                        text: 'Harap setujui transaksi sebelum melanjutkan.',
+                        confirmButtonColor: '#ff6b6b',
+                    });
+                    return;
+                }
+
+                // Simpan transaksi
+                const success = simpanTransaksi(
+                    'QRIS',
+                    totalAkhir,
+                    0, // Tidak ada kembalian untuk QRIS
+                    idTransaksi,
+                    keranjang.map(item => ({
+                        kode: item.kodeBarang,
+                        nama: item.namaBarang,
+                        jumlah: item.jumlah,
+                        harga: item.hargaJual,
+                        total: item.total,
+                        potongan: item.potongan || 0
+                    })),
+                    memberId,
+                    poin,
+                    totalAkhir
+                );
+
+                if (success) {
+                    // Tutup popup
+                    document.getElementById('popup').style.display = 'none';
+                    // Bersihkan keranjang dan member
+                    localStorage.removeItem('keranjang');
+                    localStorage.removeItem('memberTransaksi');
+
+                    // Tampilkan notifikasi sukses
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Transaksi Berhasil',
+                        text: `Transaksi ${idTransaksi} telah disimpan.`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Menyimpan Transaksi',
+                        text: 'Terjadi kesalahan saat menyimpan transaksi.',
+                        confirmButtonColor: '#ff6b6b',
+                    });
+                }
             }
         });
-    }
-
-    if (btnKonfirmasiQRIS) {
-        btnKonfirmasiQRIS.addEventListener('click', () => {
-            // Asumsi validasi QRIS dilakukan (misalnya, via API)
-            const success = simpanTransaksi(
-                'QRIS',
-                totalAkhir,
-                0, // Tidak ada kembalian untuk QRIS
-                idTransaksi,
-                keranjang.map(item => ({
-                    kode: item.kodeBarang,
-                    nama: item.namaBarang,
-                    jumlah: item.jumlah,
-                    harga: item.hargaJual,
-                    total: item.total,
-                    potongan: item.potongan || 0
-                })),
-                memberId,
-                poin,
-                totalAkhir, // Nominal sama dengan total untuk QRIS
-                voucher
-            );
-
-            if (success) {
-                // Tutup popup
-                document.getElementById('popup').style.display = 'none';
-                // Bersihkan keranjang dan voucher
-                localStorage.removeItem('keranjang');
-                localStorage.removeItem('appliedVoucher');
-                localStorage.removeItem('memberTransaksi');
-
-                // Tampilkan notifikasi sukses
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Transaksi Berhasil',
-                    text: `Transaksi ${idTransaksi} telah disimpan.`,
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal Menyimpan Transaksi',
-                    text: 'Terjadi kesalahan saat menyimpan transaksi.',
-                    confirmButtonColor: '#ff6b6b',
-                });
-            }
-        });
-    }
+    });
 }
 // Fungsi pembantu untuk memilih metode pembayaran
 function createNominalButton(nominal, container) {
