@@ -1,0 +1,2191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    
+    <title>Advanced Account Management System</title>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #eef2ff;
+            --secondary-color: #3a0ca3;
+            --danger-color: #ef233c;
+            --success-color: #2ec4b6;
+            --warning-color: #ff9f1c;
+            --dark-color: #2b2d42;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: #fff;
+        }
+
+        .menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .menu li {
+            margin: 0 10px;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu a:hover, .menu a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .menu a i {
+            font-size: 1rem;
+        }
+
+        /* Auth Indicator */
+        .auth-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Tab System */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 500;
+            color: var(--gray-color);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab:hover {
+            color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+
+        .tab.active {
+            background-color: white;
+            border-color: #ddd;
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d90429;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #1a936f;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #ff8811;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-light);
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            justify-content: center;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 0 1px #eee;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .table th {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+            text-align: left;
+            padding: 15px;
+        }
+
+        .table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tr:hover {
+            background-color: rgba(67, 97, 238, 0.03);
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background-color: rgba(46, 196, 182, 0.1);
+            color: var(--success-color);
+        }
+
+        .badge-danger {
+            background-color: rgba(239, 35, 60, 0.1);
+            color: var(--danger-color);
+        }
+
+        .badge-warning {
+            background-color: rgba(255, 159, 28, 0.1);
+            color: var(--warning-color);
+        }
+
+        .badge-primary {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+            max-width: 400px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-color);
+        }
+
+        .search-box input {
+            padding-left: 40px;
+            width: 100%;
+        }
+
+        /* Popup Styles */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup.show {
+            display: flex;
+        }
+
+        .popup-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .popup-large {
+            max-width: 800px;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .popup-title {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-color);
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            color: var(--danger-color);
+            transform: rotate(90deg);
+        }
+
+        /* Username List */
+        .username-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            padding: 10px;
+        }
+
+        .username-item {
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f5f5f5;
+            transition: var(--transition);
+        }
+
+        .username-item:last-child {
+            border-bottom: none;
+        }
+
+        .username-item:hover {
+            background-color: var(--primary-light);
+        }
+
+        .username-item input[type="checkbox"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-color);
+        }
+
+        /* Loading Spinner */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border-radius: var(--border-radius);
+            z-index: 10;
+        }
+
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notification Toast */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 3000;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification i {
+            font-size: 1.2rem;
+        }
+
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.warning {
+            background-color: var(--warning-color);
+        }
+
+        /* File Upload Styles */
+        .file-upload {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: var(--border-radius);
+            background-color: #fafafa;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+            background-color: #f5f7ff;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .file-upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+        }
+
+        .file-upload-text {
+            font-weight: 500;
+        }
+
+        .file-upload-hint {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-weight: 500;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .auth-indicator {
+                margin-top: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .popup-content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .menu {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .menu li {
+                margin: 5px 0;
+            }
+            
+            .card {
+                padding: 20px 15px;
+            }
+            
+            .table th, .table td {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+            
+            .table-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-user-shield"></i>
+                <span>Account Manager</span>
+            </div>
+            
+            <ul class="menu">
+                <li><a href="kasir.html"><i class="fas fa-cash-register"></i> POS</a></li>
+                <li><a href="laporan.html"><i class="fas fa-chart-line"></i> Reports</a></li>
+                <li><a href="void.html"><i class="fas fa-ban"></i> Void</a></li>
+                <li><a href="setoran.html"><i class="fas fa-money-bill-wave"></i> Deposits</a></li>
+                <li><a href="akun.html" class="active"><i class="fas fa-user-cog"></i> Accounts</a></li>
+                <li><a href="retur.html"><i class="fas fa-undo"></i> Returns</a></li>
+            </ul>
+            
+            <div class="auth-indicator">
+                <div class="auth-status">
+                    <i class="fas fa-user-shield"></i>
+                    <span id="authStatusText">Admin: Inactive</span>
+                </div>
+                <button class="logout-btn" id="logoutBtn" style="display: none;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('create-tab')">
+                <i class="fas fa-user-plus"></i> Create Account
+            </div>
+            <div class="tab" onclick="switchTab('manage-tab')">
+                <i class="fas fa-users-cog"></i> Manage Accounts
+                <i class="fas fa-lock" style="margin-left: 5px; font-size: 0.8rem;"></i>
+            </div>
+            <div class="tab" onclick="switchTab('activity-tab')">
+                <i class="fas fa-history"></i> Activity Log
+                <i class="fas fa-lock" style="margin-left: 5px; font-size: 0.8rem;"></i>
+            </div>
+        </div>
+
+        <!-- Create Account Tab -->
+        <div id="create-tab" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-user-plus"></i> Create New Account
+                    </h2>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="newUsername">Username</label>
+                            <input type="text" id="newUsername" class="form-control" placeholder="Enter username" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="kodeToko">Store Code</label>
+                            <input type="text" id="kodeToko" class="form-control" placeholder="Enter store code" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="newPassword">Password</label>
+                            <input type="password" id="newPassword" class="form-control" placeholder="Enter password" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <input type="password" id="confirmPassword" class="form-control" placeholder="Confirm password" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="newPin">PIN (Optional)</label>
+                            <input type="password" id="newPin" class="form-control" placeholder="PIN will default to 451 if not provided" maxlength="6">
+                            <small class="text-muted">6-digit PIN for account security</small>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="role">User Role</label>
+                            <select id="role" class="form-control">
+                                <option value="user">Regular User</option>
+                                <option value="admin">Administrator</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn btn-success" onclick="createAccount()">
+                        <i class="fas fa-save"></i> Create Account
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Accounts Tab -->
+        <div id="manage-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-users-cog"></i> Manage Accounts
+                    </h2>
+                    
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search accounts..." oninput="searchAccounts()">
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openUploadPopup()">
+                        <i class="fas fa-file-upload"></i> Bulk Upload
+                    </button>
+                    <button class="btn btn-outline" onclick="openDownloadPopup()">
+                        <i class="fas fa-file-download"></i> Export Accounts
+                    </button>
+                    <button class="btn btn-danger" onclick="openDeletePopup()">
+                        <i class="fas fa-trash-alt"></i> Delete Accounts
+                    </button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table" id="accountTable">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Store Code</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountListDisplay">
+                            <!-- Accounts will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Log Tab -->
+        <div id="activity-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-history"></i> Activity Log
+                    </h2>
+                    
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchLogInput" class="form-control" placeholder="Search logs..." oninput="searchLogs()">
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Username</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="laporanListDisplay">
+                            <!-- Logs will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account Popup -->
+    <div id="deletePopup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">
+                    <i class="fas fa-trash-alt"></i> Delete Accounts
+                </h3>
+                <button class="close-btn" onclick="closeDeletePopup()">&times;</button>
+            </div>
+            
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchDeleteInput" class="form-control" placeholder="Search usernames..." oninput="filterUsernames()">
+            </div>
+            
+            <div class="username-list" id="usernameList">
+                <!-- Usernames will be loaded here -->
+            </div>
+            
+            <button class="btn btn-primary" onclick="addToDeleteList()">
+                <i class="fas fa-plus"></i> Add to Delete List
+            </button>
+            
+            <h4 style="margin: 20px 0 10px;">Accounts to be deleted:</h4>
+            <div class="username-list" id="deleteList">
+                <!-- Selected accounts for deletion will appear here -->
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="closeDeletePopup()">
+                    Cancel
+                </button>
+                <button class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash-alt"></i> Confirm Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Accounts Popup -->
+    <div id="uploadPopup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">
+                    <i class="fas fa-file-upload"></i> Bulk Account Upload
+                </h3>
+                <button class="close-btn" onclick="closeUploadPopup()">&times;</button>
+            </div>
+            
+            <p>Upload an Excel file (.xlsx) containing account information.</p>
+            <p><strong>Required columns:</strong> Username, Password</p>
+            <p><strong>Optional columns:</strong> PIN, KodeToko, Role</p>
+            
+            <div class="file-upload">
+                <input type="file" id="uploadFile" accept=".xlsx">
+                <label for="uploadFile" class="file-upload-label">
+                    <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                    <span class="file-upload-text">Choose Excel File</span>
+                    <span class="file-upload-hint">or drag and drop file here</span>
+                </label>
+                <div id="fileNameDisplay" class="file-name" style="display: none;">
+                    <i class="fas fa-file-excel"></i>
+                    <span id="fileNameText"></span>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="closeUploadPopup()">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" onclick="uploadAccounts()">
+                    <i class="fas fa-upload"></i> Upload Accounts
+                </button>
+            </div>
+            
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Duplicate Username Popup -->
+    <div id="duplicatePopup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">
+                    <i class="fas fa-exclamation-triangle"></i> Duplicate Usernames
+                </h3>
+                <button class="close-btn" onclick="closeDuplicatePopup()">&times;</button>
+            </div>
+            
+            <p id="duplicateMessage" style="margin-bottom: 20px;"></p>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-outline" onclick="handleDuplicate(false)">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-primary" onclick="handleDuplicate(true)">
+                    <i class="fas fa-check"></i> Continue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Accounts Popup -->
+    <div id="downloadPopup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">
+                    <i class="fas fa-file-download"></i> Export Accounts
+                </h3>
+                <button class="close-btn" onclick="closeDownloadPopup()">&times;</button>
+            </div>
+            
+            <p>Please enter your PIN to download the account list as a secure ZIP file.</p>
+            
+            <div class="form-group">
+                <label for="downloadPinInput">Admin PIN</label>
+                <input type="password" id="downloadPinInput" class="form-control" placeholder="Enter 6-digit PIN">
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="closeDownloadPopup()">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" onclick="verifyDownloadPin()">
+                    <i class="fas fa-download"></i> Download
+                </button>
+            </div>
+            
+            <div id="loadingSpinner" class="loading-spinner" style="display: none; margin: 20px auto;"></div>
+        </div>
+    </div>
+
+    <!-- Change PIN Popup -->
+    <div id="changePinPopup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">
+                    <i class="fas fa-key"></i> Change PIN
+                </h3>
+                <button class="close-btn" onclick="closeChangePinPopup()">&times;</button>
+            </div>
+            
+            <p id="changePinMessage" style="margin-bottom: 20px;">
+                You must change the default PIN (451) before changing your password.
+            </p>
+            
+            <div class="form-group">
+                <label for="oldPin">Current PIN</label>
+                <input type="password" id="oldPin" class="form-control" placeholder="Enter current PIN" maxlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="newPinInput">New PIN</label>
+                <input type="password" id="newPinInput" class="form-control" placeholder="Enter new 6-digit PIN" maxlength="6">
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="closeChangePinPopup()">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" onclick="changePin()">
+                    <i class="fas fa-save"></i> Change PIN
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIN Verification Popup -->
+    <div id="pinPopup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">
+                    <i class="fas fa-shield-alt"></i> Verify PIN
+                </h3>
+                <button class="close-btn" onclick="closePinPopup()">&times;</button>
+            </div>
+            
+            <p>Please enter your 6-digit PIN to continue.</p>
+            
+            <div class="form-group">
+                <label for="pinInput">Account PIN</label>
+                <input type="password" id="pinInput" class="form-control" placeholder="Enter 6-digit PIN" maxlength="6">
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="closePinPopup()">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" onclick="verifyPin()">
+                    <i class="fas fa-check-circle"></i> Verify
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTP Verification Popup -->
+    <div id="otpPopup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">
+                    <i class="fas fa-mobile-alt"></i> OTP Verification
+                </h3>
+                <button class="close-btn" onclick="closeOtpPopup()">&times;</button>
+            </div>
+            
+            <p id="otpMessage" style="margin-bottom: 20px;"></p>
+            
+            <div class="form-group">
+                <label for="otpInput">OTP Code</label>
+                <input type="text" id="otpInput" class="form-control" placeholder="Enter 6-digit OTP" maxlength="6">
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="closeOtpPopup()">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" onclick="verifyOtp()">
+                    <i class="fas fa-check-circle"></i> Verify OTP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Popup -->
+    <div id="authPopup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">
+                    <i class="fas fa-lock"></i> Authentication Required
+                </h3>
+                <button class="close-btn" onclick="closeAuthPopup()">&times;</button>
+            </div>
+            
+            <p id="authMessage" style="margin-bottom: 20px;">
+                Please enter the administrative PIN to access this section.
+            </p>
+            
+            <div class="form-group">
+                <label for="authPinInput">Admin PIN</label>
+                <input type="password" id="authPinInput" class="form-control" placeholder="Enter 6-digit PIN" maxlength="6">
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="closeAuthPopup()">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" onclick="verifyAuthPin()">
+                    <i class="fas fa-key"></i> Authenticate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="notification">
+        <i id="notificationIcon" class="fas fa-info-circle"></i>
+        <p id="notificationMessage"></p>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script>
+        // System Constants
+        const DEFAULT_PIN = '451';
+        const ADMIN_PIN = '451661';
+        const SYSTEM_NAME = 'Account Management System';
+        
+        // Global Variables
+        let otpStore = {};
+        let currentUsername = '';
+        let accountsToDelete = [];
+        let accountsToUpload = [];
+        let authenticatedForTabs = false;
+        let currentTabToOpen = '';
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            applyDefaultPins();
+            displayAccounts();
+            displayActivityLog();
+            setupEventListeners();
+            updateAuthIndicator();
+            
+            // Initialize file upload display
+            document.getElementById('uploadFile').addEventListener('change', function(e) {
+                const fileName = e.target.files[0]?.name || '';
+                const fileNameDisplay = document.getElementById('fileNameDisplay');
+                const fileNameText = document.getElementById('fileNameText');
+                
+                if (fileName) {
+                    fileNameText.textContent = fileName;
+                    fileNameDisplay.style.display = 'flex';
+                } else {
+                    fileNameDisplay.style.display = 'none';
+                }
+            });
+        });
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', logoutAdmin);
+            
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    switchTab(tabId);
+                });
+            });
+        }
+        
+        // Tab switching with authentication
+        function switchTab(tabId) {
+            // Check if trying to access protected tabs
+            if ((tabId === 'manage-tab' || tabId === 'activity-tab') && !authenticatedForTabs) {
+                currentTabToOpen = tabId;
+                showAuthPopup();
+                return;
+            }
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Activate selected tab and content
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            
+            // Special handling for certain tabs
+            if (tabId === 'manage-tab') {
+                displayAccounts();
+            } else if (tabId === 'activity-tab') {
+                displayActivityLog();
+            }
+        }
+        
+        // Account Management Functions
+        function createAccount() {
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const newPin = document.getElementById('newPin').value || DEFAULT_PIN;
+            const kodeToko = document.getElementById('kodeToko').value.trim();
+            const role = document.getElementById('role').value;
+            
+            // Validation
+            if (!newUsername || !newPassword || !confirmPassword || !kodeToko) {
+                showNotification('All required fields must be filled out.', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showNotification('Password and confirmation do not match.', 'error');
+                return;
+            }
+            
+            if (newPin.length !== 6 && newPin !== DEFAULT_PIN) {
+                showNotification('PIN must be 6 digits long.', 'error');
+                return;
+            }
+            
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            
+            // Check for duplicate username
+            if (accounts.some(account => account.username.toLowerCase() === newUsername.toLowerCase())) {
+                showNotification('Username already exists. Please choose a different username.', 'error');
+                return;
+            }
+            
+            // Encrypt password
+            const encryptedPassword = CryptoJS.AES.encrypt(newPassword, 'secret key 123').toString();
+            
+            // Create new account
+            const newAccount = {
+                username: newUsername,
+                password: encryptedPassword,
+                pin: newPin,
+                kodeToko: kodeToko,
+                role: role,
+                createdAt: new Date().toISOString(),
+                lastModified: new Date().toISOString()
+            };
+            
+            accounts.push(newAccount);
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            
+            // Log the activity
+            logActivity('System', 'Account Created', `Created new ${role} account: ${newUsername} for store ${kodeToko}`);
+            
+            // Show success message
+            showNotification('Account created successfully!', 'success');
+            
+            // Clear the form
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('newPin').value = '';
+            document.getElementById('kodeToko').value = '';
+            document.getElementById('role').value = 'user';
+            
+            // Refresh account display
+            displayAccounts();
+        }
+        
+        // Display all accounts in the table
+        function displayAccounts() {
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const accountListDisplay = document.getElementById('accountListDisplay');
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            accountListDisplay.innerHTML = '';
+            
+            // Special admin function
+            if (searchTerm === 'fxid') {
+                openDeletePopup();
+                return;
+            }
+            
+            accounts.forEach(account => {
+                // Check if account matches search criteria
+                if (searchTerm === '' || 
+                    account.username.toLowerCase().includes(searchTerm) || 
+                    (account.kodeToko && account.kodeToko.toLowerCase().includes(searchTerm)) ||
+                    (account.role && account.role.toLowerCase().includes(searchTerm))) {
+                    
+                    const isUnsafe = account.pin === DEFAULT_PIN;
+                    const decryptedPassword = CryptoJS.AES.decrypt(account.password, 'secret key 123').toString(CryptoJS.enc.Utf8);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${account.username}</td>
+                        <td>
+                            <div class="password-field">
+                                <span class="password-mask">••••••••</span>
+                                <button class="btn btn-icon btn-sm" onclick="togglePasswordVisibility(this, '${decryptedPassword}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td>${account.kodeToko || 'N/A'}</td>
+                        <td>
+                            <span class="status-badge ${getRoleBadgeClass(account.role)}">
+                                ${account.role || 'user'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${isUnsafe ? 'badge-danger' : 'badge-success'}">
+                                <i class="fas ${isUnsafe ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                                ${isUnsafe ? 'Unsafe' : 'Secure'}
+                            </span>
+                        </td>
+                        <td class="table-actions">
+                            <button class="btn btn-sm btn-primary" onclick="promptPin('${account.username}')">
+                                <i class="fas fa-key"></i> Change Password
+                            </button>
+                            ${isUnsafe ? `
+                            <button class="btn btn-sm btn-warning" onclick="promptChangePin('${account.username}')">
+                                <i class="fas fa-shield-alt"></i> Update PIN
+                            </button>
+                            ` : ''}
+                        </td>
+                    `;
+                    
+                    accountListDisplay.appendChild(row);
+                }
+            });
+        }
+        
+        // Toggle password visibility
+        function togglePasswordVisibility(button, password) {
+            const passwordField = button.parentElement;
+            const passwordMask = passwordField.querySelector('.password-mask');
+            
+            if (passwordMask.textContent === '••••••••') {
+                passwordMask.textContent = password;
+                button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                passwordMask.textContent = '••••••••';
+                button.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+        
+        // Get badge class based on role
+        function getRoleBadgeClass(role) {
+            switch (role) {
+                case 'admin': return 'badge-danger';
+                case 'manager': return 'badge-warning';
+                default: return 'badge-primary';
+            }
+        }
+        
+        // Search accounts
+        function searchAccounts() {
+            displayAccounts();
+        }
+        
+        // Display activity log
+        function displayActivityLog(searchTerm = '') {
+            const logs = JSON.parse(localStorage.getItem('laporan')) || [];
+            const logDisplay = document.getElementById('laporanListDisplay');
+            
+            logDisplay.innerHTML = '';
+            
+            // Filter logs if search term exists
+            const filteredLogs = searchTerm ? 
+                logs.filter(log => 
+                    (log.username && log.username.toLowerCase().includes(searchTerm)) || 
+                    (log.action && log.action.toLowerCase().includes(searchTerm)) ||
+                    (log.details && log.details.toLowerCase().includes(searchTerm))
+                ) : 
+                logs;
+            
+            // Show latest logs first
+            filteredLogs.reverse().slice(0, 100).forEach(log => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${log.waktu || new Date(log.timestamp || Date.now()).toLocaleString()}</td>
+                    <td>${log.username || 'System'}</td>
+                    <td>${log.action || 'Unknown Action'}</td>
+                    <td>${log.details || '-'}</td>
+                `;
+                logDisplay.appendChild(row);
+            });
+        }
+        
+        // Search activity logs
+        function searchLogs() {
+            const searchTerm = document.getElementById('searchLogInput').value.trim().toLowerCase();
+            displayActivityLog(searchTerm);
+        }
+        
+        // PIN Management Functions
+        function applyDefaultPins() {
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            let updated = false;
+            
+            accounts.forEach(account => {
+                if (!account.pin) {
+                    account.pin = DEFAULT_PIN;
+                    updated = true;
+                }
+                
+                if (!account.role) {
+                    account.role = 'user';
+                    updated = true;
+                }
+                
+                if (!account.createdAt) {
+                    account.createdAt = new Date().toISOString();
+                    updated = true;
+                }
+            });
+            
+            if (updated) {
+                localStorage.setItem('accounts', JSON.stringify(accounts));
+            }
+        }
+        
+        // Prompt for PIN verification
+        function promptPin(username) {
+            currentUsername = username;
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const account = accounts.find(a => a.username === username);
+            
+            if (!account) {
+                showNotification('Account not found.', 'error');
+                return;
+            }
+            
+            if (account.pin === DEFAULT_PIN) {
+                showNotification('You must change the default PIN before changing your password.', 'warning');
+                promptChangePin(username);
+            } else {
+                document.getElementById('pinPopup').classList.add('show');
+            }
+        }
+        
+        // Prompt to change PIN
+        function promptChangePin(username) {
+            currentUsername = username;
+            document.getElementById('changePinPopup').classList.add('show');
+        }
+        
+        // Change PIN function
+        function changePin() {
+            const oldPin = document.getElementById('oldPin').value;
+            const newPin = document.getElementById('newPinInput').value;
+            
+            if (!newPin || newPin.length !== 6) {
+                showNotification('PIN must be 6 digits long.', 'error');
+                return;
+            }
+            
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const accountIndex = accounts.findIndex(a => a.username === currentUsername);
+            
+            if (accountIndex === -1) {
+                showNotification('Account not found.', 'error');
+                return;
+            }
+            
+            if (accounts[accountIndex].pin !== oldPin) {
+                showNotification('Current PIN is incorrect.', 'error');
+                return;
+            }
+            
+            // Update PIN
+            accounts[accountIndex].pin = newPin;
+            accounts[accountIndex].lastModified = new Date().toISOString();
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            
+            // Log the activity
+            logActivity(currentUsername, 'PIN Changed', 'User PIN was updated');
+            
+            showNotification('PIN successfully changed!', 'success');
+            closeChangePinPopup();
+            displayAccounts();
+        }
+        
+        // Verify PIN
+        function verifyPin() {
+            const pin = document.getElementById('pinInput').value;
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const account = accounts.find(a => a.username === currentUsername);
+            
+            if (!account || account.pin !== pin) {
+                showNotification('Incorrect PIN.', 'error');
+                return;
+            }
+            
+            // Generate OTP
+            const otp = generateOTP();
+            otpStore[currentUsername] = {
+                otp,
+                expiry: Date.now() + 5 * 60 * 1000 // 5 minutes
+            };
+            
+            // Try to copy to clipboard
+            try {
+                navigator.clipboard.writeText(otp).then(() => {
+                    document.getElementById('otpMessage').textContent = `OTP for ${currentUsername} is: ${otp} (copied to clipboard)`;
+                    document.getElementById('pinPopup').classList.remove('show');
+                    document.getElementById('otpPopup').classList.add('show');
+                }).catch(() => {
+                    document.getElementById('otpMessage').textContent = `OTP for ${currentUsername} is: ${otp}`;
+                    document.getElementById('pinPopup').classList.remove('show');
+                    document.getElementById('otpPopup').classList.add('show');
+                });
+            } catch (err) {
+                document.getElementById('otpMessage').textContent = `OTP for ${currentUsername} is: ${otp}`;
+                document.getElementById('pinPopup').classList.remove('show');
+                document.getElementById('otpPopup').classList.add('show');
+            }
+        }
+        
+        // Verify OTP
+        function verifyOtp() {
+            const otpInput = document.getElementById('otpInput').value;
+            const storedOtp = otpStore[currentUsername];
+            
+            if (!storedOtp || Date.now() > storedOtp.expiry || otpInput !== storedOtp.otp) {
+                showNotification('Invalid or expired OTP.', 'error');
+                return;
+            }
+            
+            closeOtpPopup();
+            showChangePasswordPopup();
+        }
+        
+        // Show change password popup
+        function showChangePasswordPopup() {
+            const newPassword = prompt('Enter new password:');
+            if (!newPassword) return;
+            
+            updatePassword(currentUsername, newPassword);
+        }
+        
+        // Update password
+        function updatePassword(username, newPassword) {
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const accountIndex = accounts.findIndex(a => a.username === username);
+            
+            if (accountIndex === -1) {
+                showNotification('Account not found.', 'error');
+                return;
+            }
+            
+            // Encrypt and update password
+            const encryptedPassword = CryptoJS.AES.encrypt(newPassword, 'secret key 123').toString();
+            accounts[accountIndex].password = encryptedPassword;
+            accounts[accountIndex].lastModified = new Date().toISOString();
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            
+            // Log the activity
+            logActivity(username, 'Password Changed', 'User password was updated');
+            
+            showNotification('Password successfully changed!', 'success');
+            
+            // Reset OTP and clear inputs
+            delete otpStore[username];
+            document.getElementById('pinInput').value = '';
+            document.getElementById('otpInput').value = '';
+            
+            displayAccounts();
+        }
+        
+        // Generate OTP
+        function generateOTP() {
+            return Array.from({length: 6}, () => Math.floor(Math.random() * 10)).join('');
+        }
+        
+        // Bulk Upload Functions
+        function openUploadPopup() {
+            document.getElementById('uploadPopup').classList.add('show');
+        }
+        
+        function closeUploadPopup() {
+            document.getElementById('uploadPopup').classList.remove('show');
+            document.getElementById('uploadFile').value = '';
+            document.getElementById('fileNameDisplay').style.display = 'none';
+        }
+        
+        function uploadAccounts() {
+            const fileInput = document.getElementById('uploadFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showNotification('Please select a file to upload.', 'error');
+                return;
+            }
+            
+            // Show loading animation
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const accounts = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    accountsToUpload = accounts;
+                    processUpload();
+                } catch (error) {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    showNotification('Error reading Excel file. Please check the format.', 'error');
+                    console.error('Error reading Excel:', error);
+                }
+            };
+            
+            reader.onerror = function() {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showNotification('Error reading file. Please try again.', 'error');
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function processUpload() {
+            const storedAccounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const duplicateAccounts = [];
+            
+            accountsToUpload.forEach(account => {
+                if (account.Username && account.Password) {
+                    const existingAccount = storedAccounts.find(a => a.username.toLowerCase() === account.Username.toLowerCase());
+                    if (existingAccount) {
+                        duplicateAccounts.push(account.Username);
+                    }
+                }
+            });
+            
+            document.getElementById('loadingOverlay').style.display = 'none';
+            
+            if (duplicateAccounts.length > 0) {
+                const message = `The following usernames already exist: ${duplicateAccounts.join(', ')}. The system will modify these usernames. Do you want to continue?`;
+                document.getElementById('duplicateMessage').textContent = message;
+                document.getElementById('duplicatePopup').classList.add('show');
+            } else {
+                completeUpload(storedAccounts);
+            }
+        }
+        
+        function completeUpload(storedAccounts) {
+            let successCount = 0;
+            
+            accountsToUpload.forEach(account => {
+                if (account.Username && account.Password) {
+                    const username = account.Username;
+                    const encryptedPassword = CryptoJS.AES.encrypt(account.Password, 'secret key 123').toString();
+                    const pin = account.PIN || DEFAULT_PIN;
+                    const kodeToko = account.KodeToko || '';
+                    const role = account.Role || 'user';
+                    
+                    storedAccounts.push({
+                        username,
+                        password: encryptedPassword,
+                        pin,
+                        kodeToko,
+                        role,
+                        createdAt: new Date().toISOString(),
+                        lastModified: new Date().toISOString()
+                    });
+                    
+                    successCount++;
+                }
+            });
+            
+            localStorage.setItem('accounts', JSON.stringify(storedAccounts));
+            
+            // Log the activity
+            logActivity('System', 'Bulk Upload', `${successCount} accounts were imported`);
+            
+            showNotification(`Successfully uploaded ${successCount} accounts.`, 'success');
+            closeUploadPopup();
+            displayAccounts();
+        }
+        
+        function handleDuplicate(continueUpload) {
+            if (continueUpload) {
+                let storedAccounts = JSON.parse(localStorage.getItem('accounts')) || [];
+                let successCount = 0;
+                
+                accountsToUpload.forEach(account => {
+                    if (account.Username && account.Password) {
+                        let username = account.Username;
+                        let counter = 1;
+                        
+                        // Add numerical suffix to duplicate usernames
+                        while (storedAccounts.some(a => a.username.toLowerCase() === username.toLowerCase())) {
+                            username = `${account.Username}${counter}`;
+                            counter++;
+                        }
+                        
+                        const encryptedPassword = CryptoJS.AES.encrypt(account.Password, 'secret key 123').toString();
+                        const pin = account.PIN || DEFAULT_PIN;
+                        const kodeToko = account.KodeToko || '';
+                        const role = account.Role || 'user';
+                        
+                        storedAccounts.push({
+                            username,
+                            password: encryptedPassword,
+                            pin,
+                            kodeToko,
+                            role,
+                            createdAt: new Date().toISOString(),
+                            lastModified: new Date().toISOString()
+                        });
+                        
+                        successCount++;
+                    }
+                });
+                
+                localStorage.setItem('accounts', JSON.stringify(storedAccounts));
+                
+                // Log the activity
+                logActivity('System', 'Bulk Upload', `${successCount} accounts were imported with username modifications`);
+                
+                showNotification(`Successfully uploaded ${successCount} accounts with modified usernames.`, 'success');
+                closeDuplicatePopup();
+                displayAccounts();
+            } else {
+                showNotification('Upload canceled.', 'warning');
+                closeDuplicatePopup();
+            }
+        }
+        
+        // Account Export Functions
+        function openDownloadPopup() {
+            document.getElementById('downloadPopup').classList.add('show');
+        }
+        
+        function closeDownloadPopup() {
+            document.getElementById('downloadPopup').classList.remove('show');
+            document.getElementById('downloadPinInput').value = '';
+        }
+        
+        function verifyDownloadPin() {
+            const pin = document.getElementById('downloadPinInput').value;
+            
+            if (pin !== ADMIN_PIN) {
+                showNotification('Incorrect PIN.', 'error');
+                return;
+            }
+            
+            document.getElementById('loadingSpinner').style.display = 'block';
+            
+            setTimeout(() => {
+                downloadAccountsAsZip();
+                document.getElementById('loadingSpinner').style.display = 'none';
+                closeDownloadPopup();
+            }, 1000);
+        }
+        
+        function downloadAccountsAsZip() {
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            
+            // Format data for export
+            const exportData = accounts.map(account => ({
+                Username: account.username,
+                Password: CryptoJS.AES.decrypt(account.password, 'secret key 123').toString(CryptoJS.enc.Utf8),
+                PIN: account.pin,
+                'Store Code': account.kodeToko || '',
+                Role: account.role || 'user',
+                'Created At': account.createdAt,
+                'Last Modified': account.lastModified || ''
+            }));
+            
+            // Create worksheet
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            
+            // Auto-size columns
+            const wscols = [
+                {wch: 20}, {wch: 20}, {wch: 10}, 
+                {wch: 15}, {wch: 12}, {wch: 20}, {wch: 20}
+            ];
+            ws['!cols'] = wscols;
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Accounts');
+            
+            // Generate Excel file
+            const excelData = XLSX.write(wb, {bookType: 'xlsx', type: 'binary'});
+            
+            // Create ZIP file
+            const zip = new JSZip();
+            
+            // Add Excel file to ZIP
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+            const excelFilename = `account_export_${timestamp}.xlsx`;
+            
+            zip.file(excelFilename, excelData, {binary: true});
+            
+            // Add README file
+            zip.file('README.txt', 
+                `ACCOUNT EXPORT - ${new Date().toLocaleString()}\n\n` +
+                `This file contains sensitive account information. Please handle with care.\n` +
+                `Total accounts exported: ${accounts.length}\n\n` +
+                `CONFIDENTIAL - FOR AUTHORIZED PERSONNEL ONLY`
+            );
+            
+            // Generate ZIP file
+            zip.generateAsync({type: 'blob'}).then(content => {
+                // Create download link
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = `account_export_${timestamp}.zip`;
+                link.click();
+                
+                // Log the activity
+                logActivity('System', 'Account Export', `Exported ${accounts.length} accounts to ZIP file`);
+                
+                showNotification('Account export completed successfully!', 'success');
+            });
+        }
+        
+        // Account Deletion Functions
+        function openDeletePopup() {
+            document.getElementById('deletePopup').classList.add('show');
+            displayUsernames();
+        }
+        
+        function closeDeletePopup() {
+            document.getElementById('deletePopup').classList.remove('show');
+            accountsToDelete = [];
+            document.getElementById('deleteList').innerHTML = '';
+        }
+        
+        function displayUsernames() {
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const usernameList = document.getElementById('usernameList');
+            
+            usernameList.innerHTML = '';
+            
+            accounts.forEach(account => {
+                const item = document.createElement('div');
+                item.className = 'username-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="user_${account.username}" value="${account.username}">
+                    <label for="user_${account.username}">
+                        ${account.username} 
+                        <span class="status-badge ${getRoleBadgeClass(account.role)}" style="margin-left: 8px;">
+                            ${account.role}
+                        </span>
+                        ${account.kodeToko ? `<span style="margin-left: 8px;">- ${account.kodeToko}</span>` : ''}
+                    </label>
+                `;
+                usernameList.appendChild(item);
+            });
+        }
+        
+        function filterUsernames() {
+            const filter = document.getElementById('searchDeleteInput').value.toLowerCase();
+            const items = document.querySelectorAll('#usernameList .username-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+        
+        function addToDeleteList() {
+            const checkedItems = document.querySelectorAll('#usernameList input[type="checkbox"]:checked');
+            const deleteList = document.getElementById('deleteList');
+            
+            accountsToDelete = [];
+            deleteList.innerHTML = '';
+            
+            checkedItems.forEach(item => {
+                const username = item.value;
+                if (!accountsToDelete.includes(username)) {
+                    accountsToDelete.push(username);
+                    
+                    const li = document.createElement('div');
+                    li.className = 'username-item';
+                    li.innerHTML = `
+                        ${username}
+                        <button class="btn btn-danger btn-sm" style="margin-left: auto;" onclick="removeFromDeleteList('${username}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    deleteList.appendChild(li);
+                }
+            });
+        }
+        
+        function removeFromDeleteList(username) {
+            accountsToDelete = accountsToDelete.filter(name => name !== username);
+            const deleteList = document.getElementById('deleteList');
+            
+            deleteList.innerHTML = '';
+            
+            accountsToDelete.forEach(name => {
+                const li = document.createElement('div');
+                li.className = 'username-item';
+                li.innerHTML = `
+                    ${name}
+                    <button class="btn btn-danger btn-sm" style="margin-left: auto;" onclick="removeFromDeleteList('${name}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                deleteList.appendChild(li);
+            });
+        }
+        
+        function confirmDelete() {
+            if (accountsToDelete.length === 0) {
+                showNotification('No accounts selected for deletion.', 'warning');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to delete ${accountsToDelete.length} account(s)? This action cannot be undone.`)) {
+                return;
+            }
+            
+            let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const originalLength = accounts.length;
+            
+            // Filter out accounts to be deleted
+            accounts = accounts.filter(account => !accountsToDelete.includes(account.username));
+            
+            localStorage.setItem('accounts', JSON.stringify(accounts));
+            
+            // Log the activity
+            logActivity('System', 'Accounts Deleted', `Deleted ${originalLength - accounts.length} accounts: ${accountsToDelete.join(', ')}`);
+            
+            showNotification(`Successfully deleted ${accountsToDelete.length} account(s).`, 'success');
+            
+            // Reset and close
+            accountsToDelete = [];
+            closeDeletePopup();
+            displayAccounts();
+        }
+        
+        // Authentication Functions
+        function showAuthPopup() {
+            document.getElementById('authMessage').textContent = 
+                `Please enter the administrative PIN to access ${currentTabToOpen === 'manage-tab' ? 'Manage Accounts' : 'Activity Log'}`;
+            document.getElementById('authPopup').classList.add('show');
+        }
+        
+        function closeAuthPopup() {
+            document.getElementById('authPopup').classList.remove('show');
+            document.getElementById('authPinInput').value = '';
+        }
+        
+        function verifyAuthPin() {
+            const pin = document.getElementById('authPinInput').value;
+            
+            if (pin !== ADMIN_PIN) {
+                showNotification('Incorrect PIN. Access denied.', 'error');
+                return;
+            }
+            
+            authenticatedForTabs = true;
+            closeAuthPopup();
+            updateAuthIndicator();
+            
+            // Log the authentication
+            logActivity('System', 'Admin Access', `Authenticated for ${currentTabToOpen === 'manage-tab' ? 'Manage Accounts' : 'Activity Log'}`);
+            
+            showNotification('Authentication successful. You now have administrative access.', 'success');
+            
+            // Switch to the requested tab
+            switchTab(currentTabToOpen);
+        }
+        
+        function logoutAdmin() {
+            if (authenticatedForTabs) {
+                authenticatedForTabs = false;
+                updateAuthIndicator();
+                switchTab('create-tab');
+                
+                // Log the logout
+                logActivity('System', 'Admin Logout', 'Administrative session ended');
+                
+                showNotification('You have been logged out from administrative functions.', 'success');
+            }
+        }
+        
+        function updateAuthIndicator() {
+            const authStatus = document.getElementById('authStatusText');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (authenticatedForTabs) {
+                authStatus.textContent = 'Admin: Active';
+                logoutBtn.style.display = 'block';
+                
+                // Update tab locks
+                document.querySelectorAll('.tab').forEach(tab => {
+                    const lockIcon = tab.querySelector('.fa-lock');
+                    if (lockIcon) {
+                        lockIcon.className = 'fas fa-check-circle';
+                        lockIcon.style.color = 'var(--success-color)';
+                    }
+                });
+            } else {
+                authStatus.textContent = 'Admin: Inactive';
+                logoutBtn.style.display = 'none';
+                
+                // Update tab locks
+                document.querySelectorAll('.tab').forEach(tab => {
+                    const checkIcon = tab.querySelector('.fa-check-circle');
+                    if (checkIcon) {
+                        checkIcon.className = 'fas fa-lock';
+                        checkIcon.style.color = '';
+                    }
+                });
+            }
+        }
+        
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notificationToast');
+            const icon = document.getElementById('notificationIcon');
+            const messageElement = document.getElementById('notificationMessage');
+            
+            // Reset classes
+            notification.className = 'notification';
+            
+            // Set type-specific styles
+            switch (type) {
+                case 'error':
+                    notification.classList.add('error');
+                    icon.className = 'fas fa-exclamation-circle';
+                    break;
+                case 'success':
+                    notification.classList.add('success');
+                    icon.className = 'fas fa-check-circle';
+                    break;
+                case 'warning':
+                    notification.classList.add('warning');
+                    icon.className = 'fas fa-exclamation-triangle';
+                    break;
+                default:
+                    icon.className = 'fas fa-info-circle';
+            }
+            
+            messageElement.textContent = message;
+            notification.classList.add('show');
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Activity Logging
+        function logActivity(username, action, details = '') {
+            let logs = JSON.parse(localStorage.getItem('laporan')) || [];
+            
+            logs.push({
+                timestamp: Date.now(),
+                waktu: new Date().toLocaleString(),
+                username: username || 'System',
+                action: action,
+                details: details
+            });
+            
+            // Keep only the latest 500 logs
+            if (logs.length > 500) {
+                logs = logs.slice(-500);
+            }
+            
+            localStorage.setItem('laporan', JSON.stringify(logs));
+            
+            // Refresh log display if on the activity tab
+            if (document.getElementById('activity-tab').classList.contains('active')) {
+                displayActivityLog();
+            }
+        }
+        
+        // Popup Close Functions
+        function closeDuplicatePopup() {
+            document.getElementById('duplicatePopup').classList.remove('show');
+        }
+        
+        function closePinPopup() {
+            document.getElementById('pinPopup').classList.remove('show');
+            document.getElementById('pinInput').value = '';
+        }
+        
+        function closeOtpPopup() {
+            document.getElementById('otpPopup').classList.remove('show');
+            document.getElementById('otpInput').value = '';
+        }
+        
+        function closeChangePinPopup() {
+            document.getElementById('changePinPopup').classList.remove('show');
+            document.getElementById('oldPin').value = '';
+            document.getElementById('newPinInput').value = '';
+        }
+    </script>
+</body>
+</html>
