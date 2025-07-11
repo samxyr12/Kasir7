@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Biometrik fxid - Advanced</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --error-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --cyber-gradient: linear-gradient(135deg, #0f3460 0%, #0c1c2d 50%, #1a0b33 100%);
+    --neon-blue: #00d4ff;
+    --neon-purple: #8b5cf6;
+    --neon-pink: #f06292;
+    --neon-green: #00ff88;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --dark-glass: rgba(0, 0, 0, 0.3);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --shadow-primary: 0 25px 50px rgba(0, 0, 0, 0.3);
+    --shadow-neon: 0 0 30px rgba(0, 212, 255, 0.4);
+    --border-radius: 20px;
+    --transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--cyber-gradient);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    padding: 20px 0;
+}
+
+/* Cyberpunk Grid Background */
+.cyber-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 1;
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+}
+
+/* Animated Orbs */
+.orb-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: orbFloat 8s ease-in-out infinite;
+}
+
+.orb:nth-child(1) {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.orb:nth-child(2) {
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+    top: 60%;
+    right: 15%;
+    animation-delay: -2s;
+}
+
+.orb:nth-child(3) {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(240, 98, 146, 0.1) 0%, transparent 70%);
+    bottom: 30%;
+    left: 20%;
+    animation-delay: -4s;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+/* Holographic Effect */
+.holographic-lines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.holo-line {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+    animation: holoScan 4s linear infinite;
+}
+
+.holo-line:nth-child(1) { top: 20%; animation-delay: 0s; }
+.holo-line:nth-child(2) { top: 40%; animation-delay: 1s; }
+.holo-line:nth-child(3) { top: 60%; animation-delay: 2s; }
+.holo-line:nth-child(4) { top: 80%; animation-delay: 3s; }
+
+@keyframes holoScan {
+    0% { opacity: 0; transform: translateX(-100%); }
+    50% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(100%); }
+}
+
+.biometric-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+    z-index: 10;
+    position: relative;
+    margin: 50px auto;
+}
+
+.auth-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-primary);
+    padding: 50px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    animation: cardEntry 1s cubic-bezier(0.23, 1, 0.32, 1);
+    min-height: 800px;
+}
+
+.auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(0, 212, 255, 0.1) 0%, 
+        rgba(139, 92, 246, 0.1) 50%, 
+        rgba(240, 98, 146, 0.1) 100%);
+    opacity: 0.3;
+    z-index: -1;
+}
+
+.auth-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.1), 
+        transparent);
+    animation: cardShimmer 3s infinite;
+    z-index: -1;
+}
+
+@keyframes cardEntry {
+    0% { 
+        opacity: 0; 
+        transform: translateY(50px) scale(0.9); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+@keyframes cardShimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.logo {
+    font-size: 80px;
+    background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 30px;
+    animation: logoGlow 2s ease-in-out infinite alternate;
+    position: relative;
+    display: inline-block;
+}
+
+.logo::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: -1;
+    animation: logoAura 3s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+    0% { filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5)); }
+    100% { filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.8)); }
+}
+
+@keyframes logoAura {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; }
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    font-family: 'Inter', sans-serif;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* Enhanced Fingerprint Area */
+.fingerprint-area {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 40px;
+    border: 3px solid rgba(0, 212, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+    background: var(--dark-glass);
+    backdrop-filter: blur(10px);
+}
+
+.fingerprint-area::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        var(--neon-blue),
+        transparent
+    );
+    animation: rotate 3s linear infinite;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.fingerprint-area.active::before {
+    opacity: 1;
+}
+
+.fingerprint-area.active {
+    border-color: var(--neon-blue);
+    box-shadow: 
+        0 0 40px rgba(0, 212, 255, 0.6),
+        inset 0 0 40px rgba(0, 212, 255, 0.1);
+    background: rgba(0, 212, 255, 0.05);
+    animation: pulseGlow 2s infinite;
+}
+
+.fingerprint-area.success {
+    border-color: var(--neon-green);
+    box-shadow: 
+        0 0 40px rgba(0, 255, 136, 0.8),
+        inset 0 0 40px rgba(0, 255, 136, 0.2);
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.fingerprint-area.error {
+    border-color: var(--neon-pink);
+    box-shadow: 
+        0 0 40px rgba(240, 98, 146, 0.8),
+        inset 0 0 40px rgba(240, 98, 146, 0.2);
+    background: rgba(240, 98, 146, 0.1);
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulseGlow {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.05); filter: brightness(1.2); }
+}
+
+.fingerprint-icon {
+    font-size: 90px;
+    color: var(--text-primary);
+    transition: var(--transition);
+    filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.4));
+    z-index: 2;
+}
+
+.fingerprint-area.active .fingerprint-icon {
+    color: var(--neon-blue);
+    animation: iconPulse 1.5s infinite;
+}
+
+.fingerprint-area.success .fingerprint-icon {
+    color: var(--neon-green);
+}
+
+.fingerprint-area.error .fingerprint-icon {
+    color: var(--neon-pink);
+}
+
+@keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Enhanced Scan Lines */
+.scan-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.scan-line {
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+    box-shadow: 0 0 10px var(--neon-blue);
+    animation: scanAnimation 2s ease-in-out infinite;
+}
+
+.scan-line:nth-child(1) { animation-delay: 0s; }
+.scan-line:nth-child(2) { animation-delay: 0.5s; }
+.scan-line:nth-child(3) { animation-delay: 1s; }
+
+.fingerprint-area.active .scan-lines {
+    opacity: 1;
+}
+
+@keyframes scanAnimation {
+    0% { top: 15%; opacity: 0; transform: scaleX(0.5); }
+    50% { top: 50%; opacity: 1; transform: scaleX(1); }
+    100% { top: 85%; opacity: 0; transform: scaleX(0.5); }
+}
+
+/* Enhanced Buttons */
+.auth-button {
+    background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+    color: var(--text-primary);
+    border: none;
+    padding: 18px 36px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 auto 40px;
+    width: 100%;
+    max-width: 300px;
+    transition: var(--transition);
+    box-shadow: 
+        0 10px 30px rgba(0, 212, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.auth-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    transition: var(--transition);
+}
+
+.auth-button:hover::before {
+    left: 100%;
+}
+
+.auth-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 15px 40px rgba(0, 212, 255, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.auth-button:active {
+    transform: translateY(-1px);
+}
+
+.auth-button:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.auth-button:disabled:hover {
+    transform: none;
+}
+
+/* Alternative Authentication Section */
+.alternative-auth {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.alternative-auth p {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.pin-button {
+    background: var(--dark-glass);
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    color: var(--text-primary);
+    padding: 14px 30px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+}
+
+.pin-button:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Enhanced PIN Authentication */
+.pin-auth-container {
+    display: none;
+    margin-top: 24px;
+    animation: slideInUp 0.5s ease;
+}
+
+.pin-auth-container.show {
+    display: block;
+}
+
+@keyframes slideInUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.pin-auth-container input {
+    width: 100%;
+    padding: 18px 24px;
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 16px;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+    background: var(--dark-glass);
+    color: var(--text-primary);
+    backdrop-filter: blur(10px);
+}
+
+.pin-auth-container input::placeholder {
+    color: var(--text-muted);
+}
+
+.pin-auth-container input:focus {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.4);
+    outline: none;
+}
+
+.pin-auth-container button {
+    background: linear-gradient(45deg, var(--neon-green), #4facfe);
+    color: var(--text-primary);
+    border: none;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: var(--transition);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+}
+
+.pin-auth-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(0, 255, 136, 0.4);
+}
+
+/* Enhanced Status Messages */
+.auth-status {
+    margin-top: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    height: 24px;
+    transition: var(--transition);
+    text-shadow: 0 0 10px currentColor;
+}
+
+.auth-status.success {
+    color: var(--neon-green);
+}
+
+.auth-status.error {
+    color: var(--neon-pink);
+}
+
+/* Progress Bar */
+.progress-container {
+    width: 100%;
+    height: 6px;
+    background: var(--dark-glass);
+    border-radius: 3px;
+    margin: 20px 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple));
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.3s ease;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Security Indicators */
+.security-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.security-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    background: var(--dark-glass);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: var(--transition);
+    min-width: 80px;
+}
+
+.security-indicator.active {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+.security-indicator i {
+    font-size: 24px;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+.security-indicator.active i {
+    color: var(--neon-blue);
+    filter: drop-shadow(0 0 10px var(--neon-blue));
+}
+
+.security-indicator span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Session Timer */
+.session-timer {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    background: var(--dark-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    z-index: 100;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Loading Animation */
+.loading-spinner {
+    display: none;
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(0, 212, 255, 0.3);
+    border-top: 4px solid var(--neon-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+    filter: drop-shadow(0 0 10px var(--neon-blue));
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Notification Toast */
+.toast {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dark-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 12px;
+    padding: 16px 24px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    opacity: 0;
+    transition: var(--transition);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.toast.show {
+    opacity: 1;
+    animation: slideInDown 0.5s ease;
+}
+
+.toast.success {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.toast.error {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 20px rgba(240, 98, 146, 0.3);
+}
+
+@keyframes slideInDown {
+    from { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(-20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(-50%) translateY(0); 
+    }
+}
+
+/* Particle Effects */
+.particle-effect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+    animation: particleFloat 6s infinite ease-in-out;
+    box-shadow: 0 0 6px var(--neon-blue);
+}
+
+@keyframes particleFloat {
+    0%, 100% { 
+        transform: translateY(0px) rotate(0deg); 
+        opacity: 0.4; 
+    }
+    50% { 
+        transform: translateY(-30px) rotate(180deg); 
+        opacity: 1; 
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .biometric-container {
+        padding: 16px;
+    }
+
+    .auth-card {
+        padding: 40px 30px;
+        min-height: 700px;
+    }
+
+    .fingerprint-area {
+        width: 180px;
+        height: 180px;
+    }
+
+    .fingerprint-icon {
+        font-size: 70px;
+    }
+
+    .logo {
+        font-size: 60px;
+    }
+
+    h1 {
+        font-size: 26px;
+    }
+
+    .security-indicators {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .session-timer {
+        top: 20px;
+        right: 20px;
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- Cyberpunk Background Effects -->
+    <div class="cyber-grid"></div>
+    <div class="particle-effect"></div>
+    <div class="orb-container">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+    <div class="holographic-lines">
+        <div class="holo-line"></div>
+        <div class="holo-line"></div>
+        <div class="holo-line"></div>
+        <div class="holo-line"></div>
+    </div>
+    
+    <!-- Animated Background -->
+    <div class="particles"></div>
+    <div class="geometric-shapes"></div>
+    
+    <!-- Session Timer -->
+    <div class="session-timer" id="sessionTimer">
+        <i class="fas fa-clock"></i> <span id="timerDisplay">--:--</span>
+    </div>
+
+    <div class="biometric-container">
+        <div class="auth-card">
+            <div class="logo">
+                <i class="fas fa-fingerprint"></i>
+            </div>
+            <h1>Verifikasi Biometrik</h1>
+            <p class="subtitle">Sistem keamanan berlapis untuk melindungi akses Anda ke data barang</p>
+            
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner"></div>
+            
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="fingerprint-area" id="fingerprintArea">
+                <div class="fingerprint-icon">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                <div class="scan-lines">
+                    <div class="scan-line"></div>
+                    <div class="scan-line"></div>
+                    <div class="scan-line"></div>
+                </div>
+            </div>
+            
+            <button id="authButton" class="auth-button">
+                <i class="fas fa-fingerprint"></i> Verifikasi Sidik Jari
+            </button>
+            
+            <!-- Security Indicators -->
+            <div class="security-indicators">
+                <div class="security-indicator" id="biometricIndicator">
+                    <i class="fas fa-fingerprint"></i>
+                    <span>Biometrik</span>
+                </div>
+                <div class="security-indicator" id="encryptionIndicator">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Enkripsi</span>
+                </div>
+                <div class="security-indicator" id="sessionIndicator">
+                    <i class="fas fa-clock"></i>
+                    <span>Sesi</span>
+                </div>
+            </div>
+            
+            <div class="alternative-auth">
+                <p>Atau gunakan metode alternatif</p>
+                <button id="pinButton" class="pin-button">
+                    <i class="fas fa-key"></i> Kata Sandi
+                </button>
+            </div>
+            
+            <div id="pinAuthContainer" class="pin-auth-container">
+                <input type="password" id="passwordInput" placeholder="Masukkan kata sandi Anda" maxlength="50">
+                <button id="submitPinButton">
+                    <i class="fas fa-unlock"></i> Verifikasi
+                </button>
+            </div>
+            
+            <div id="authStatus" class="auth-status"></div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        // Configuration
+        const CONFIG = {
+            MAIN_PAGE: "barang.html",
+            INITIAL_TIMEOUT: 3 * 60 * 1000, // 3 minutes
+            EXTENDED_TIMEOUT: 10 * 60 * 1000, // 10 minutes
+            MAX_ATTEMPTS: 3,
+            LOCKOUT_TIME: 5 * 60 * 1000, // 5 minutes
+            PROGRESS_STEPS: 5
+        };
+
+        // State management
+        let authAttempts = 0;
+        let isLocked = false;
+        let sessionTimer = null;
+        let progressInterval = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            createBackgroundEffects();
+            setupEventListeners();
+            startSessionTimer();
+        });
+
+        function initializeApp() {
+            const elements = {
+                authButton: document.getElementById('authButton'),
+                pinButton: document.getElementById('pinButton'),
+                pinAuthContainer: document.getElementById('pinAuthContainer'),
+                submitPinButton: document.getElementById('submitPinButton'),
+                fingerprintArea: document.getElementById('fingerprintArea'),
+                authStatus: document.getElementById('authStatus'),
+                passwordInput: document.getElementById('passwordInput'),
+                loadingSpinner: document.getElementById('loadingSpinner'),
+                progressBar: document.getElementById('progressBar')
+            };
+
+            // Store elements globally
+            window.elements = elements;
+
+            // Check login status
+            checkLoginStatus();
+            
+            // Check biometric support
+            checkBiometricSupport();
+            
+            // Initialize security indicators
+            updateSecurityIndicators();
+            
+            // Check for lockout
+            checkLockoutStatus();
+        }
+
+        function setupEventListeners() {
+            const { authButton, pinButton, submitPinButton, passwordInput } = window.elements;
+
+            authButton.addEventListener('click', handleBiometricAuth);
+            pinButton.addEventListener('click', togglePinAuth);
+            submitPinButton.addEventListener('click', handlePasswordAuth);
+            
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handlePasswordAuth();
+            });
+
+            // Add input validation
+            passwordInput.addEventListener('input', validatePasswordInput);
+        }
+
+        function createBackgroundEffects() {
+            // Create animated particles
+            const particlesContainer = document.querySelector('.particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+
+            // Create geometric shapes
+            const shapesContainer = document.querySelector('.geometric-shapes');
+            const shapes = ['triangle', 'square', 'circle'];
+            
+            for (let i = 0; i < 15; i++) {
+                const shape = document.createElement('div');
+                const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
+                shape.className = `shape ${shapeType}`;
+                shape.style.left = Math.random() * 100 + '%';
+                shape.style.top = Math.random() * 100 + '%';
+                shape.style.animationDelay = Math.random() * 20 + 's';
+                shape.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                shapesContainer.appendChild(shape);
+            }
+        }
+
+        function checkLoginStatus() {
+            const username = localStorage.getItem('username');
+            const loggedIn = localStorage.getItem('loggedIn');
+            
+            if (!username || loggedIn !== 'true') {
+                showToast('Anda belum login. Mengalihkan ke halaman login...', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            }
+        }
+
+        async function checkBiometricSupport() {
+            const { authButton } = window.elements;
+            
+            try {
+                if (!window.PublicKeyCredential) {
+                    throw new Error('WebAuthn not supported');
+                }
+
+                const available = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                
+                if (!available) {
+                    authButton.disabled = true;
+                    authButton.innerHTML = '<i class="fas fa-times-circle"></i> Sidik Jari Tidak Tersedia';
+                    updateAuthStatus('Perangkat tidak mendukung autentikasi biometrik', 'error');
+                    document.getElementById('biometricIndicator').style.opacity = '0.5';
+                }
+            } catch (error) {
+                authButton.disabled = true;
+                authButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Tidak Didukung';
+                updateAuthStatus('Browser tidak mendukung Web Authentication API', 'error');
+                document.getElementById('biometricIndicator').style.opacity = '0.5';
+            }
+        }
+
+        function checkLockoutStatus() {
+            const lockoutData = localStorage.getItem('authLockout');
+            if (lockoutData) {
+                const lockout = JSON.parse(lockoutData);
+                const now = Date.now();
+                
+                if (now < lockout.expiresAt) {
+                    isLocked = true;
+                    const remainingTime = Math.ceil((lockout.expiresAt - now) / 1000);
+                    showLockoutMessage(remainingTime);
+                } else {
+                    localStorage.removeItem('authLockout');
+                    authAttempts = 0;
+                }
+            }
+        }
+
+        function showLockoutMessage(seconds) {
+            const { authButton, pinButton } = window.elements;
+            authButton.disabled = true;
+            pinButton.disabled = true;
+            
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            const timeString = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            
+            updateAuthStatus(`Akun terkunci. Coba lagi dalam ${timeString}`, 'error');
+            
+            setTimeout(() => {
+                if (seconds > 1) {
+                    showLockoutMessage(seconds - 1);
+                } else {
+                    isLocked = false;
+                    authButton.disabled = false;
+                    pinButton.disabled = false;
+                    updateAuthStatus('Lockout berakhir. Anda dapat mencoba lagi.', 'success');
+                    localStorage.removeItem('authLockout');
+                    authAttempts = 0;
+                }
+            }, 1000);
+        }
+
+        async function handleBiometricAuth() {
+            if (isLocked) return;
+            
+            const { authButton, fingerprintArea, loadingSpinner } = window.elements;
+            
+            try {
+                updateAuthStatus('Memulai verifikasi biometrik...', '');
+                fingerprintArea.classList.add('active');
+                loadingSpinner.style.display = 'block';
+                document.getElementById('biometricIndicator').classList.add('active');
+                
+                startProgressAnimation();
+                
+                const publicKey = {
+                    challenge: crypto.getRandomValues(new Uint8Array(32)),
+                    rp: {
+                        name: "Sistem Kasir FXID",
+                        id: window.location.hostname
+                    },
+                    user: {
+                        id: crypto.getRandomValues(new Uint8Array(16)),
+                        name: localStorage.getItem('username') || "user@example.com",
+                        displayName: "Pengguna Terverifikasi"
+                    },
+                    pubKeyCredParams: [
+                        { type: "public-key", alg: -7 },  // ES256
+                        { type: "public-key", alg: -257 }, // RS256
+                        { type: "public-key", alg: -37 }   // PS256
+                    ],
+                    authenticatorSelection: {
+                        authenticatorAttachment: "platform",
+                        userVerification: "required",
+                        residentKey: "preferred"
+                    },
+                    timeout: 60000,
+                    attestation: "direct"
+                };
+                
+                const credential = await navigator.credentials.create({ publicKey });
+                
+                // Simulate additional security checks
+                await simulateSecurityChecks();
+                
+                handleAuthSuccess('biometric');
+                
+            } catch (error) {
+                handleAuthError(error, 'biometric');
+            } finally {
+                loadingSpinner.style.display = 'none';
+                stopProgressAnimation();
+                document.getElementById('biometricIndicator').classList.remove('active');
+            }
+        }
+
+        function handlePasswordAuth() {
+            if (isLocked) return;
+            
+            const { passwordInput } = window.elements;
+            const password = passwordInput.value.trim();
+            
+            if (!password) {
+                updateAuthStatus('Silakan masukkan kata sandi', 'error');
+                return;
+            }
+            
+            updateAuthStatus('Memverifikasi kata sandi...', '');
+            startProgressAnimation();
+            
+            setTimeout(() => {
+                validatePassword(password);
+            }, 1000);
+        }
+
+        function validatePassword(password) {
+            const currentUser = localStorage.getItem('username');
+            const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            const account = accounts.find(acc => acc.username === currentUser);
+
+            if (!account) {
+                handleAuthError(new Error('Akun tidak ditemukan'), 'password');
+                return;
+            }
+
+            try {
+                const decryptedPassword = CryptoJS.AES.decrypt(account.password, 'secret key 123').toString(CryptoJS.enc.Utf8);
+                
+                if (password === decryptedPassword) {
+                    handleAuthSuccess('password');
+                } else {
+                    handleAuthError(new Error('Kata sandi salah'), 'password');
+                }
+            } catch (error) {
+                handleAuthError(new Error('Kesalahan sistem saat memverifikasi'), 'password');
+            }
+        }
+
+        function handleAuthSuccess(method) {
+            const { fingerprintArea, passwordInput } = window.elements;
+            
+            fingerprintArea.classList.remove('active');
+            fingerprintArea.classList.add('success');
+            
+            updateAuthStatus('Verifikasi berhasil! Mengalihkan ke dashboard...', 'success');
+            updateSecurityIndicators('success');
+            
+            showToast(`Autentikasi ${method === 'biometric' ? 'biometrik' : 'kata sandi'} berhasil!`, 'success');
+            
+            // Reset attempts
+            authAttempts = 0;
+            localStorage.removeItem('authAttempts');
+            
+            // Complete progress
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = '100%';
+            
+            setTimeout(() => {
+                redirectToMainPage();
+            }, 2000);
+        }
+
+        function handleAuthError(error, method) {
+            const { fingerprintArea, passwordInput } = window.elements;
+            
+            authAttempts++;
+            localStorage.setItem('authAttempts', authAttempts.toString());
+            
+            fingerprintArea.classList.remove('active');
+            fingerprintArea.classList.add('error');
+            
+            if (method === 'password') {
+                passwordInput.value = '';
+            }
+            
+            const remainingAttempts = CONFIG.MAX_ATTEMPTS - authAttempts;
+            
+            if (authAttempts >= CONFIG.MAX_ATTEMPTS) {
+                // Lock the account
+                const lockoutData = {
+                    timestamp: Date.now(),
+                    expiresAt: Date.now() + CONFIG.LOCKOUT_TIME
+                };
+                localStorage.setItem('authLockout', JSON.stringify(lockoutData));
+                
+                showLockoutMessage(CONFIG.LOCKOUT_TIME / 1000);
+                showToast('Akun terkunci karena terlalu banyak percobaan gagal', 'error');
+            } else {
+                updateAuthStatus(`Verifikasi gagal. Sisa percobaan: ${remainingAttempts}`, 'error');
+                showToast(`Verifikasi gagal. ${remainingAttempts} percobaan tersisa`, 'error');
+            }
+            
+            setTimeout(() => {
+                fingerprintArea.classList.remove('error');
+            }, 3000);
+            
+            stopProgressAnimation();
+        }
+
+        function togglePinAuth() {
+            const { pinAuthContainer, passwordInput } = window.elements;
+            
+            if (pinAuthContainer.classList.contains('show')) {
+                pinAuthContainer.classList.remove('show');
+                setTimeout(() => {
+                    pinAuthContainer.style.display = 'none';
+                }, 500);
+            } else {
+                pinAuthContainer.style.display = 'block';
+                setTimeout(() => {
+                    pinAuthContainer.classList.add('show');
+                    passwordInput.focus();
+                }, 50);
+            }
+        }
+
+        function validatePasswordInput() {
+            const { passwordInput } = window.elements;
+            const password = passwordInput.value;
+            
+            // Add visual feedback for password strength
+            if (password.length > 0) {
+                passwordInput.style.borderColor = password.length >= 6 ? '#4facfe' : '#fa709a';
+            } else {
+                passwordInput.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            }
+        }
+
+        function updateAuthStatus(message, type = '') {
+            const authStatus = document.getElementById('authStatus');
+            authStatus.textContent = message;
+            authStatus.className = `auth-status ${type}`;
+        }
+
+        function updateSecurityIndicators(status = 'default') {
+            const indicators = ['biometricIndicator', 'encryptionIndicator', 'sessionIndicator'];
+            
+            indicators.forEach(id => {
+                const indicator = document.getElementById(id);
+                indicator.classList.remove('active');
+                
+                if (status === 'success') {
+                    indicator.classList.add('active');
+                }
+            });
+        }
+
+        function startProgressAnimation() {
+            const progressBar = document.getElementById('progressBar');
+            let progress = 0;
+            
+            progressInterval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+            }, 200);
+        }
+
+        function stopProgressAnimation() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+            
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = '0%';
+        }
+
+        function simulateSecurityChecks() {
+            return new Promise(resolve => {
+                let step = 0;
+                const steps = [
+                    'Memverifikasi identitas biometrik...',
+                    'Melakukan enkripsi data...',
+                    'Memvalidasi sertifikat keamanan...',
+                    'Memeriksa integritas sistem...',
+                    'Menyelesaikan autentikasi...'
+                ];
+                
+                const interval = setInterval(() => {
+                    if (step < steps.length) {
+                        updateAuthStatus(steps[step], '');
+                        step++;
+                    } else {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, 800);
+            });
+        }
+
+        function redirectToMainPage() {
+            const authData = {
+                token: generateAuthToken(),
+                timestamp: Date.now(),
+                expiresAt: Date.now() + CONFIG.INITIAL_TIMEOUT,
+                method: 'biometric'
+            };
+            
+            localStorage.setItem('authData', JSON.stringify(authData));
+            window.location.href = CONFIG.MAIN_PAGE;
+        }
+
+        function generateAuthToken() {
+            const randomBytes = crypto.getRandomValues(new Uint8Array(32));
+            const randomString = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
+            const timestamp = Date.now().toString(36);
+            return `auth_${randomString}_${timestamp}`;
+        }
+
+        function startSessionTimer() {
+            const timerDisplay = document.getElementById('timerDisplay');
+            const sessionData = localStorage.getItem('authData');
+            
+            if (sessionData) {
+                const auth = JSON.parse(sessionData);
+                const remaining = auth.expiresAt - Date.now();
+                
+                if (remaining > 0) {
+                    updateTimer(remaining);
+                } else {
+                    timerDisplay.textContent = 'Expired';
+                }
+            } else {
+                timerDisplay.textContent = 'No Session';
+            }
+        }
+
+        function updateTimer(remaining) {
+            const timerDisplay = document.getElementById('timerDisplay');
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            
+            timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (remaining > 0) {
+                setTimeout(() => updateTimer(remaining - 1000), 1000);
+            } else {
+                timerDisplay.textContent = 'Expired';
+                showToast('Sesi telah berakhir', 'error');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Enhanced security features
+        function detectDeviceChanges() {
+            const deviceInfo = {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                screenResolution: `${screen.width}x${screen.height}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            
+            const storedDevice = localStorage.getItem('deviceInfo');
+            if (storedDevice) {
+                const stored = JSON.parse(storedDevice);
+                const isChanged = Object.keys(deviceInfo).some(key => 
+                    deviceInfo[key] !== stored[key]
+                );
+                
+                if (isChanged) {
+                    showToast('Perangkat berbeda terdeteksi. Verifikasi tambahan mungkin diperlukan.', 'warning');
+                }
+            }
+            
+            localStorage.setItem('deviceInfo', JSON.stringify(deviceInfo));
+        }
+
+        // Anti-tampering measures
+        function detectTampering() {
+            const originalTitle = document.title;
+            
+            setInterval(() => {
+                if (document.title !== originalTitle) {
+                    document.title = originalTitle;
+                    showToast('Aktivitas mencurigakan terdeteksi', 'error');
+                }
+            }, 1000);
+        }
+
+        // Initialize security features
+        document.addEventListener('DOMContentLoaded', () => {
+            detectDeviceChanges();
+            detectTampering();
+            
+            // Prevent right-click context menu
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            
+            // Prevent F12 and other dev tools shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                    (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                    (e.ctrlKey && e.key === 'u')) {
+                    e.preventDefault();
+                    showToast('Aksi tidak diizinkan', 'error');
+                }
+            });
+        });
+
+        // Auto-logout on tab visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('Tab hidden - starting security timer');
+            } else {
+                console.log('Tab visible - resuming normal operation');
+            }
+        });
+
+        // Network status monitoring
+        window.addEventListener('online', () => {
+            showToast('Koneksi internet tersedia', 'success');
+            document.getElementById('encryptionIndicator').classList.add('active');
+        });
+
+        window.addEventListener('offline', () => {
+            showToast('Koneksi internet terputus', 'error');
+            document.getElementById('encryptionIndicator').classList.remove('active');
+        });
+    </script>
+</body>
+</html>

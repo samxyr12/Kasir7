@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <title>Kasir Pintar</title>
+    <link rel="stylesheet" href="kasir.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="promosi.css">
+   
+   
+   
+    <style>
+        
+/* Reset and base styles */
+:root {
+  --barcodeScan-primary: #2563eb;
+  --barcodeScan-secondary: #1e40af;
+  --barcodeScan-accent: #3b82f6;
+  --barcodeScan-success: #10b981;
+  --barcodeScan-error: #ef4444;
+  --barcodeScan-text: #1f2937;
+  --barcodeScan-bg: #ffffff;
+  --barcodeScan-overlay: rgba(0, 0, 0, 0.75);
+  --barcodeScan-radius: 12px;
+  --barcodeScan-transition: 0.3s;
+}
+
+/* Base Modal Styles */
+.barcodeScanner-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Ubah ke align paling atas */
+    padding-top: 50px; /* Tambahkan padding dari atas */
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.barcodeScanner-modal.active {
+    opacity: 1;
+}
+
+.barcodeScanner-modal-content {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    width: 90%;
+    max-width: 480px;
+    position: relative;
+    transform: scale(0.95);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.barcodeScanner-modal.active .barcodeScanner-modal-content {
+    transform: scale(1);
+}
+
+/* Title Styles */
+.barcodeScanner-title {
+    text-align: center;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+/* Close Button */
+.barcodeScanner-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.barcodeScanner-close:hover {
+    background: #e0e0e0;
+    color: #333;
+    transform: rotate(90deg);
+}
+
+/* Video Container */
+.barcodeScanner-video-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: #000;
+    margin-bottom: 20px;
+}
+
+#barcodeScanner-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Scan Line Animation */
+.barcodeScanner-scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        rgba(0,255,0,0) 0%,
+        rgba(0,255,0,0.8) 50%,
+        rgba(0,255,0,0) 100%);
+    animation: scanLine 2s linear infinite;
+    top: 0;
+}
+
+@keyframes scanLine {
+    0% {
+        top: 0%;
+    }
+    100% {
+        top: 100%;
+    }
+}
+
+/* Scanner Guide */
+.barcodeScanner-guide {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 70%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+}
+
+.barcodeScanner-guide::before,
+.barcodeScanner-guide::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-color: #00ff00;
+    border-style: solid;
+}
+
+.barcodeScanner-guide::before {
+    top: -2px;
+    left: -2px;
+    border-width: 2px 0 0 2px;
+}
+
+.barcodeScanner-guide::after {
+    bottom: -2px;
+    right: -2px;
+    border-width: 0 2px 2px 0;
+}
+
+/* Success Animation */
+.barcodeScanner-success {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 255, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.barcodeScanner-success::before {
+    content: '✓';
+    font-size: 48px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    animation: successPop 0.3s ease-out;
+}
+
+@keyframes successPop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Loading Spinner */
+.barcodeScanner-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    margin: 20px auto;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error Message */
+.barcodeScanner-error {
+    background-color: #fff3f3;
+    color: #d63031;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 10px 0;
+    font-size: 14px;
+    text-align: center;
+    border-left: 4px solid #ff4d4d;
+    animation: errorShake 0.3s ease-in-out;
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+/* Button Styles */
+.barcodeScanner-button {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+}
+
+.barcodeScanner-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(99, 102, 241, 0.3);
+}
+
+.barcodeScanner-button:active {
+    transform: translateY(0);
+}
+
+/* Action Buttons Container */
+.barcodeScanner-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease-in-out;
+}
+
+.barcodeScanner-buttons.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Rescan and Finish Buttons */
+.barcodeScanner-rescan,
+.barcodeScanner-finish {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.barcodeScanner-rescan {
+    background-color: #f8f9fa;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+
+.barcodeScanner-rescan:hover {
+    background-color: #e5e7eb;
+}
+
+.barcodeScanner-finish {
+    background-color: #10b981;
+    color: white;
+    border: none;
+}
+
+.barcodeScanner-finish:hover {
+    background-color: #059669;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .barcodeScanner-modal-content {
+        width: 95%;
+        padding: 16px;
+    }
+
+    .barcodeScanner-title {
+        font-size: 1.25rem;
+        margin-bottom: 15px;
+    }
+
+    .barcodeScanner-buttons {
+        flex-direction: column;
+    }
+
+    .barcodeScanner-rescan,
+    .barcodeScanner-finish {
+        width: 100%;
+    }
+
+    .barcodeScanner-guide {
+        width: 85%;
+        height: 85%;
+    }
+}
+
+
+     .qr-scanner-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .qr-scanner-popup.qr-show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .qr-scanner-content {
+            background: linear-gradient(145deg, #ffffff, #f8f9ff);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            position: relative;
+            transform: scale(0.7) translateY(50px);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 2px solid rgba(102, 126, 234, 0.1);
+            min-width: 300px;
+        }
+
+        .qr-scanner-popup.qr-show .qr-scanner-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .qr-scanner-content::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+            border-radius: 22px;
+            z-index: -1;
+            opacity: 0.3;
+            animation: qrBorderGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes qrBorderGlow {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.6; }
+        }
+
+    
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Global animations and variables */
+:root {
+  --primary-color: #667eea;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-color: #f093fb;
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --success-color: #4ecdc4;
+  --success-gradient: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  --danger-color: #ff6b6b;
+  --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  --warning-color: #feca57;
+  --warning-gradient: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+  --glass-bg: rgba(255, 255, 255, 0.25);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --shadow-soft: 0 8px 32px rgba(31, 38, 135, 0.37);
+  --shadow-hard: 0 15px 35px rgba(0, 0, 0, 0.1);
+  --border-radius: 16px;
+  --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Keyframe animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotateY(-10deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-100px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes scanLine {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(102, 126, 234, 0.8), 0 0 60px rgba(102, 126, 234, 0.4);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Import SF Pro Display font (iOS style) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* iOS Design Variables */
+:root {
+  --ios-blue: #0A84FF; /* Brighter blue for contrast */
+  --ios-light-blue: #5AC8FA;
+  --ios-indigo: #5856D6;
+  --ios-purple: #AF52DE;
+  --ios-pink: #FF2D92;
+  --ios-red: #FF453A; /* Brighter red */
+  --ios-orange: #FF9F0A; /* Brighter orange */
+  --ios-yellow: #FFD60A; /* Brighter yellow */
+  --ios-green: #30D158; /* Brighter green */
+  --ios-teal: #5AC8FA;
+  --ios-cyan: #64D2FF;
+  
+  /* Solid Colors for Popup and Buttons */
+  --popup-bg: #FFFFFF; /* Solid white background for popup */
+  --popup-border: #D1D1D6; /* Light gray border for contrast */
+  --button-bg: #0A84FF; /* Solid blue for buttons */
+  --button-border: #0055B3; /* Darker blue border */
+  --button-text: #FFFFFF; /* White text for buttons */
+  --shadow-ios: 0 10px 40px rgba(0, 0, 0, 0.2); /* Simplified shadow */
+  --shadow-elevated: 0 20px 60px rgba(0, 0, 0, 0.15);
+  
+  /* Background Gradients */
+  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg-gradient-alt: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --bg-gradient-ios: linear-gradient(135deg, #0A84FF 0%, #5856D6 50%, #AF52DE 100%);
+  
+  /* Effects */
+  --border-radius: 20px;
+  --border-radius-sm: 12px;
+  --border-radius-lg: 28px;
+  
+  /* Transitions */
+  --transition-ios: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-elastic: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* iOS Animations */
+@keyframes liquidFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes liquidBounce {
+  0% {
+    transform: scale(0.8) translateY(20px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05) translateY(-5px);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* iOS Popup Container */
+.qr-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay for contrast */
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-popup.show {
+  display: flex;
+}
+
+/* iOS Popup Content */
+.qr-popup-content {
+  background: var(--popup-bg); /* Solid white background */
+  border: 2px solid var(--popup-border); /* Solid border */
+  border-radius: var(--border-radius-lg);
+  padding: 40px;
+  width: 90%;
+  max-width: 720px;
+  box-shadow: var(--shadow-ios);
+  text-align: center;
+  position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  animation: liquidBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* iOS Style Action Buttons */
+.qr-action-btn {
+  background: var(--button-bg); /* Solid blue */
+  color: var(--button-text); /* White text */
+  border: 1px solid var(--button-border); /* Solid border */
+  padding: 16px 32px;
+  margin: 12px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: var(--transition-ios);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  text-transform: none;
+  letter-spacing: -0.5px;
+}
+
+.qr-action-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  background: #0071E3; /* Slightly darker blue on hover */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.qr-action-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* iOS Headers */
+.qr-popup-content h2 {
+  margin: 0 0 32px;
+  font-size: 32px;
+  font-weight: 700;
+  color: #000000; /* Black text for white background */
+  letter-spacing: -1px;
+}
+
+/* iOS QR Reader */
+.qr-reader {
+  margin: 32px auto;
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-ios);
+  animation: liquidBounce 1s ease-out 0.4s both;
+  background: #F2F2F7; /* Light gray background */
+  border: 1px solid var(--popup-border);
+}
+
+.qr-reader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--ios-blue) 50%, 
+    transparent 100%);
+  animation: liquidWave 2.5s infinite;
+  z-index: 10;
+}
+
+/* Enhanced History/Riwayat Table Styles */
+.qr-history-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 20px 0;
+    background: #FFFFFF;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    max-height: 500px;
+    display: block;
+    overflow-y: auto;
+    border: 1px solid #E5E5EA;
+}
+
+.qr-history-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.qr-history-table th {
+    background: #F2F2F7;
+    color: #000000;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 16px 12px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid #E5E5EA;
+}
+
+.qr-history-table td {
+    padding: 14px 12px;
+    font-size: 14px;
+    color: #3A3A3C;
+    border-bottom: 1px solid #F2F2F7;
+    transition: all 0.2s ease;
+}
+
+.qr-history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.qr-history-table tbody tr:hover {
+    background-color: rgba(10, 132, 255, 0.05);
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    border: none;
+}
+
+.status-success {
+    background: rgba(48, 209, 88, 0.15);
+    color: #30D158;
+}
+
+.status-pending {
+    background: rgba(255, 214, 10, 0.15);
+    color: #FFD60A;
+}
+
+.status-failed {
+    background: rgba(255, 69, 58, 0.15);
+    color: #FF453A;
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    margin-right: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.action-btn i {
+    font-size: 12px;
+}
+
+.action-btn.view {
+    background: rgba(10, 132, 255, 0.1);
+    color: #0A84FF;
+}
+
+.action-btn.edit {
+    background: rgba(255, 159, 10, 0.1);
+    color: #FF9F0A;
+}
+
+.action-btn.delete {
+    background: rgba(255, 69, 58, 0.1);
+    color: #FF453A;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+/* Scrollbar Styling */
+.qr-history-table::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.qr-history-table::-webkit-scrollbar-track {
+    background: #F2F2F7;
+    border-radius: 10px;
+}
+
+.qr-history-table::-webkit-scrollbar-thumb {
+    background: #C7C7CC;
+    border-radius: 10px;
+}
+
+.qr-history-table::-webkit-scrollbar-thumb:hover {
+    background: #AEAEB2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .qr-history-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .qr-history-table th,
+    .qr-history-table td {
+        padding: 12px 8px;
+        font-size: 13px;
+    }
+    
+    .action-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #8E8E93;
+    font-size: 14px;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 32px;
+    margin-bottom: 16px;
+    color: #C7C7CC;
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.loading-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(10, 132, 255, 0.2);
+    border-top-color: #0A84FF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Search and Filter */
+.search-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1px solid #E5E5EA;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #0A84FF;
+    box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.2);
+}
+
+.date-filter {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.date-input {
+    padding: 8px 12px;
+    border: 1px solid #E5E5EA;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+/* iOS Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  border: 1px solid var(--popup-border);
+}
+
+.status-success {
+  background: var(--ios-green);
+  color: #FFFFFF;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.status-pending {
+  background: var(--ios-yellow);
+  color: #000000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.status-failed {
+  background: var(--ios-red);
+  color: #FFFFFF;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* iOS PIN Input */
+.qr-admin-pin-input {
+  padding: 18px 24px;
+  margin: 24px 0;
+  width: 100%;
+  max-width: 320px;
+  border: 1px solid var(--popup-border);
+  background: #FFFFFF;
+  border-radius: var(--border-radius);
+  font-size: 18px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+  transition: var(--transition-ios);
+  text-align: center;
+  letter-spacing: 4px;
+  color: #000000; /* Black text */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.qr-admin-pin-input:focus {
+  outline: none;
+  border-color: var(--ios-blue);
+  box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.3);
+  transform: scale(1.02);
+}
+
+.qr-admin-pin-input::placeholder {
+  color: #6B6B70; /* Gray for placeholder */
+  letter-spacing: normal;
+}
+
+/* iOS Popup Buttons */
+.qr-popup-content button {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--button-border);
+  padding: 16px 28px;
+  margin: 10px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: var(--transition-ios);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.qr-popup-content button:hover {
+  transform: translateY(-2px) scale(1.02);
+  background: #0071E3;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Close Button Styling */
+.qr-popup-content button:last-child,
+.qr-popup-content button[onclick*="close"] {
+  background: var(--ios-red);
+  color: #FFFFFF;
+  border-color: #CC231F;
+}
+
+.qr-popup-content button[last-child]:hover,
+.qr-popup-content button[onclick*="close"]:hover {
+  background: #CC231F;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* iOS Action Buttons */
+.action-btn {
+  padding: 8px 16px;
+  margin: 4px;
+  border: 1px solid var(--popup-border);
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: var(--transition-ios);
+}
+
+.action-btn.edit {
+  background: var(--ios-orange);
+  color: #FFFFFF;
+}
+
+.action-btn.delete {
+  background: var(--ios-red);
+  color: #FFFFFF;
+}
+
+.action-btn.view {
+  background: var(--ios-blue);
+  color: #FFFFFF;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* iOS Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--button-bg);
+  border: 1px solid var(--button-border);
+  color: var(--button-text);
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: var(--shadow-ios);
+  transition: var(--transition-elastic);
+  z-index: 999;
+}
+
+.fab:hover {
+  transform: scale(1.1) translateY(-5px);
+  background: #0071E3;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* iOS Toast Notification */
+.toast {
+  position: fixed;
+  top: 60px;
+  right: 30px;
+  padding: 16px 24px;
+  background: #FFFFFF;
+  color: #000000;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--popup-border);
+  box-shadow: var(--shadow-ios);
+  transform: translateX(400px);
+  transition: var(--transition-elastic);
+  z-index: 1001;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast.error {
+  background: var(--ios-red);
+  color: #FFFFFF;
+  border-color: #CC231F;
+}
+
+.toast.warning {
+  background: var(--ios-yellow);
+  color: #000000;
+  border-color: #D1A700;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #D1D1D6;
+  border-radius: 50%;
+  border-top-color: var(--ios-blue);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .qr-popup-content {
+    width: 95%;
+    padding: 30px 24px;
+    margin: 20px;
+    border-radius: var(--border-radius);
+  }
+
+  .qr-popup-content h2 {
+    font-size: 26px;
+    margin-bottom: 24px;
+  }
+
+  .qr-reader {
+    max-width: 320px;
+  }
+
+  .qr-history-table th,
+  .qr-history-table td {
+    padding: 14px 12px;
+    font-size: 14px;
+  }
+
+  .qr-action-btn,
+  .qr-popup-content button {
+    padding: 14px 24px;
+    font-size: 16px;
+    margin: 8px;
+  }
+
+  .fab {
+    bottom: 30px;
+    right: 30px;
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .qr-popup-content {
+    padding: 24px 18px;
+    border-radius: 16px;
+  }
+
+  .qr-popup-content h2 {
+    font-size: 22px;
+  }
+
+  .qr-history-table th,
+  .qr-history-table td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+
+  .action-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    margin: 2px;
+  }
+
+  .toast {
+    right: 20px;
+    left: 20px;
+    transform: translateY(-100px);
+  }
+
+  .toast.show {
+    transform: translateY(0);
+  }
+}
+
+/* Dark Mode Enhancements */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --popup-bg: #1C1C1E; /* Dark background */
+    --popup-border: #3A3A3C; /* Darker gray border */
+    --button-bg: #0A84FF;
+    --button-border: #0055B3;
+    --button-text: #FFFFFF;
+  }
+
+  .qr-popup-content h2,
+  .qr-history-table th,
+  .qr-history-table td,
+  .qr-admin-pin-input {
+    color: #FFFFFF; /* White text for dark background */
+  }
+
+  .qr-admin-pin-input::placeholder {
+    color: #8E8E93; /* Light gray for placeholder */
+  }
+
+  .qr-history-table,
+  .qr-reader {
+    background: #2C2C2E;
+  }
+
+  .qr-history-table th {
+    background: #3A3A3C;
+  }
+
+  .qr-history-table tbody tr {
+    background: #2C2C2E;
+  }
+
+  .qr-history-table tbody tr:hover {
+    background: #3A3A3C;
+  }
+
+  .toast {
+    background: #2C2C2E;
+    color: #FFFFFF;
+    border-color: #3A3A3C;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .qr-popup-content {
+    border: 2px solid #000000;
+  }
+  
+  .qr-action-btn,
+  .qr-popup-content button {
+    border: 2px solid #000000;
+    color: #FFFFFF;
+  }
+}
+
+
+.search-filter-container {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.filter-group label {
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.clear-filters {
+  padding: 8px 15px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.clear-filters:hover {
+  background: #c0392b;
+}
+
+.history-summary {
+  margin-bottom: 10px;
+  font-style: italic;
+  color: #666;
+}
+
+/* Button Bar Navigation System */
+.nav-container {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    z-index: 1000;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
+}
+
+.main-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #111827, #1f2937);
+    color: #f9fafb;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.main-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.3);
+}
+
+.nav-buttons {
+    position: absolute;
+    display: flex;
+    gap: 15px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Top buttons column */
+.nav-buttons.top {
+    bottom: 85px;
+    left: 0;
+    flex-direction: column;
+    transform: translateY(30px) scale(0.9);
+}
+
+/* Right buttons row */
+.nav-buttons.right {
+    bottom: 0;
+    left: 85px;
+    flex-direction: row;
+    transform: translateX(30px) scale(0.9);
+}
+
+.nav-container.active .nav-buttons {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(0) scale(1);
+}
+
+.nav-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #1f2937, #374151);
+    color: #f9fafb;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transform: scale(0.5);
+    opacity: 0;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.nav-container.active .nav-btn {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1) !important;
+    background: linear-gradient(145deg, #4b5563, #374151);
+}
+
+.tooltip {
+    position: absolute;
+    background: #111827;
+    color: #f9fafb;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+    z-index: -1;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transform-origin: center;
+}
+
+/* Tooltip positioning */
+.nav-buttons.top .nav-btn .tooltip {
+    left: 50%;
+    transform: translateX(-50%) translateY(10px) scale(0.95);
+    bottom: -25px;
+}
+
+.nav-buttons.right .nav-btn .tooltip {
+    left: 50%;
+    transform: translateX(-50%) translateY(10px) scale(0.95);
+    top: -25px;
+}
+
+.nav-btn:hover .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* Button colors and delays */
+.nav-btn:nth-child(1) { 
+    transition-delay: 0.1s; 
+    background: linear-gradient(145deg, #3b82f6, #2563eb);
+}
+.nav-btn:nth-child(2) { 
+    transition-delay: 0.15s; 
+    background: linear-gradient(145deg, #10b981, #059669);
+}
+.nav-btn:nth-child(3) { 
+    transition-delay: 0.2s; 
+    background: linear-gradient(145deg, #ef4444, #dc2626);
+}
+.nav-btn:nth-child(4) { 
+    transition-delay: 0.25s; 
+    background: linear-gradient(145deg, #f59e0b, #d97706);
+}
+.nav-btn:nth-child(5) { 
+    transition-delay: 0.3s; 
+    background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+}
+.nav-btn:nth-child(6) { 
+    transition-delay: 0.35s; 
+    background: linear-gradient(145deg, #ec4899, #db2777);
+}
+
+/* Glow animation */
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+    50% { box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0.5); }
+}
+
+.nav-container.active .main-btn {
+    animation: glow 3s infinite;
+}
+
+/* Floating animation */
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0); }
+    50% { transform: translateY(-15px) rotate(3deg); }
+}
+
+.nav-container:not(.active) .main-btn {
+    animation: float 6s ease-in-out infinite;
+}
+
+/* Ripple effect */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: ripple 0.8s ease-out;
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Bounce-in animation for buttons */
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.nav-container.active .nav-btn {
+    animation: bounceIn 0.6s both;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .nav-container {
+        bottom: 20px;
+        left: 20px;
+    }
+    
+    .main-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .nav-buttons.top {
+        bottom: 70px;
+    }
+    
+    .nav-buttons.right {
+        left: 70px;
+    }
+    
+    .nav-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .tooltip {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+    <header class="header">
+        <input class="menu-btn" type="checkbox" id="menu-btn" />
+        <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
+        <ul class="menu">
+            <li><a href="kasir.html">KASIR</a></li>
+            <li><a href="laporan.html">LAPORAN</a></li>
+            <li><a href="void.html">VOID</a></li>
+            <li><a href="setoran.html">SETORAN</a></li>
+            <li><a href="akun.html">AKUN</a></li>
+            <li><a href="retur.html">RETUR</a></li>
+            <li><a href="barang.html">BARANG</a></li>
+        </ul>
+    </header>
+ 
+ 
+ 
+    <div id="popupDaftarBarang" class="popup" style="display:none;">
+        <div class="popup-content">
+            <span onclick="tutupPopupDaftarBarang()" class="close">&times;</span>
+            <h2>Daftar Barang</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Kode Barang</th>
+                        <th>Nama Barang</th>
+                        <th>Stok</th>
+                        <th>Harga Jual</th>
+                    </tr>
+                </thead>
+                <tbody id="daftarBarangTabel"></tbody>
+            </table>
+        </div>
+    </div> 
+   
+    <h2>Tambah ke Keranjang</h2>
+   <div class="input-container">
+    <input type="text" id="kodeNamaBarang" placeholder="Kode/Nama Barang">
+    <!-- Elemen saran akan ditambahkan secara dinamis -->
+</div>
+<input type="number" id="jumlahBarang" placeholder="Jumlah">
+   
+ 
+<button onclick="tambahKeKeranjang()" style="
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    gap: 10px;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+" onmouseover="
+    this.style.transform='translateY(-5px) rotateX(10deg)';
+    this.style.boxShadow='0 10px 20px rgba(0, 0, 0, 0.3)';
+    this.style.background='linear-gradient(135deg, #2c3e50, #34495e)';
+" 
+   onmouseout="
+    this.style.transform='translateY(0) rotateX(0)';
+    this.style.boxShadow='0 6px 12px rgba(0, 0, 0, 0.2)';
+    this.style.background='#2c3e50';
+"
+>
+    🛒 Tambah ke Keranjang
+</button>
+
+<!-- Tombol untuk Scan QR dan Riwayat -->
+<button id="scanQrBtn" style="
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    gap: 10px;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+" onmouseover="
+    this.style.transform='translateY(-5px) rotateX(10deg)';
+    this.style.boxShadow='0 10px 20px rgba(0, 0, 0, 0.3)';
+    this.style.background='linear-gradient(135deg, #2c3e50, #34495e)';
+" 
+   onmouseout="
+    this.style.transform='translateY(0) rotateX(0)';
+    this.style.boxShadow='0 6px 12px rgba(0, 0, 0, 0.2)';
+    this.style.background='#2c3e50';
+"
+>
+    Scan QR
+</button>
+<button id="historyBtn" style="
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    gap: 10px;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+" onmouseover="
+    this.style.transform='translateY(-5px) rotateX(10deg)';
+    this.style.boxShadow='0 10px 20px rgba(0, 0, 0, 0.3)';
+    this.style.background='linear-gradient(135deg, #2c3e50, #34495e)';
+" 
+   onmouseout="
+    this.style.transform='translateY(0) rotateX(0)';
+    this.style.boxShadow='0 6px 12px rgba(0, 0, 0, 0.2)';
+    this.style.background='#2c3e50';
+"
+>
+    Riwayat
+</button>
+<!-- Popup untuk Scan QR Transaksi -->
+<div id="scanQrPopup" class="qr-popup" style="display:none;">
+  <div class="qr-popup-content">
+    <h2>Scan QR Transaksi</h2>
+    <div id="qrReader" class="qr-reader"></div>
+    <button onclick="closeScanQrPopup()">Tutup</button>
+  </div>
+</div>
+
+<!-- Popup untuk Riwayat -->
+<div id="historyPopup" class="qr-popup" style="display:none;">
+  <div class="qr-popup-content">
+    <h2>Riwayat Transaksi</h2>
+    
+    <!-- Search/Filter Section -->
+    <div class="search-filter-container">
+      <div class="filter-group">
+        <label for="searchInput">Cari:</label>
+        <input type="text" id="searchInput" placeholder="Cari berdasarkan ID, Nama, atau Barang..." onkeyup="filterHistory()">
+      </div>
+      
+    <div class="filter-group">
+  <label for="statusFilter">Filter Status:</label>
+  <select id="statusFilter" onchange="filterHistory()">
+    <option value="all">Semua Status</option>
+    <option value="selesai">Selesai</option>
+    <option value="pending">Pending</option>
+  </select>
+</div>
+      <div class="filter-group">
+        <label for="dateFilter">Filter Tanggal:</label>
+        <input type="date" id="dateFilter" onchange="filterHistory()">
+      </div>
+      
+      <button class="clear-filters" onclick="clearFilters()">Hapus Filter</button>
+    </div>
+    
+    <div class="history-summary">
+      Menampilkan <span id="displayCount">0</span> dari <span id="totalCount">0</span> transaksi
+    </div>
+    
+    <table id="historyTable" class="qr-history-table">
+      <thead>
+        <tr>
+          <th>ID Transaksi</th>
+          <th>Nama</th>
+          <th>Barang</th>
+          <th>Status</th>
+          <th>Tanggal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button onclick="closeHistoryPopup()">Tutup</button>
+  </div>
+</div>
+
+<!-- Popup untuk Scan QR PIN -->
+<div id="scanPinPopup" class="qr-popup" style="display:none;">
+  <div class="qr-popup-content">
+    <h2>Scan QR PIN</h2>
+    <div id="qrPinReader" class="qr-reader"></div>
+    <button onclick="closeScanPinPopup()">Tutup</button>
+  </div>
+</div>
+
+<!-- Popup untuk PIN Admin -->
+<div id="adminPinPopup" class="qr-popup" style="display:none;">
+  <div class="qr-popup-content">
+    <h2>Masukkan PIN Admin</h2>
+    <input type="password" id="adminPinInput" class="qr-admin-pin-input" placeholder="PIN Admin">
+    <button onclick="verifyAdminPin()">Verifikasi</button>
+    <button onclick="closeAdminPinPopup()">Tutup</button>
+  </div>
+</div>
+
+
+
+<button id="pendingButton" style="
+    display: none;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    gap: 10px;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+" onmouseover="
+    this.style.transform='translateY(-5px) rotateX(10deg)';
+    this.style.boxShadow='0 10px 20px rgba(0, 0, 0, 0.3)';
+    this.style.background='linear-gradient(135deg, #2c3e50, #34495e)';
+" 
+   onmouseout="
+    this.style.transform='translateY(0) rotateX(0)';
+    this.style.boxShadow='0 6px 12px rgba(0, 0, 0, 0.2)';
+    this.style.background='#2c3e50';
+"
+>
+    ⏳ Pending
+</button>
+
+<button id="unpendingButton" style="
+    display: none;
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    gap: 10px;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+" onmouseover="
+    this.style.transform='translateY(-5px) rotateX(10deg)';
+    this.style.boxShadow='0 10px 20px rgba(0, 0, 0, 0.3)';
+    this.style.background='linear-gradient(135deg, #2c3e50, #34495e)';
+" 
+   onmouseout="
+    this.style.transform='translateY(0) rotateX(0)';
+    this.style.boxShadow='0 6px 12px rgba(0, 0, 0, 0.2)';
+    this.style.background='#2c3e50';
+"
+>
+    🔓 Unpending
+</button>
+
+<button id="lihatDiskonButton" style="
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    gap: 10px;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+" onmouseover="
+    this.style.transform='translateY(-5px) rotateX(10deg)';
+    this.style.boxShadow='0 10px 20px rgba(0, 0, 0, 0.3)';
+    this.style.background='linear-gradient(135deg, #2c3e50, #34495e)';
+" 
+   onmouseout="
+    this.style.transform='translateY(0) rotateX(0)';
+    this.style.boxShadow='0 6px 12px rgba(0, 0, 0, 0.2)';
+    this.style.background='#2c3e50';
+"
+>
+    💸 Lihat Daftar Diskon
+</button>
+
+<button id="barcodeScanner-btn" style="
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    gap: 10px;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+" onmouseover="
+    this.style.transform='translateY(-5px) rotateX(10deg)';
+    this.style.boxShadow='0 10px 20px rgba(0, 0, 0, 0.3)';
+    this.style.background='linear-gradient(135deg, #2c3e50, #34495e)';
+" 
+   onmouseout="
+    this.style.transform='translateY(0) rotateX(0)';
+    this.style.boxShadow='0 6px 12px rgba(0, 0, 0, 0.2)';
+    this.style.background='#2c3e50';
+"
+>
+    🔍 Scan Barcode/QR Code
+</button>
+
+ 
+ 
+ 
+   <!-- Tombol Cetak Ulang Struk -->
+<button id="tombolCetakUlangStruk" class="tombol-cetak-ulang" title="Cetak Ulang Struk" onclick="cetakUlangStruk()">
+    <div class="icon-wrapper">
+        <i class="fas fa-receipt"></i>
+        <i class="fas fa-print overlay-icon"></i>
+    </div>
+   
+</button> 
+ 
+ 
+    
+<div id="barcodeScanner-popup" class="barcodeScanner-modal" style="display: none;">
+    <div class="barcodeScanner-modal-content">
+        <button class="barcodeScanner-close">×</button>
+        <h2 class="barcodeScanner-title">Scan Barcode/QR Code</h2>
+        
+        <div class="barcodeScanner-video-container">
+            <video id="barcodeScanner-video" playsinline autoplay></video>
+            <div class="barcodeScanner-scan-line"></div>
+            <div class="barcodeScanner-guide"></div>
+            <div class="barcodeScanner-success" style="display: none;"></div>
+        </div>
+        
+        <div class="barcodeScanner-spinner" style="display: none;"></div>
+        <div class="barcodeScanner-error" style="display: none;"></div>
+        
+        <div id="barcodeScanner-options" class="barcodeScanner-buttons" style="display: none;">
+            <button class="barcodeScanner-rescan">Scan Ulang</button>
+            <button class="barcodeScanner-finish">Selesai</button>
+        </div>
+    </div>
+</div>
+
+    <h2>Keranjang</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Nama</th>
+                <th>Jumlah</th>
+                <th>Harga</th>
+                <th>Diskon</th>
+                <th>Total</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="tabelKeranjang"></tbody>
+    </table>
+    <h3>Total:  <span id="totalKeranjang"></span></h3>
+   
+<button onclick="bayar()" style="
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4fcf70, #4ab0ff);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    gap: 10px;
+    outline: none;
+    transform: perspective(1px) translateZ(0);
+    position: relative;
+    overflow: hidden;
+" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.3)'" 
+   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.2)'"
+>
+    💳 Bayar
+</button>
+
+<button onclick="lihatLaporan()" style="
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ff6b6b, #ff9a9e);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    gap: 10px;
+    outline: none;
+    transform: perspective(1px) translateZ(0);
+    position: relative;
+    overflow: hidden;
+" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.3)'" 
+   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.2)'"
+>
+    📄 Lihat Laporan
+</button>
+       <div id="popupVoid" class="popup" style="display:none;">
+        <div class="popup-content">
+            <span onclick="tutupPopup()" class="close">&times;</span>
+            <h2>Verifikasi Void</h2>
+            <input type="password" id="pinVoid" placeholder="Masukkan PIN"><br>
+            <button onclick="verifikasiVoid()">Verifikasi</button>
+            <p id="voidCode" style="display:none;">Kode Void: <span id="generatedVoidCode"></span></p>
+            <input type="text" id="inputVoidCode" placeholder="Masukkan Kode Void" style="display:none;"><br>
+            <button onclick="prosesVoid()" style="display:none;">Proses Void</button>
+        </div>
+    </div>
+
+
+<!-- Payment Popup -->
+<div id="popup" class="popup fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style="display:none;">
+    <div class="popup-content bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <div class="popup-header flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">Metode Pembayaran</h2>
+            <span onclick="tutupPopup()" class="close text-gray-500 hover:text-gray-700 cursor-pointer text-2xl">×</span>
+        </div>
+
+        <div class="payment-methods flex justify-center gap-4 mb-4">
+            <button class="method-btn bg-gray-100 p-3 rounded-md hover:bg-gray-200 transition duration-200 flex items-center gap-2" onclick="pilihMetode('cash')">
+                <i class="fas fa-money-bill-wave text-green-600"></i>
+                <span class="text-sm font-medium">Cash</span>
+            </button>
+            <button class="method-btn bg-gray-100 p-3 rounded-md hover:bg-gray-200 transition duration-200 flex items-center gap-2" onclick="pilihMetode('qris')">
+                <i class="fas fa-qrcode text-blue-600"></i>
+                <span class="text-sm font-medium">QRIS</span>
+            </button>
+        </div>
+
+        <div id="metodeCash" class="payment-section mt-4" style="display:none;">
+            <div class="total-section mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Total Pembayaran</h3>
+                <div class="total-amount text-xl font-bold text-blue-600">Rp <span id="totalBayar">0</span></div>
+            </div>
+            
+            <div class="nominal-suggestions mb-4">
+                <h4 class="text-md font-medium text-gray-700">Nominal Cepat</h4>
+                <div id="defaultNominals" class="nominal-buttons grid grid-cols-3 gap-2 mt-2">
+                    <!-- Default nominal buttons will be added here -->
+                </div>
+                
+                <h4 class="text-md font-medium text-gray-700 mt-4">Nominal Analisa</h4>
+                <div id="analysisNominals" class="nominal-buttons grid grid-cols-3 gap-2 mt-2">
+                    <!-- Analysis-based nominal buttons will be added here -->
+                </div>
+            </div>
+
+            <div class="manual-input-section mb-4">
+                <div class="input-group">
+                    <label for="nominalCash" class="block text-sm font-medium text-gray-700 mb-1">Nominal Pembayaran</label>
+                    <input type="text" id="nominalCash" class="block w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Masukkan nominal" autocomplete="off" oninput="updateKembalian()">
+                    <div id="teksNominal" class="text-sm text-gray-600 mt-1"></div>
+                </div>
+                
+                <div class="kembalian-section mt-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Kembalian</h3>
+                    <div class="kembalian-amount text-xl font-bold text-green-600"><span id="kembalian">0</span></div>
+                </div>
+            </div>
+
+            <button class="process-btn w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition duration-200 flex items-center justify-center gap-2" onclick="prosesPembayaran('cash')">
+                <i class="fas fa-check-circle"></i>
+                <span>Proses Pembayaran</span>
+            </button>
+        </div>
+
+        <div id="metodeQRIS" class="payment-section mt-4" style="display:none;">
+            <div class="total-section mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Total Pembayaran</h3>
+                <div class="total-amount text-xl font-bold text-blue-600">Rp <span id="totalBayarQRIS">0</span></div>
+            </div>
+
+            <div class="qr-section text-center">
+                <img src="QRIS.jpg" width="200" height="200" alt="QR Code" class="mx-auto mb-4">
+                <div class="qr-agreement">
+                    <label class="checkbox-container flex items-center justify-center gap-2">
+                        <input type="checkbox" id="checkbox">
+                        <span class="checkmark"></span>
+                        <span class="text-sm font-medium text-gray-700">Saya setuju dengan transaksi ini</span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="process-btn w-full bg-green-600 text-white py-3 rounded-md hover:bg-green-700 transition duration-200 mt-4 flex items-center justify-center gap-2" onclick="prosesPembayaran('qris')">
+                <i class="fas fa-check-circle"></i>
+                <span>Proses Pembayaran</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div id="popupMember" class="popup" style="display:none;">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h2>Daftar Member</h2>
+            <button onclick="tutupPopupMember()" class="close-button">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    id="inputCariMember" 
+                    placeholder="Cari member..."
+                    oninput="cariMember()"
+                >
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="filter-tags" id="filterTags">
+                <span class="tag active" onclick="filterMembers('all')">Semua</span>
+                <span class="tag" onclick="filterMembers('vip')">VIP</span>
+                <span class="tag" onclick="filterMembers('regular')">Regular</span>
+            </div>
+            <div id="searchStats" class="search-stats"></div>
+        </div>
+
+        <!-- Member List Container -->
+        <div id="daftarMemberContainer"></div>
+    </div>
+</div>
+<div id="pesawat" class="pesawat" style="display:none;"></div>
+
+
+
+    <button 
+        onclick="logout()" 
+        style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            outline: none;
+        "
+        onmouseover="this.style.transform='translateY(-3px)'"
+        onmouseout="this.style.transform='translateY(0)'"
+    >
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+
+    
+    <input type="file" id="fileInput" accept=".html,.css,.js" multiple style="display: none;">
+      <button 
+        id="selectFilesBtn" 
+        onclick="document.getElementById('fileInput').click()"
+        style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            outline: none;
+        "
+        onmouseover="this.style.transform='translateY(-3px)'"
+        onmouseout="this.style.transform='translateY(0)'"
+    >
+        <i class="fas fa-file-upload"></i> Pilih File
+    </button>
+    
+    <button 
+        id="uploadBtn" 
+        onclick="document.getElementById('uploadExcel').click()"
+        style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f39c12, #d35400);
+            color: white;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            outline: none;
+        "
+        onmouseover="this.style.transform='translateY(-3px)'"
+        onmouseout="this.style.transform='translateY(0)'"
+    >
+        <i class="fas fa-file-excel"></i> Upload Excel
+    </button>
+    
+    
+    
+    <input type="file" id="fileInput" accept=".html,.css,.js" multiple style="display: none;">
+
+    <button 
+        onclick="jalankanBanyakFile()"
+        style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            outline: none;
+        "
+        onmouseover="this.style.transform='translateY(-3px)'"
+        onmouseout="this.style.transform='translateY(0)'"
+    >
+        <i class="fas fa-play-circle"></i> Jalankan File
+    </button>
+
+    <input type="file" id="uploadExcel" accept=".xlsx, .xls" style="display: none;" onchange="uploadExcel()" />
+
+    <div id="download-animation" style="display: none;">
+        <div style="
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        "></div>
+        <p>Mengunduh data, mohon tunggu...</p>
+    </div>
+
+    <!-- Script tags -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>  
+   
+   
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <script src="kasir.js"></script> 
+    
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    // Create button bar HTML structure
+    const buttonBarHTML = `
+        <div class="nav-container">
+            <!-- Top buttons column -->
+            <div class="nav-buttons top">
+                <button class="nav-btn" onclick="navigateTo('cashier')">
+                    <i class="fas fa-cash-register"></i>
+                    <span class="tooltip">Kasir</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('deposit')">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span class="tooltip">Setoran</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('transaction-report')">
+                    <i class="fas fa-receipt"></i>
+                    <span class="tooltip">Laporan Transaksi</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('deposit-report')">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span class="tooltip">Laporan Setoran</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('account')">
+                    <i class="fas fa-user-cog"></i>
+                    <span class="tooltip">Akun</span>
+                </button>
+            </div>
+            
+            <!-- Right buttons row -->
+            <div class="nav-buttons right">
+                <button class="nav-btn" onclick="navigateTo('inventory')">
+                    <i class="fas fa-boxes"></i>
+                    <span class="tooltip">Data Barang</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('stock-check')">
+                    <i class="fas fa-search-plus"></i>
+                    <span class="tooltip">Cek Stok</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('item-summary')">
+                    <i class="fas fa-box-open"></i>
+                    <span class="tooltip">Rekap Barang</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('receipt')">
+                    <i class="fas fa-dolly"></i>
+                    <span class="tooltip">Penerimaan</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('return')">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span class="tooltip">Retur Barang</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('void')">
+                    <i class="fas fa-ban"></i>
+                    <span class="tooltip">Void</span>
+                </button>
+            </div>
+            
+            <button class="main-btn" id="mainNavBtn">
+                <i class="fas fa-plus" id="mainIcon"></i>
+            </button>
+        </div>
+    `;
+    
+    // Append button bar to body
+    document.body.insertAdjacentHTML('beforeend', buttonBarHTML);
+    
+    // Initialize button bar functionality
+    const navContainer = document.querySelector('.nav-container');
+    const mainBtn = document.getElementById('mainNavBtn');
+    const mainIcon = document.getElementById('mainIcon');
+    
+    // Create ripple effect
+    function createRipple(event) {
+        const btn = event.currentTarget;
+        const circle = document.createElement("span");
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = event.clientX - rect.left - size/2;
+        const y = event.clientY - rect.top - size/2;
+        
+        circle.style.width = circle.style.height = `${size}px`;
+        circle.style.left = `${x}px`;
+        circle.style.top = `${y}px`;
+        circle.classList.add("ripple");
+        
+        btn.appendChild(circle);
+        
+        setTimeout(() => {
+            circle.remove();
+        }, 800);
+    }
+    
+    // Toggle navigation
+    mainBtn.addEventListener('click', function(e) {
+        createRipple(e);
+        navContainer.classList.toggle('active');
+        
+        if (navContainer.classList.contains('active')) {
+            this.style.transform = 'rotate(225deg) scale(1.15)';
+            mainIcon.classList.replace('fa-plus', 'fa-times');
+        } else {
+            this.style.transform = 'rotate(0) scale(1)';
+            mainIcon.classList.replace('fa-times', 'fa-plus');
+        }
+    });
+    
+    // Add ripple to all buttons
+    document.querySelectorAll('.nav-btn, .main-btn').forEach(btn => {
+        btn.addEventListener('click', createRipple);
+    });
+    
+    // Close when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!navContainer.contains(e.target) && navContainer.classList.contains('active')) {
+            navContainer.classList.remove('active');
+            mainBtn.style.transform = 'rotate(0) scale(1)';
+            mainIcon.classList.replace('fa-times', 'fa-plus');
+        }
+    });
+    
+    // Navigation function
+    window.navigateTo = function(destination) {
+        // Close menu
+        navContainer.classList.remove('active');
+        mainBtn.style.transform = 'rotate(0) scale(1)';
+        mainIcon.classList.replace('fa-times', 'fa-plus');
+        
+        // Page links configuration
+        const pageLinks = {
+            'cashier': 'kasir.html',
+            'deposit': 'setoran.html',
+            'transaction-report': 'laporan.html',
+            'deposit-report': 'https://rekapsetoran.rf.gd/user.php?i=1',
+            'account': 'akun.html',
+            'inventory': 'barang.html',
+            'stock-check': 'cek ulang stok.html',
+            'item-summary': 'https://rekapsetoran.rf.gd/terima.php',
+            'receipt': 'resif.html',
+            'return': 'retur.html',
+            'void': 'void.html'
+        };
+        
+        // Navigate to page
+        if (pageLinks[destination]) {
+            // Smooth page transition
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.4s ease';
+            
+            setTimeout(() => {
+                window.location.href = pageLinks[destination];
+            }, 400);
+        } else {
+            console.warn('Page not configured:', destination);
+        }
+    };
+    
+    // Restore opacity when returning
+    window.addEventListener('pageshow', () => {
+        document.body.style.opacity = '1';
+    });
+});
+        // Fungsi untuk mencegah zoom di desktop
+function preventDesktopZoom(e) {
+    // Mencegah zoom dengan kombinasi Ctrl + Mouse Wheel
+    if (e.ctrlKey && (e.deltaY < 0 || e.deltaY > 0)) {
+        e.preventDefault();
+    }
+}
+
+// Menambahkan event listener untuk wheel
+window.addEventListener('wheel', preventDesktopZoom, { passive: false });
+        
+    </script>     
+</body>
+</html>

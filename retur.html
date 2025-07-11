@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+    <title>Data Retur Transaksi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a6da7;
+            --primary-dark: #395580;
+            --secondary-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-color: #212529;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            z-index: 3;
+        }
+
+        .header ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            overflow: hidden;
+            background-color: var(--primary-color);
+        }
+
+        .header li a {
+            display: block;
+            padding: 16px 20px;
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .header li a:hover,
+        .header .menu-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .header .menu {
+            clear: both;
+            max-height: 0;
+            transition: max-height 0.2s ease-out;
+        }
+
+        .header .menu-icon {
+            cursor: pointer;
+            display: inline-block;
+            float: right;
+            padding: 28px 20px;
+            position: relative;
+            user-select: none;
+        }
+
+        .header .menu-icon .navicon {
+            background: white;
+            display: block;
+            height: 2px;
+            position: relative;
+            transition: background 0.2s ease-out;
+            width: 18px;
+        }
+
+        .header .menu-icon .navicon:before,
+        .header .menu-icon .navicon:after {
+            background: white;
+            content: '';
+            display: block;
+            height: 100%;
+            position: absolute;
+            transition: all 0.2s ease-out;
+            width: 100%;
+        }
+
+        .header .menu-icon .navicon:before {
+            top: 5px;
+        }
+
+        .header .menu-icon .navicon:after {
+            top: -5px;
+        }
+
+        .header .menu-btn {
+            display: none;
+        }
+
+        .header .menu-btn:checked ~ .menu {
+            max-height: 350px;
+        }
+
+        .header .menu-btn:checked ~ .menu-icon .navicon {
+            background: transparent;
+        }
+
+        .header .menu-btn:checked ~ .menu-icon .navicon:before {
+            transform: rotate(-45deg);
+        }
+
+        .header .menu-btn:checked ~ .menu-icon .navicon:after {
+            transform: rotate(45deg);
+        }
+
+        .header .menu-btn:checked ~ .menu-icon .navicon:before,
+        .header .menu-btn:checked ~ .menu-icon .navicon:after {
+            top: 0;
+        }
+
+        #wrapper {
+            padding: 80px 20px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-container input, 
+        .search-container select,
+        .search-container button {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        #downloadButton {
+            background-color: var(--success-color);
+        }
+
+        #downloadButton:hover {
+            background-color: #218838;
+        }
+
+        #resetButton {
+            background-color: var(--warning-color);
+            color: #212529;
+        }
+
+        #resetButton:hover {
+            background-color: #e0a800;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 60px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+
+        .pagination button {
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination .active {
+            background-color: var(--primary-dark);
+        }
+
+        .status-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .loading i {
+            animation: spin 1s linear infinite;
+            font-size: 48px;
+            color: var(--primary-color);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (min-width: 768px) {
+            .header li {
+                float: left;
+            }
+            .header li a {
+                padding: 20px 30px;
+            }
+            .header .menu {
+                clear: none;
+                float: right;
+                max-height: none;
+            }
+            .header .menu-icon {
+                display: none;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .search-container {
+                grid-template-columns: 1fr;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+            
+            .responsive-table {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <input class="menu-btn" type="checkbox" id="menu-btn" />
+        <label class="menu-icon" for="menu-btn"><span class="navicon"></span></label>
+        <ul class="menu">
+            <li><a href="kasir.html">KASIR</a></li>
+            <li><a href="laporan.html">LAPORAN</a></li>
+            <li><a href="void.html">VOID</a></li>
+            <li><a href="setoran.html">SETORAN</a></li>
+            <li><a href="akun.html">AKUN</a></li>
+            <li><a href="retur.html">RETUR</a></li>
+        </ul>
+    </header>
+    
+    <div id="wrapper" style="display: none;">
+        <h1>Data Retur Transaksi</h1>
+        
+        <div class="card">
+            <div class="search-container">
+                <input type="text" id="searchId" placeholder="Masukkan ID Transaksi">
+                <input type="date" id="searchTanggal" placeholder="Pilih Tanggal">
+                <input type="month" id="searchBulan" placeholder="Pilih Bulan">
+                <input type="number" id="searchTahun" placeholder="Masukkan Tahun" min="1900" max="2100">
+                <button onclick="cariRetur()"><i class="fas fa-search"></i> Cari</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="btn-row">
+                <div>
+                    <button id="downloadButton" onclick="downloadExcelZip()">
+                        <i class="fas fa-file-excel"></i> Download Excel
+                    </button>
+                    <button id="resetButton" onclick="resetFilter()">
+                        <i class="fas fa-sync-alt"></i> Reset Filter
+                    </button>
+                </div>
+                <div class="status-info">
+                    <span id="totalEntries">Total: 0 entri</span>
+                    <span id="currentFilter">Menampilkan: Semua data</span>
+                </div>
+            </div>
+            
+            <div id="loadingIndicator" class="loading" style="display: none;">
+                <i class="fas fa-spinner"></i>
+            </div>
+            
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox"></i>
+                <p>Tidak ada data retur yang ditemukan</p>
+            </div>
+            
+            <div class="responsive-table">
+                <table id="tabelRetur">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">ID Transaksi <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(1)">Username <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(2)">Jam Retur <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(3)">Tanggal Retur <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(4)">Kode Barang <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(5)">Nama Barang <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(6)">Jumlah <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(7)">Total <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(8)">Tanggal Transaksi <i class="fas fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data retur akan ditampilkan di sini -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="pagination" class="pagination">
+                <!-- Pagination buttons will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const correctPIN = '451661750';
+        const itemsPerPage = 10;
+        let currentPage = 1;
+        let filteredData = [];
+        let allData = [];
+        let sortColumn = -1;
+        let sortDirection = 1; // 1 for ascending, -1 for descending
+
+        // Initialize on load
+        window.onload = function() {
+            verifyPIN();
+        };
+
+        // PIN Verification
+        function verifyPIN() {
+            Swal.fire({
+                title: 'Verifikasi Akses',
+                text: 'Masukkan PIN untuk mengakses data retur',
+                input: 'password',
+                inputPlaceholder: 'Masukkan PIN Anda',
+                inputAttributes: {
+                    autocapitalize: 'off',
+                    autocorrect: 'off'
+                },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                confirmButtonText: 'Verifikasi',
+                showLoaderOnConfirm: true,
+                preConfirm: (pin) => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            if (pin === correctPIN) {
+                                resolve(true);
+                            } else {
+                                Swal.showValidationMessage('PIN tidak valid');
+                                resolve(false);
+                            }
+                        }, 500);
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('wrapper').style.display = 'block';
+                    showLoading();
+                    loadRetur();
+                } else {
+                    window.location.href = 'kasir.html';
+                }
+            });
+        }
+
+        // Loading state functions
+        function showLoading() {
+            document.getElementById('loadingIndicator').style.display = 'flex';
+            document.getElementById('tabelRetur').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('pagination').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('tabelRetur').style.display = 'table';
+            
+            if (filteredData.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('tabelRetur').style.display = 'none';
+                document.getElementById('pagination').style.display = 'none';
+            } else {
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('pagination').style.display = 'flex';
+            }
+        }
+
+        // Format currency
+        function formatRupiah(value) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        // Load data
+        function loadRetur() {
+            allData = JSON.parse(localStorage.getItem('retur')) || [];
+            filteredData = [...allData];
+            updateTableInfo();
+            sortData();
+            renderTable();
+            setTimeout(hideLoading, 500); // Simulate network delay
+        }
+
+        // Update table info
+        function updateTableInfo() {
+            document.getElementById('totalEntries').textContent = `Total: ${filteredData.length} entri`;
+            
+            const searchId = document.getElementById('searchId').value;
+            const searchTanggal = document.getElementById('searchTanggal').value;
+            const searchBulan = document.getElementById('searchBulan').value;
+            const searchTahun = document.getElementById('searchTahun').value;
+            
+            let filterText = 'Menampilkan: ';
+            if (!searchId && !searchTanggal && !searchBulan && !searchTahun) {
+                filterText += 'Semua data';
+            } else {
+                const filters = [];
+                if (searchId) filters.push(`ID: ${searchId}`);
+                if (searchTanggal) {
+                    const date = new Date(searchTanggal);
+                    filters.push(`Tanggal: ${date.toLocaleDateString('id-ID')}`);
+                }
+                if (searchBulan) {
+                    const [year, month] = searchBulan.split('-');
+                    filters.push(`Bulan: ${month}/${year}`);
+                }
+                if (searchTahun) filters.push(`Tahun: ${searchTahun}`);
+                filterText += filters.join(', ');
+            }
+            
+            document.getElementById('currentFilter').textContent = filterText;
+        }
+
+        // Render table with pagination
+        function renderTable() {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+            
+            const tabelRetur = document.getElementById('tabelRetur').getElementsByTagName('tbody')[0];
+            tabelRetur.innerHTML = '';
+            
+            paginatedData.forEach(item => {
+                const row = tabelRetur.insertRow();
+                
+                row.insertCell(0).innerText = String(item.id || '').toUpperCase();
+                row.insertCell(1).innerText = String(item.username || '').toUpperCase();
+                row.insertCell(2).innerText = String(item.jamRetur || '').toUpperCase();
+                row.insertCell(3).innerText = String(item.tanggalRetur || '').toUpperCase();
+                row.insertCell(4).innerText = String(item.kodeBarang || '').toUpperCase();
+                row.insertCell(5).innerText = String(item.namaBarang || '').toUpperCase();
+                row.insertCell(6).innerText = item.jumlah || 0;
+                row.insertCell(7).innerText = formatRupiah(item.total || 0);
+                row.insertCell(8).innerText = String(item.tanggal || '').toUpperCase();
+            });
+            
+            renderPagination();
+        }
+
+        // Generate pagination controls
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = '';
+            
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+            
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            if (startPage > 1) {
+                const firstPageBtn = document.createElement('button');
+                firstPageBtn.textContent = '1';
+                firstPageBtn.addEventListener('click', () => {
+                    currentPage = 1;
+                    renderTable();
+                });
+                paginationContainer.appendChild(firstPageBtn);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('button');
+                    ellipsis.textContent = '...';
+                    ellipsis.disabled = true;
+                    paginationContainer.appendChild(ellipsis);
+                }
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                if (i === currentPage) {
+                    pageButton.classList.add('active');
+                }
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTable();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('button');
+                    ellipsis.textContent = '...';
+                    ellipsis.disabled = true;
+                    paginationContainer.appendChild(ellipsis);
+                }
+                
+                const lastPageBtn = document.createElement('button');
+                lastPageBtn.textContent = totalPages;
+                lastPageBtn.addEventListener('click', () => {
+                    currentPage = totalPages;
+                    renderTable();
+                });
+                paginationContainer.appendChild(lastPageBtn);
+            }
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextButton.disabled = currentPage === totalPages || totalPages === 0;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+
+        // Search function
+        function cariRetur() {
+            showLoading();
+            
+            const searchId = document.getElementById('searchId').value;
+            const searchTanggal = document.getElementById('searchTanggal').value;
+            const searchBulan = document.getElementById('searchBulan').value;
+            const searchTahun = document.getElementById('searchTahun').value;
+            
+            filteredData = allData;
+            
+            if (searchId) {
+                filteredData = filteredData.filter(item =>
+                    item.id && item.id.toLowerCase().includes(searchId.toLowerCase())
+                );
+            }
+            
+            if (searchTanggal) {
+                filteredData = filteredData.filter(item =>
+                    item.tanggalRetur === searchTanggal
+                );
+            }
+            
+            if (searchBulan) {
+                const [year, month] = searchBulan.split('-');
+                filteredData = filteredData.filter(item => {
+                    if (!item.tanggalRetur) return false;
+                    const itemDate = new Date(item.tanggalRetur);
+                    return itemDate.getFullYear() === parseInt(year) && 
+                           (itemDate.getMonth() + 1) === parseInt(month);
+                });
+            }
+            
+            if (searchTahun) {
+                filteredData = filteredData.filter(item => {
+                    if (!item.tanggalRetur) return false;
+                    const itemDate = new Date(item.tanggalRetur);
+                    return itemDate.getFullYear() === parseInt(searchTahun);
+                });
+            }
+            
+            currentPage = 1;
+            updateTableInfo();
+            sortData();
+            setTimeout(() => {
+                renderTable();
+                hideLoading();
+                
+                // Show search results message
+                Swal.fire({
+                    icon: filteredData.length > 0 ? 'success' : 'info',
+                    title: filteredData.length > 0 ? 'Pencarian Berhasil' : 'Tidak Ada Data',
+                    text: filteredData.length > 0 
+                        ? `Ditemukan ${filteredData.length} data retur` 
+                        : 'Tidak ada data retur yang sesuai dengan kriteria pencarian',
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }, 500);
+        }
+
+        // Reset filter
+        function resetFilter() {
+            document.getElementById('searchId').value = '';
+            document.getElementById('searchTanggal').value = '';
+            document.getElementById('searchBulan').value = '';
+            document.getElementById('searchTahun').value = '';
+            
+            showLoading();
+            filteredData = [...allData];
+            currentPage = 1;
+            updateTableInfo();
+            sortData();
+            
+            setTimeout(() => {
+                renderTable();
+                hideLoading();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Filter Direset',
+                    text: 'Menampilkan semua data retur',
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }, 500);
+        }
+
+        // Download Excel as ZIP
+        function downloadExcelZip() {
+            if (filteredData.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tidak Ada Data',
+                    text: 'Tidak ada data yang dapat diunduh',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            // Show loading indicator
+            Swal.fire({
+                title: 'Memproses Data',
+                text: 'Sedang menyiapkan file Excel dan ZIP...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            setTimeout(() => {
+                try {
+                    // Generate Excel data
+                    const dataToExport = filteredData.map(item => ({
+                        ID_Transaksi: item.id || '',
+                        Username: item.username || '',
+                        Jam_Retur: item.jamRetur || '',
+                        Tanggal_Retur: item.tanggalRetur || '',
+                        Kode_Barang: item.kodeBarang || '',
+                        Nama_Barang: item.namaBarang || '',
+                        Jumlah: item.jumlah || 0,
+                        Total: (item.total || 0).toString(),
+                        Tanggal_Transaksi: item.tanggal || ''
+                    }));
+                    
+                    const ws = XLSX.utils.json_to_sheet(dataToExport);
+                    
+                    // Format columns
+                    const range = XLSX.utils.decode_range(ws['!ref']);
+                    for (let C = range.s.c; C <= range.e.c; C++) {
+                        const address = XLSX.utils.encode_col(C) + '1';
+                        if (!ws[address]) continue;
+                        ws[address].s = { font: { bold: true }, alignment: { horizontal: 'center' } };
+                    }
+                    
+                    // Auto-size columns
+                    const colWidths = [];
+                    for (let C = range.s.c; C <= range.e.c; C++) {
+                        let maxLen = 10; // default
+                        for (let R = range.s.r; R <= range.e.r; R++) {
+                            const address = XLSX.utils.encode_cell({ c: C, r: R });
+                            if (!ws[address]) continue;
+                            const cellText = String(ws[address].v || '');
+                            maxLen = Math.max(maxLen, cellText.length);
+                        }
+                        colWidths.push({ wch: maxLen + 2 });
+                    }
+                    ws['!cols'] = colWidths;
+                    
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Retur Transaksi');
+                    
+                    // Get current date for filename
+                    const today = new Date();
+                    const day = String(today.getDate()).padStart(2, '0');
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const year = today.getFullYear();
+                    const hour = String(today.getHours()).padStart(2, '0');
+                    const minute = String(today.getMinutes()).padStart(2, '0');
+                    
+                    const excelFileName = `retur_${day}-${month}-${year}_${hour}${minute}.xlsx`;
+                    const zipFileName = `retur_${day}-${month}-${year}_${hour}${minute}.zip`;
+                    
+                    // Create Excel binary data
+                    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                    
+                    // Create a ZIP file
+                    const zip = new JSZip();
+                    
+                    // Add the Excel file to the ZIP
+                    zip.file(excelFileName, excelBuffer);
+                    
+                    // Add a readme.txt file with information
+                    const fileCount = filteredData.length;
+                    const totalAmount = filteredData.reduce((sum, item) => sum + (item.total || 0), 0);
+                    const readmeContent = 
+                        `Laporan Retur Transaksi\n` +
+                        `------------------------\n` +
+                        `Tanggal ekspor: ${today.toLocaleString('id-ID')}\n` +
+                        `Jumlah data: ${fileCount}\n` +
+                        `Total nilai retur: ${formatRupiah(totalAmount)}\n\n` +
+                        `File ini dibuat otomatis dari sistem retur.\n` +
+                        `© ${year} Sistem Manajemen Toko`;
+                    
+                    zip.file("readme.txt", readmeContent);
+                    
+                    // Generate the ZIP file
+                    zip.generateAsync({ type: 'blob' }).then(function(content) {
+                        // Save the ZIP file
+                        saveAs(content, zipFileName);
+                        
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Download Berhasil',
+                            text: `File "${zipFileName}" telah diunduh`,
+                            timer: 2000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                    });
+                } catch (error) {
+                    console.error("Error creating ZIP file:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan',
+                        text: 'Gagal membuat file ZIP. Silakan coba lagi.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }, 500); // Adding a small delay for better UX
+        }
+        
+        // Regular Excel download (as backup)
+        function downloadExcel() {
+            if (filteredData.length === 0) {
+                Swal.fire({
+
+                    icon: 'warning',
+                    title: 'Tidak Ada Data',
+                    text: 'Tidak ada data yang dapat diunduh',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            const dataToExport = filteredData.map(item => ({
+                ID_Transaksi: item.id || '',
+                Username: item.username || '',
+                Jam_Retur: item.jamRetur || '',
+                Tanggal_Retur: item.tanggalRetur || '',
+                Kode_Barang: item.kodeBarang || '',
+                Nama_Barang: item.namaBarang || '',
+                Jumlah: item.jumlah || 0,
+                Total: (item.total || 0).toString(),
+                Tanggal_Transaksi: item.tanggal || ''
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            
+            // Format columns
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let C = range.s.c; C <= range.e.c; C++) {
+                const address = XLSX.utils.encode_col(C) + '1';
+                if (!ws[address]) continue;
+                ws[address].s = { font: { bold: true }, alignment: { horizontal: 'center' } };
+            }
+            
+            // Auto-size columns
+            const colWidths = [];
+            for (let C = range.s.c; C <= range.e.c; C++) {
+                let maxLen = 10; // default
+                for (let R = range.s.r; R <= range.e.r; R++) {
+                    const address = XLSX.utils.encode_cell({ c: C, r: R });
+                    if (!ws[address]) continue;
+                    const cellText = String(ws[address].v || '');
+                    maxLen = Math.max(maxLen, cellText.length);
+                }
+                colWidths.push({ wch: maxLen + 2 });
+            }
+            ws['!cols'] = colWidths;
+            
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Retur Transaksi');
+            
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            const hour = String(today.getHours()).padStart(2, '0');
+            const minute = String(today.getMinutes()).padStart(2, '0');
+            
+            const fileName = `retur_${day}-${month}-${year}_${hour}${minute}.xlsx`;
+            
+            XLSX.writeFile(wb, fileName);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Download Berhasil',
+                text: `File "${fileName}" telah diunduh`,
+                timer: 2000,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
+
+        // Sort table
+        function sortTable(columnIndex) {
+            if (sortColumn === columnIndex) {
+                sortDirection *= -1;
+            } else {
+                sortColumn = columnIndex;
+                sortDirection = 1;
+            }
+            
+            sortData();
+            renderTable();
+            
+            // Update sort icons
+            const headers = document.querySelectorAll('#tabelRetur th');
+            headers.forEach((header, index) => {
+                let iconClass = 'fas fa-sort';
+                if (index === sortColumn) {
+                    iconClass = sortDirection === 1 ? 'fas fa-sort-up' : 'fas fa-sort-down';
+                }
+                const icon = header.querySelector('i');
+                if (icon) {
+                    icon.className = iconClass;
+                }
+            });
+        }
+
+        // Sort data based on current sort settings
+        function sortData() {
+            if (sortColumn < 0) return;
+            
+            filteredData.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch (sortColumn) {
+                    case 0: // ID
+                        valueA = String(a.id || '').toUpperCase();
+                        valueB = String(b.id || '').toUpperCase();
+                        break;
+                    case 1: // Username
+                        valueA = String(a.username || '').toUpperCase();
+                        valueB = String(b.username || '').toUpperCase();
+                        break;
+                    case 2: // Jam Retur
+                        valueA = String(a.jamRetur || '').toUpperCase();
+                        valueB = String(b.jamRetur || '').toUpperCase();
+                        break;
+                    case 3: // Tanggal Retur
+                        valueA = a.tanggalRetur || '';
+                        valueB = b.tanggalRetur || '';
+                        break;
+                    case 4: // Kode Barang
+                        valueA = String(a.kodeBarang || '').toUpperCase();
+                        valueB = String(b.kodeBarang || '').toUpperCase();
+                        break;
+                    case 5: // Nama Barang
+                        valueA = String(a.namaBarang || '').toUpperCase();
+                        valueB = String(b.namaBarang || '').toUpperCase();
+                        break;
+                    case 6: // Jumlah
+                        valueA = a.jumlah || 0;
+                        valueB = b.jumlah || 0;
+                        break;
+                    case 7: // Total
+                        valueA = a.total || 0;
+                        valueB = b.total || 0;
+                        break;
+                    case 8: // Tanggal Transaksi
+                        valueA = a.tanggal || '';
+                        valueB = b.tanggal || '';
+                        break;
+                    default:
+                        valueA = '';
+                        valueB = '';
+                }
+                
+                // For numeric values
+                if (sortColumn === 6 || sortColumn === 7) {
+                    return (valueA - valueB) * sortDirection;
+                }
+                
+                // For date values
+                if (sortColumn === 3 || sortColumn === 8) {
+                    const dateA = valueA ? new Date(valueA) : new Date(0);
+                    const dateB = valueB ? new Date(valueB) : new Date(0);
+                    return (dateA - dateB) * sortDirection;
+                }
+                
+                // For string values
+                if (valueA < valueB) return -1 * sortDirection;
+                if (valueA > valueB) return 1 * sortDirection;
+                return 0;
+            });
+        }
+
+        // Export Data
+        function exportData(format) {
+            if (filteredData.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tidak Ada Data',
+                    text: 'Tidak ada data yang dapat diekspor',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            if (format === 'print') {
+                window.print();
+                return;
+            }
+
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            const hour = String(today.getHours()).padStart(2, '0');
+            const minute = String(today.getMinutes()).padStart(2, '0');
+            const timestamp = `${day}-${month}-${year}_${hour}${minute}`;
+            
+            if (format === 'pdf') {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4');
+                
+                // Add title
+                doc.setFontSize(18);
+                doc.text('Data Retur Transaksi', 10, 10);
+                
+                // Add export info
+                doc.setFontSize(10);
+                doc.text(`Diekspor pada: ${today.toLocaleString('id-ID')}`, 10, 20);
+                doc.text(`Total data: ${filteredData.length}`, 10, 25);
+                
+                // Add table
+                doc.autoTable({
+                    head: [['ID Transaksi', 'Username', 'Jam Retur', 'Tanggal Retur', 'Kode Barang', 'Nama Barang', 'Jumlah', 'Total', 'Tanggal Transaksi']],
+                    body: filteredData.map(item => [
+                        item.id || '',
+                        item.username || '',
+                        item.jamRetur || '',
+                        item.tanggalRetur || '',
+                        item.kodeBarang || '',
+                        item.namaBarang || '',
+                        item.jumlah || 0,
+                        formatRupiah(item.total || 0),
+                        item.tanggal || ''
+                    ]),
+                    startY: 30
+                });
+                
+                doc.save(`retur_${timestamp}.pdf`);
+            }
+        }
+
+        // Helper function to get date in Indonesian format
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            
+            return date.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Add event listeners for keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Alt + F - Search (Find)
+            if (event.altKey && event.key === 'f') {
+                event.preventDefault();
+                document.getElementById('searchId').focus();
+            }
+            
+            // Alt + R - Reset filter
+            if (event.altKey && event.key === 'r') {
+                event.preventDefault();
+                resetFilter();
+            }
+            
+            // Alt + D - Download Excel Zip
+            if (event.altKey && event.key === 'd') {
+                event.preventDefault();
+                downloadExcelZip();
+            }
+            
+            // Alt + Left/Right - Navigate pages
+            if (event.altKey && event.key === 'ArrowLeft') {
+                event.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            }
+            
+            if (event.altKey && event.key === 'ArrowRight') {
+                event.preventDefault();
+                const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            }
+        });
+
+        // Add debounce function for search input
+        function debounce(func, delay) {
+            let timer;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    func.apply(context, args);
+                }, delay);
+            };
+        }
+
+        // Initialize search inputs with debounce
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInputs = [
+                document.getElementById('searchId'),
+                document.getElementById('searchTanggal'),
+                document.getElementById('searchBulan'),
+                document.getElementById('searchTahun')
+            ];
+            
+            searchInputs.forEach(input => {
+                if (input) {
+                    input.addEventListener('input', debounce(function() {
+                        // Only auto-search if the input has a value
+                        if (this.value) {
+                            cariRetur();
+                        }
+                    }, 500));
+                }
+            });
+        });
+        
+        
+        
+        document.addEventListener('DOMContentLoaded', function() {
+    // Create button bar HTML structure
+    const buttonBarHTML = `
+        <div class="nav-container">
+            <!-- Top buttons column -->
+            <div class="nav-buttons top">
+                <button class="nav-btn" onclick="navigateTo('cashier')">
+                    <i class="fas fa-cash-register"></i>
+                    <span class="tooltip">Kasir</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('deposit')">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span class="tooltip">Setoran</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('transaction-report')">
+                    <i class="fas fa-receipt"></i>
+                    <span class="tooltip">Laporan Transaksi</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('deposit-report')">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span class="tooltip">Laporan Setoran</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('account')">
+                    <i class="fas fa-user-cog"></i>
+                    <span class="tooltip">Akun</span>
+                </button>
+            </div>
+            
+            <!-- Right buttons row -->
+            <div class="nav-buttons right">
+                <button class="nav-btn" onclick="navigateTo('inventory')">
+                    <i class="fas fa-boxes"></i>
+                    <span class="tooltip">Data Barang</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('stock-check')">
+                    <i class="fas fa-search-plus"></i>
+                    <span class="tooltip">Cek Stok</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('item-summary')">
+                    <i class="fas fa-box-open"></i>
+                    <span class="tooltip">Rekap Barang</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('receipt')">
+                    <i class="fas fa-dolly"></i>
+                    <span class="tooltip">Penerimaan</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('return')">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span class="tooltip">Retur Barang</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('void')">
+                    <i class="fas fa-ban"></i>
+                    <span class="tooltip">Void</span>
+                </button>
+            </div>
+            
+            <button class="main-btn" id="mainNavBtn">
+                <i class="fas fa-plus" id="mainIcon"></i>
+            </button>
+        </div>
+    `;
+    
+    // Append button bar to body
+    document.body.insertAdjacentHTML('beforeend', buttonBarHTML);
+    
+    // Initialize button bar functionality
+    const navContainer = document.querySelector('.nav-container');
+    const mainBtn = document.getElementById('mainNavBtn');
+    const mainIcon = document.getElementById('mainIcon');
+    
+    // Create ripple effect
+    function createRipple(event) {
+        const btn = event.currentTarget;
+        const circle = document.createElement("span");
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = event.clientX - rect.left - size/2;
+        const y = event.clientY - rect.top - size/2;
+        
+        circle.style.width = circle.style.height = `${size}px`;
+        circle.style.left = `${x}px`;
+        circle.style.top = `${y}px`;
+        circle.classList.add("ripple");
+        
+        btn.appendChild(circle);
+        
+        setTimeout(() => {
+            circle.remove();
+        }, 800);
+    }
+    
+    // Toggle navigation
+    mainBtn.addEventListener('click', function(e) {
+        createRipple(e);
+        navContainer.classList.toggle('active');
+        
+        if (navContainer.classList.contains('active')) {
+            this.style.transform = 'rotate(225deg) scale(1.15)';
+            mainIcon.classList.replace('fa-plus', 'fa-times');
+        } else {
+            this.style.transform = 'rotate(0) scale(1)';
+            mainIcon.classList.replace('fa-times', 'fa-plus');
+        }
+    });
+    
+    // Add ripple to all buttons
+    document.querySelectorAll('.nav-btn, .main-btn').forEach(btn => {
+        btn.addEventListener('click', createRipple);
+    });
+    
+    // Close when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!navContainer.contains(e.target) && navContainer.classList.contains('active')) {
+            navContainer.classList.remove('active');
+            mainBtn.style.transform = 'rotate(0) scale(1)';
+            mainIcon.classList.replace('fa-times', 'fa-plus');
+        }
+    });
+    
+    // Navigation function
+    window.navigateTo = function(destination) {
+        // Close menu
+        navContainer.classList.remove('active');
+        mainBtn.style.transform = 'rotate(0) scale(1)';
+        mainIcon.classList.replace('fa-times', 'fa-plus');
+        
+        // Page links configuration
+        const pageLinks = {
+            'cashier': 'kasir.html',
+            'deposit': 'setoran.html',
+            'transaction-report': 'laporan.html',
+            'deposit-report': 'https://rekapsetoran.rf.gd/user.php?i=1',
+            'account': 'akun.html',
+            'inventory': 'barang.html',
+            'stock-check': 'cek ulang stok.html',
+            'item-summary': 'https://rekapsetoran.rf.gd/terima.php',
+            'receipt': 'resif.html',
+            'return': 'retur.html',
+            'void': 'void.html'
+        };
+        
+        // Navigate to page
+        if (pageLinks[destination]) {
+            // Smooth page transition
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.4s ease';
+            
+            setTimeout(() => {
+                window.location.href = pageLinks[destination];
+            }, 400);
+        } else {
+            console.warn('Page not configured:', destination);
+        }
+    };
+    
+    // Restore opacity when returning
+    window.addEventListener('pageshow', () => {
+        document.body.style.opacity = '1';
+    });
+});
+    </script>
+    <link rel="stylesheet" href="nav.css">
+</body>
+</html>

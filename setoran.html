@@ -1,0 +1,3464 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <title>Data Setoran - Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="nav.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        html, body {
+            min-height: 100%;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+
+        .page-container {
+            min-height: 100vh;
+            display: flex;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+        }
+
+        .dark .page-container {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            padding: 1.5rem;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .dark .sidebar {
+            background: #1e293b;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .content-wrapper {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-x: hidden;
+        }
+
+        .table-container {
+            border-radius: 1rem;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .dark .table-container {
+            background: #1e293b;
+            color: #e5e7eb;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        thead tr th {
+            background-color: #f9fafb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .dark thead tr th {
+            background-color: #334155;
+            color: #e5e7eb;
+        }
+
+        tfoot tr td {
+            background-color: #f9fafb;
+        }
+
+        .dark tfoot tr td {
+            background-color: #334155;
+            color: #e5e7eb;
+        }
+
+        /* Sticky Filter Bar */
+        .filter-bar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .filter-bar {
+            background: #1e293b;
+        }
+
+        /* Neumorphic Buttons */
+        .btn-neumorphic {
+            background: #e0e7ff;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .dark .btn-neumorphic {
+            background: #1e293b;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-neumorphic:hover {
+            transform: translateY(-2px);
+            box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.15), -3px -3px 6px rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-neumorphic:active {
+            transform: translateY(0);
+            box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Animations */
+        .animated-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-1rem); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-1rem); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .animate-fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
+        /* Mobile Filter Drawer */
+        .filter-drawer {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .filter-drawer.open {
+            transform: translateX(0);
+        }
+        
+        
+        
+        /* Animasi Scale-In untuk Modal */
+@keyframes scaleIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* Gaya Tombol Neumorphic */
+.btn-neumorphic {
+    background: #e0e7ff;
+    border: none;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1), -5px -5px 10px rgba(255, 255, 255, 0.7);
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.dark .btn-neumorphic {
+    background: #1e293b;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3), -5px -5px 10px rgba(255, 255, 255, 0.1);
+}
+
+.btn-neumorphic:hover {
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.15), -3px -3px 6px rgba(255, 255, 255, 0.5);
+}
+
+.btn-neumorphic:active {
+    transform: translateY(0);
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Gaya Checkbox */
+input[type="checkbox"].export-column {
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #d1d5db;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+input[type="checkbox"].export-column:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 5.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+}
+
+.dark input[type="checkbox"].export-column {
+    border-color: #4b5563;
+    background-color: #1e293b;
+}
+
+.dark input[type="checkbox"].export-column:checked {
+    background-color: #60a5fa;
+    border-color: #60a5fa;
+}
+
+/* Gaya Pratinjau */
+#pdfPreviewContainer {
+    position: relative;
+}
+
+#pdfPreviewPlaceholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 0.75rem;
+}
+/* Log Deletion Modal Styles */
+.log-modal {
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 1rem;
+    background: white;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.dark .log-modal {
+    background: #1e293b;
+    color: #e5e7eb;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.log-table-container {
+    border-radius: 0.75rem;
+    background: #f9fafb;
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+.dark .log-table-container {
+    background: #334155;
+}
+
+.log-table th {
+    position: sticky;
+    top: 0;
+    background: #f9fafb;
+    z-index: 10;
+    padding: 0.75rem 1.5rem;
+}
+
+.dark .log-table th {
+    background: #334155;
+}
+
+.log-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.log-table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.dark .log-table tbody tr:hover {
+    background-color: #4b5563;
+}
+
+/* Filter Section */
+.log-filter-bar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.dark .log-filter-bar {
+    background: #1e293b;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Collapsible Details */
+.log-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.log-details.open {
+    max-height: 600px; /* Adjust based on content */
+}
+
+/* Animations */
+@keyframes scaleIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scaleOut {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.8); opacity: 0; }
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+}
+
+.animate-scale-out {
+    animation: scaleOut 0.3s ease-out forwards;
+}
+
+/* No Data Message */
+.no-data-message {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+.dark .no-data-message {
+    color: #9ca3af;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+    .log-modal {
+        width: 95%;
+        padding: 1rem;
+    }
+
+    .log-table-container {
+        font-size: 0.85rem;
+    }
+
+    .log-filter-bar {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .log-table th, .log-table td {
+        padding: 0.5rem;
+    }
+}
+
+    /* Smooth transitions for charts container */
+#chartsContainer {
+    transition: opacity 0.7s ease-in-out, transform 0.7s ease-in-out;
+}
+
+/* Smooth transitions for charts container */
+#chartsContainer {
+    transition: opacity 0.7s ease-in-out, transform 0.7s ease-in-out;
+}
+
+/* Card hover effect */
+#chartsContainer > div {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#chartsContainer > div:hover {
+    transform: translateY(-4px);
+}
+
+/* Dark mode card shadow */
+.dark #chartsContainer > div {
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.05);
+}
+
+/* Button ripple effect */
+.group:active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+    to {
+        transform: translate(-50%, -50%) scale(3);
+        opacity: 0;
+    }
+}
+
+/* Ensure canvas respects container */
+canvas {
+    max-width: 100% !important;
+    max-height: 100% !important;
+}
+
+</style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- Sidebar -->
+        <div class="sidebar hidden md:block fixed top-0 left-0 h-full z-30">
+            <div class="flex items-center space-x-3 mb-6">
+                <i class="fas fa-money-bill-wave text-2xl text-blue-500 dark:text-blue-300"></i>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Dashboard</h2>
+            </div>
+            <!-- Informasi Akun -->
+            <div id="userInfo" class="mb-6 text-gray-600 dark:text-gray-300">
+                <p class="text-sm font-medium">Sedang login sebagai:</p>
+                <p id="loggedInUsername" class="text-base font-semibold">Memuat...</p>
+            </div>
+            <nav>
+                <ul>
+                    <li class="mb-2">
+                        <a href="#" class="flex items-center p-2 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
+                            <i class="fas fa-table mr-2"></i> Data Setoran
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" class="flex items-center p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <i class="fas fa-chart-line mr-2"></i> Analitik
+                        </a>
+                    </li>
+                    <li>
+                        <button id="logoutButton" class="flex items-center p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Keluar
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-wrapper">
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center hidden z-50 backdrop-filter backdrop-blur-sm">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl flex items-center space-x-3">
+                    <i class="fas fa-circle-notch animated-spin text-blue-500 text-xl"></i>
+                    <span class="text-gray-700 dark:text-gray-200 font-medium">Memuat data...</span>
+                </div>
+            </div>
+
+            <!-- Export Modal -->
+            <!-- Export Modal -->
+<div id="exportModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden backdrop-filter backdrop-blur-sm">
+    <div class="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-4xl transform transition-all animate-scale-in">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Ekspor Laporan</h3>
+            <button id="cancelExport" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Kolom Pilihan -->
+            <div>
+                <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Pilih Kolom untuk Ekspor</h4>
+                <div class="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
+                    <label class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" checked value="1" class="export-column h-5 w-5 text-blue-500 rounded focus:ring-blue-400">
+                        <span>ID</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" checked value="2" class="export-column h-5 w-5 text-blue-500 rounded focus:ring-blue-400">
+                        <span>Tanggal</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" checked value="3" class="export-column h-5 w-5 text-blue-500 rounded focus:ring-blue-400">
+                        <span>Jam</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" checked value="4" class="export-column h-5 w-5 text-blue-500 rounded focus:ring-blue-400">
+                        <span>Nama Kasir</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" checked value="5" class="export-column h-5 w-5 text-blue-500 rounded focus:ring-blue-400">
+                        <span>Nominal</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" checked value="6" class="export-column h-5 w-5 text-blue-500 rounded focus:ring-blue-400">
+                        <span>Cash</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" checked value="7" class="export-column h-5 w-5 text-blue-500 rounded focus:ring-blue-400">
+                        <span>QRIS</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" checked value="8" class="export-column h-5 w-5 text-blue-500 rounded focus:ring-blue-400">
+                        <span>Selisih</span>
+                    </label>
+                    <label class="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" checked value="9" class="export-column h-5 w-5 text-blue-500 rounded focus:ring-blue-400">
+                        <span>Status</span>
+                    </label>
+                </div>
+            </div>
+            <!-- Pratinjau PDF -->
+            <div class="hidden lg:block">
+                <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Pratinjau PDF</h4>
+                <div id="pdfPreviewContainer" class="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 h-64 overflow-auto">
+                    <iframe id="pdfPreview" class="w-full h-full border-0" title="Pratinjau PDF"></iframe>
+                    <div id="pdfPreviewPlaceholder" class="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-file-pdf text-2xl mr-2"></i>
+                        <span>Klik "Pratinjau" untuk melihat</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end gap-4 mt-6">
+            <button id="previewPDF" class="btn-neumorphic px-6 py-3 text-blue-600 dark:text-blue-400 flex items-center space-x-2 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors">
+                <i class="fas fa-eye"></i>
+                <span>Pratinjau</span>
+            </button>
+            <button id="confirmPDF" class="btn-neumorphic px-6 py-3 text-red-600 dark:text-red-400 flex items-center space-x-2 hover:bg-red-100 dark:hover:bg-red-900 transition-colors">
+                <i class="fas fa-download"></i>
+                <span>Unduh PDF</span>
+            </button>
+            <button id="confirmExcel" class="btn-neumorphic px-6 py-3 text-green-600 dark:text-green-400 flex items-center space-x-2 hover:bg-green-100 dark:hover:bg-green-900 transition-colors">
+                <i class="fas fa-file-excel"></i>
+                <span>Unduh Excel</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+            <!-- Advanced Search Modal -->
+            <div id="advancedSearchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl w-full max-w-md animate-fade-in">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Pencarian Lanjutan</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">ID</label>
+                        <input 
+                            type="text" 
+                            id="searchID" 
+                            class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                            placeholder="Masukkan ID"
+                        >
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Tanggal</label>
+                        <input 
+                            type="date" 
+                            id="searchDate" 
+                            class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                        >
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Nama Kasir</label>
+                        <input 
+                            type="text" 
+                            id="searchUsername" 
+                            class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                            placeholder="Masukkan nama kasir"
+                        >
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button 
+                            id="cancelSearch" 
+                            class="btn-neumorphic px-4 py-2 text-gray-600 dark:text-gray-300"
+                        >
+                            Batal
+                        </button>
+                        <button 
+                            id="applySearch" 
+                            class="btn-neumorphic px-4 py-2 text-blue-600 dark:text-blue-400"
+                        >
+                            Terapkan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Schedule Modal -->
+            <div id="scheduleModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl w-full max-w-md animate-fade-in">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Jadwalkan Ekspor</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Frekuensi</label>
+                        <select id="scheduleFrequency" class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full">
+                            <option value="daily">Harian</option>
+                            <option value="weekly">Mingguan</option>
+                            <option value="monthly">Bulanan</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Format</label>
+                        <select id="scheduleFormat" class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full">
+                            <option value="excel">Excel</option>
+                            <option value="pdf">PDF</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button 
+                            id="cancelSchedule" 
+                            class="btn-neumorphic px-4 py-2 text-gray-600 dark:text-gray-300"
+                        >
+                            Batal
+                        </button>
+                        <button 
+                            id="saveSchedule" 
+                            class="btn-neumorphic px-4 py-2 text-blue-600 dark:text-blue-400"
+                        >
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Filter Drawer -->
+            <div id="filterDrawer" class="fixed inset-y-0 right-0 w-3/4 max-w-sm bg-white dark:bg-gray-800 p-6 shadow-lg z-40 filter-drawer">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Filter</h3>
+                    <button id="closeFilterDrawer" class="text-gray-600 dark:text-gray-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Dari</label>
+                        <input 
+                            type="date" 
+                            id="mobileStartDate" 
+                            class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Sampai</label>
+                        <input 
+                            type="date" 
+                            id="mobileEndDate" 
+                            class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Status</label>
+                        <select 
+                            id="mobileStatusFilter" 
+                            class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                        >
+                            <option value="">Semua</option>
+                            <option value="Plus">Plus</option>
+                            <option value="Minus">Minus</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Cari kasir</label>
+                        <input 
+                            type="text" 
+                            id="mobileSearchInput" 
+                            class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                            placeholder="Masukkan nama..."
+                        >
+                    </div>
+                    <button 
+                        id="applyMobileFilters" 
+                        class="btn-neumorphic px-4 py-2 text-blue-600 dark:text-blue-400"
+                    >
+                        Terapkan
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container p-4 md:p-6">
+                <!-- Header Section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg">
+                            <i class="fas fa-money-bill-wave text-2xl text-blue-500 dark:text-blue-300"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-200">Data Setoran</h1>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manajemen dan monitoring setoran harian</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button id="toggleSidebar" class="md:hidden btn-neumorphic p-2">
+                            <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                        </button>
+                        <button id="themeToggle" class="btn-neumorphic p-2" aria-label="Toggle theme">
+                            <i class="fas fa-moon text-gray-600 dark:text-yellow-400"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Section -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+                        <h3 class="text-sm font-medium text-gray-600 dark:text-gray-300">Total Transaksi</h3>
+                        <p id="totalTransactions" class="text-2xl font-bold text-gray-800 dark:text-gray-200">0</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+                        <h3 class="text-sm font-medium text-gray-600 dark:text-gray-300">Rata-rata Nominal</h3>
+                        <p id="avgNominal" class="text-2xl font-bold text-gray-800 dark:text-gray-200">Rp 0</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
+                        <h3 class="text-sm font-medium text-gray-600 dark:text-gray-300">Status Plus/Minus</h3>
+                        <p id="statusSummary" class="text-2xl font-bold text-gray-800 dark:text-gray-200">0 / 0</p>
+                    </div>
+                </div>
+
+  <!-- Chart Section -->
+<div class="mb-8">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+            <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i>
+            Analisis Setoran
+        </h2>
+        <button 
+            id="toggleCharts" 
+            class="group relative px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-500 dark:from-indigo-700 dark:to-blue-600 text-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center overflow-hidden"
+        >
+            <span class="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 opacity-0 group-hover:opacity-30 transition-opacity duration-200"></span>
+            <i class="fas fa-chart-bar mr-2 transform group-hover:scale-110 transition-transform duration-200"></i>
+            <span class="text-sm font-medium">Grafik</span>
+        </button>
+    </div>
+    <div id="chartsContainer" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-0 transition-all duration-500 ease-in-out">
+        <div class="relative bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+            <div class="absolute top-3 right-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
+                    Nominal
+                </span>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Transaksi</h3>
+            <div class="relative w-full aspect-[4/3] max-h-48">
+                <canvas id="summaryChart" class="w-full h-full"></canvas>
+            </div>
+        </div>
+        <div class="relative bg-white dark:bg-gray-900 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+            <div class="absolute top-3 right-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                    Selisih
+                </span>
+            </div>
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Status</h3>
+            <div class="relative w-full aspect-[4/3] max-h-48">
+                <canvas id="statusChart" class="w-full h-full"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+                <!-- Filter Bar -->
+                <div class="filter-bar flex flex-col md:flex-row gap-4 w-full md:w-auto mb-6">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="w-full sm:w-auto">
+                            <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Dari</label>
+                            <input 
+                                type="date" 
+                                id="startDate" 
+                                class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                onchange="filterTable()"
+                            >
+                        </div>
+                        <div class="w-full sm:w-auto">
+                            <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Sampai</label>
+                            <input 
+                                type="date" 
+                                id="endDate" 
+                                class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                onchange="filterTable()"
+                            >
+                        </div>
+                        <div class="w-full sm:w-auto">
+                            <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Status</label>
+                            <select 
+                                id="statusFilter" 
+                                class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                onchange="filterTable()"
+                            >
+                                <option value="">Semua</option>
+                                <option value="Plus">Plus</option>
+                                <option value="Minus">Minus</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-64">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Cari kasir</label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                class="pl-10 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Masukkan nama..."
+                                onkeyup="filterTable()"
+                            >
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                                <i class="fas fa-search text-gray-400 dark:text-gray-500"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button 
+                            id="advancedSearchBtn" 
+                            class="btn-neumorphic px-4 py-2.5 text-blue-600 dark:text-blue-400"
+                        >
+                            <i class="fas fa-search-plus mr-2"></i> Pencarian Lanjutan
+                        </button>
+                        <button 
+                            id="resetFilters" 
+                            class="btn-neumorphic px-4 py-2.5 text-gray-600 dark:text-gray-300"
+                            onclick="resetFilters()"
+                        >
+                            <i class="fas fa-undo mr-2"></i> Reset
+                        </button>
+                        <button 
+                            id="openFilterDrawer" 
+                            class="md:hidden btn-neumorphic px-4 py-2.5 text-blue-600 dark:text-blue-400"
+                        >
+                            <i class="fas fa-filter mr-2"></i> Filter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="table-responsive border border-gray-200 dark:border-gray-600 rounded-xl">
+                    <table id="setoranTable" class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">
+                                    <input type="checkbox" id="selectAll" aria-label="Select all rows">
+                                </th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">ID</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Tanggal</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Jam</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Nama kasir</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Nominal</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Cash</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">QRIS</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Selisih</th>
+                                <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                            <!-- Table content will be populated by JavaScript -->
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-gray-50 dark:bg-gray-700 font-semibold">
+                                <td class="px-6 py-4"></td>
+                                <td colspan="4" class="px-6 py-4 text-gray-700 dark:text-gray-200">Total</td>
+                                <td id="totalNominal" class="px-6 py-4 text-gray-700 dark:text-gray-200"></td>
+                                <td id="totalCash" class="px-6 py-4 text-gray-700 dark:text-gray-200"></td>
+                                <td id="totalQRIS" class="px-6 py-4 text-gray-700 dark:text-gray-200"></td>
+                                <td id="totalSelisih" class="px-6 py-4 text-gray-700 dark:text-gray-200"></td>
+                                <td class="px-6 py-4"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+<!-- PIN Confirmation Modal -->
+<div id="pinConfirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl w-full max-w-md animate-fade-in">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Konfirmasi Penghapusan</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Masukkan PIN untuk mengonfirmasi penghapusan data.</p>
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">PIN</label>
+            <input 
+                type="password" 
+                id="pinInput" 
+                class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                placeholder="Masukkan PIN"
+            >
+        </div>
+        <div class="flex justify-end gap-3">
+            <button 
+                id="cancelPin" 
+                class="btn-neumorphic px-4 py-2 text-gray-600 dark:text-gray-300"
+            >
+                Batal
+            </button>
+            <button 
+                id="confirmPin" 
+                class="btn-neumorphic px-4 py-2 text-red-600 dark:text-red-400"
+            >
+                Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+                <!-- Footer Section -->
+                <div class="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button 
+                            id="bulkDeleteBtn" 
+                            class="btn-neumorphic px-4 py-2.5 text-red-600 dark:text-red-400 disabled:opacity-50"
+                            disabled
+                        >
+                            <i class="fas fa-trash mr-2"></i> Hapus Terpilih
+                        </button>
+                        
+                        
+                        <button 
+    id="viewDeletedLog" 
+    class="btn-neumorphic px-4 py-2.5 text-yellow-600 dark:text-yellow-400"
+>
+    <i class="fas fa-history mr-2"></i> Lihat Log Penghapusan
+</button>
+
+                        <button 
+                            id="downloadExcelBtn" 
+                            class="btn-neumorphic px-4 py-2.5 text-green-600 dark:text-green-400"
+                        >
+                            <i class="fas fa-file-excel mr-2"></i> Unduh Excel
+                        </button>
+                        <button 
+                            id="downloadPDFBtn" 
+                            class="btn-neumorphic px-4 py-2.5 text-red-600 dark:text-red-400"
+                        >
+                            <i class="fas fa-file-pdf mr-2"></i> Unduh PDF
+                        </button>
+                        <button 
+                            id="scheduleExportBtn" 
+                            class="btn-neumorphic px-4 py-2.5 text-purple-600 dark:text-purple-400"
+                        >
+                            <i class="fas fa-calendar-alt mr-2"></i> Jadwalkan Ekspor
+                        </button>
+                        <button 
+                            id="backupData" 
+                            class="btn-neumorphic px-4 py-2.5 text-indigo-600 dark:text-indigo-400"
+                            onclick="backupData()"
+                        >
+                            <i class="fas fa-download mr-2"></i> Backup Data
+                        </button>
+                        <label 
+                            class="btn-neumorphic px-4 py-2.5 text-blue-600 dark:text-blue-400 flex items-center justify-center cursor-pointer"
+                        >
+                            <i class="fas fa-upload mr-2"></i> Restore Data
+                            <input type="file" id="restoreData" class="hidden" accept=".json" onchange="restoreData(event)">
+                        </label>
+                    </div>
+                    <div id="summary" class="text-sm text-gray-600 dark:text-gray-300 font-medium"></div>
+                </div>
+
+                <!-- Scroll to Top Button -->
+                <button 
+                    id="scrollToTop" 
+                    class="fixed bottom-4 right-4 btn-neumorphic p-3 text-blue-600 dark:text-blue-400 hidden"
+                    aria-label="Scroll to top"
+                >
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+    // Create button bar HTML structure
+    const buttonBarHTML = `
+        <div class="nav-container">
+            <!-- Top buttons column -->
+            <div class="nav-buttons top">
+                <button class="nav-btn" onclick="navigateTo('cashier')">
+                    <i class="fas fa-cash-register"></i>
+                    <span class="tooltip">Kasir</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('deposit')">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span class="tooltip">Setoran</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('transaction-report')">
+                    <i class="fas fa-receipt"></i>
+                    <span class="tooltip">Laporan Transaksi</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('deposit-report')">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span class="tooltip">Laporan Setoran</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('account')">
+                    <i class="fas fa-user-cog"></i>
+                    <span class="tooltip">Akun</span>
+                </button>
+            </div>
+            
+            <!-- Right buttons row -->
+            <div class="nav-buttons right">
+                <button class="nav-btn" onclick="navigateTo('inventory')">
+                    <i class="fas fa-boxes"></i>
+                    <span class="tooltip">Data Barang</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('stock-check')">
+                    <i class="fas fa-search-plus"></i>
+                    <span class="tooltip">Cek Stok</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('item-summary')">
+                    <i class="fas fa-box-open"></i>
+                    <span class="tooltip">Rekap Barang</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('receipt')">
+                    <i class="fas fa-dolly"></i>
+                    <span class="tooltip">Penerimaan</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('return')">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span class="tooltip">Retur Barang</span>
+                </button>
+                
+                <button class="nav-btn" onclick="navigateTo('void')">
+                    <i class="fas fa-ban"></i>
+                    <span class="tooltip">Void</span>
+                </button>
+            </div>
+            
+            <button class="main-btn" id="mainNavBtn">
+                <i class="fas fa-plus" id="mainIcon"></i>
+            </button>
+        </div>
+    `;
+    
+    // Append button bar to body
+    document.body.insertAdjacentHTML('beforeend', buttonBarHTML);
+    
+    // Initialize button bar functionality
+    const navContainer = document.querySelector('.nav-container');
+    const mainBtn = document.getElementById('mainNavBtn');
+    const mainIcon = document.getElementById('mainIcon');
+    
+    // Create ripple effect
+    function createRipple(event) {
+        const btn = event.currentTarget;
+        const circle = document.createElement("span");
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = event.clientX - rect.left - size/2;
+        const y = event.clientY - rect.top - size/2;
+        
+        circle.style.width = circle.style.height = `${size}px`;
+        circle.style.left = `${x}px`;
+        circle.style.top = `${y}px`;
+        circle.classList.add("ripple");
+        
+        btn.appendChild(circle);
+        
+        setTimeout(() => {
+            circle.remove();
+        }, 800);
+    }
+    
+    // Toggle navigation
+    mainBtn.addEventListener('click', function(e) {
+        createRipple(e);
+        navContainer.classList.toggle('active');
+        
+        if (navContainer.classList.contains('active')) {
+            this.style.transform = 'rotate(225deg) scale(1.15)';
+            mainIcon.classList.replace('fa-plus', 'fa-times');
+        } else {
+            this.style.transform = 'rotate(0) scale(1)';
+            mainIcon.classList.replace('fa-times', 'fa-plus');
+        }
+    });
+    
+    // Add ripple to all buttons
+    document.querySelectorAll('.nav-btn, .main-btn').forEach(btn => {
+        btn.addEventListener('click', createRipple);
+    });
+    
+    // Close when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!navContainer.contains(e.target) && navContainer.classList.contains('active')) {
+            navContainer.classList.remove('active');
+            mainBtn.style.transform = 'rotate(0) scale(1)';
+            mainIcon.classList.replace('fa-times', 'fa-plus');
+        }
+    });
+    
+    // Navigation function
+    window.navigateTo = function(destination) {
+        // Close menu
+        navContainer.classList.remove('active');
+        mainBtn.style.transform = 'rotate(0) scale(1)';
+        mainIcon.classList.replace('fa-times', 'fa-plus');
+        
+        // Page links configuration
+        const pageLinks = {
+            'cashier': 'kasir.html',
+            'deposit': 'setoran.html',
+            'transaction-report': 'laporan.html',
+            'deposit-report': 'https://rekapsetoran.rf.gd/user.php?i=1',
+            'account': 'akun.html',
+            'inventory': 'barang.html',
+            'stock-check': 'cek ulang stok.html',
+            'item-summary': 'https://rekapsetoran.rf.gd/terima.php',
+            'receipt': 'resif.html',
+            'return': 'retur.html',
+            'void': 'void.html'
+        };
+        
+        // Navigate to page
+        if (pageLinks[destination]) {
+            // Smooth page transition
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.4s ease';
+            
+            setTimeout(() => {
+                window.location.href = pageLinks[destination];
+            }, 400);
+        } else {
+            console.warn('Page not configured:', destination);
+        }
+    };
+    
+    // Restore opacity when returning
+    window.addEventListener('pageshow', () => {
+        document.body.style.opacity = '1';
+    });
+});
+        
+        
+        
+        // Library Availability Check
+        if (!window.jspdf || !window.XLSX || !window.Chart) {
+            console.error('One or more external libraries failed to load.');
+            alert('Gagal memuat pustaka eksternal. Pastikan koneksi internet stabil.');
+        }
+
+        let sortConfig = { column: null, direction: 'asc' };
+        let chartInstance = null;
+        let statusChartInstance = null;
+        let selectedRows = new Set();
+                // Theme Toggle
+
+
+        // Utility Functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingOverlay').classList.add('flex');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('loadingOverlay').classList.remove('flex');
+        }
+
+        function parseNumber(text) {
+            const numbersOnly = text.replace(/[^0-9-]/g, '');
+            const parsed = parseInt(numbersOnly);
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { 
+                style: 'currency', 
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(angka);
+        }
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function formatDetailDate(date) {
+            return new Date(date).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function getLaporanPeriode() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            if (startDate && endDate) {
+                return `Periode: ${formatDetailDate(startDate)} - ${formatDetailDate(endDate)}`;
+            } else {
+                return `Periode: Semua Data`;
+            }
+        }
+
+        function showSuccess(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+            toast.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('animate-fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('animate-fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Authentication Functions
+        function checkLogin() {
+            const loggedIn = localStorage.getItem('loggedIn');
+            const username = localStorage.getItem('username');
+            const userInfo = document.getElementById('loggedInUsername');
+            
+            if (loggedIn !== 'true') {
+                if (userInfo) {
+                    userInfo.textContent = 'Tidak ada pengguna';
+                }
+                showError('Anda belum login. Mengarahkan ke halaman login...');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000); // Delay 2 detik agar peringatan terlihat
+                return false;
+            }
+            
+            if (userInfo && username) {
+                userInfo.textContent = username;
+            }
+            return true;
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('username');
+            localStorage.setItem('loginAttempts', JSON.stringify({}));
+            showSuccess('Berhasil keluar.');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1000); // Delay 1 detik agar pesan sukses terlihat
+        }
+
+
+
+
+// Toggle Charts
+function toggleCharts() {
+    const chartsContainer = document.getElementById('chartsContainer');
+    const toggleButton = document.getElementById('toggleCharts');
+    const isHidden = chartsContainer.classList.contains('hidden');
+
+    // Toggle visibility
+    chartsContainer.classList.toggle('hidden');
+
+    // Update button text and animation
+    toggleButton.querySelector('span').textContent = isHidden ? 'Sembunyikan' : 'Grafik';
+    toggleButton.classList.toggle('bg-gradient-to-r', isHidden);
+    toggleButton.classList.toggle('from-indigo-600', isHidden);
+    toggleButton.classList.toggle('to-blue-500', isHidden);
+    toggleButton.classList.toggle('from-red-600', !isHidden);
+    toggleButton.classList.toggle('to-pink-500', !isHidden);
+
+    if (!chartsContainer.classList.contains('hidden')) {
+        chartsContainer.style.opacity = '0';
+        chartsContainer.style.transform = 'translateY(10px)';
+        setTimeout(() => {
+            chartsContainer.style.opacity = '1';
+            chartsContainer.style.transform = 'translateY(0)';
+        }, 50); // Smooth slide-in
+
+        const totals = document.querySelectorAll('#setoranTable tfoot td');
+        if (totals.length < 5) {
+            console.warn('Insufficient table footer data for charts');
+            return;
+        }
+        const statusPlus = document.querySelectorAll(
+            '#setoranTable tbody tr:not([style*="display: none"]) td:nth-child(10).text-green-600'
+        ).length;
+        const statusMinus = document.querySelectorAll(
+            '#setoranTable tbody tr:not([style*="display: none"]) td:nth-child(10).text-red-600'
+        ).length;
+
+        renderCharts(
+            parseNumber(totals[2].textContent), // Total Nominal
+            parseNumber(totals[3].textContent), // Total Cash
+            parseNumber(totals[4].textContent), // Total QRIS
+            statusPlus,
+            statusMinus
+        );
+    } else {
+        chartsContainer.style.opacity = '0';
+        chartsContainer.style.transform = 'translateY(10px)';
+        // Destroy chart instances
+        if (chartInstance) {
+            chartInstance.destroy();
+            chartInstance = null;
+        }
+        if (statusChartInstance) {
+            statusChartInstance.destroy();
+            statusChartInstance = null;
+        }
+    }
+}
+
+// Render Charts with Compact Styling
+function renderCharts(nominal, cash, qris, statusPlus, statusMinus) {
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    const textColor = isDarkMode ? '#d1d5db' : '#111827';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)';
+    const shadowColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
+    // Summary Chart (Bar)
+    const summaryCtx = document.getElementById('summaryChart')?.getContext('2d');
+    if (!summaryCtx) {
+        console.error('Summary chart canvas not found');
+        return;
+    }
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(summaryCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Nominal', 'Cash', 'QRIS'],
+            datasets: [{
+                label: 'Jumlah (Rp)',
+                data: [nominal, cash, qris],
+                backgroundColor: ['#4f46e5', '#10b981', '#8b5cf6'],
+                borderColor: ['#4338ca', '#059669', '#7c3aed'],
+                borderWidth: 1,
+                borderRadius: 8,
+                barThickness: 30,
+                hoverBackgroundColor: ['#6366f1', '#34d399', '#a78bfa']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 4 / 3,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                    titleColor: textColor,
+                    bodyColor: textColor,
+                    borderColor: shadowColor,
+                    borderWidth: 1,
+                    padding: 8,
+                    cornerRadius: 6,
+                    callbacks: {
+                        label: (context) => `Rp ${formatRupiah(context.raw)}`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { 
+                        color: textColor, 
+                        font: { size: 10, weight: '500' },
+                        padding: 5
+                    }
+                },
+                y: {
+                    grid: { color: gridColor, borderDash: [3, 3] },
+                    ticks: {
+                        color: textColor,
+                        font: { size: 10 },
+                        padding: 5,
+                        callback: (value) => `Rp ${formatRupiah(value)}`
+                    },
+                    beginAtZero: true
+                }
+            },
+            animation: {
+                duration: 800,
+                easing: 'easeOutCubic',
+                delay: (context) => context.dataIndex * 150
+            }
+        }
+    });
+
+    // Status Chart (Doughnut)
+    const statusCtx = document.getElementById('statusChart')?.getContext('2d');
+    if (!statusCtx) {
+        console.error('Status chart canvas not found');
+        return;
+    }
+    if (statusChartInstance) statusChartInstance.destroy();
+    statusChartInstance = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Plus', 'Minus'],
+            datasets: [{
+                data: [statusPlus, statusMinus],
+                backgroundColor: ['#10b981', '#ef4444'],
+                borderColor: ['#059669', '#dc2626'],
+                borderWidth: 2,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 4 / 3,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { 
+                        color: textColor, 
+                        font: { size: 10, weight: '500' },
+                        padding: 10,
+                        boxWidth: 10,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+                    titleColor: textColor,
+                    bodyColor: textColor,
+                    borderColor: shadowColor,
+                    borderWidth: 1,
+                    padding: 8,
+                    cornerRadius: 6
+                }
+            },
+            animation: {
+                duration: 800,
+                easing: 'easeOutCubic'
+            },
+            cutout: '65%'
+        }
+    });
+}
+
+// Update Totals with Chart Sync
+function updateTotals(nominal, cash, qris, plus, minus, total, avgNominal, statusPlus, statusMinus) {
+    nominal = isNaN(nominal) ? 0 : nominal;
+    cash = isNaN(cash) ? 0 : cash;
+    qris = isNaN(qris) ? 0 : qris;
+    plus = isNaN(plus) ? 0 : plus;
+    minus = isNaN(minus) ? 0 : minus;
+
+    document.getElementById('totalNominal').textContent = formatRupiah(nominal);
+    document.getElementById('totalCash').textContent = formatRupiah(cash);
+    document.getElementById('totalQRIS').textContent = formatRupiah(qris);
+    document.getElementById('totalSelisih').textContent = 
+        `+${formatRupiah(plus)} / -${formatRupiah(minus)}`;
+    document.getElementById('totalTransactions').textContent = total;
+    document.getElementById('avgNominal').textContent = formatRupiah(avgNominal);
+    document.getElementById('statusSummary').textContent = `${statusPlus} / ${statusMinus}`;
+
+    const chartsContainer = document.getElementById('chartsContainer');
+    if (!chartsContainer.classList.contains('hidden')) {
+        chartsContainer.style.opacity = '0';
+        chartsContainer.style.transform = 'translateY(10px)';
+        setTimeout(() => {
+            renderCharts(nominal, cash, qris, statusPlus, statusMinus);
+            chartsContainer.style.opacity = '1';
+            chartsContainer.style.transform = 'translateY(0)';
+        }, 50); // Smooth slide-in
+    }
+}
+
+// Event Listener
+const toggleChartsButton = document.getElementById('toggleCharts');
+if (toggleChartsButton) {
+    toggleChartsButton.addEventListener('click', toggleCharts);
+} else {
+    console.warn('Toggle charts button not found');
+}
+
+
+        function updateSummary(total, plus, minus) {
+            const summaryText = `Total ${total} transaksi | Selisih Plus: ${formatRupiah(plus)} | Selisih Minus: ${formatRupiah(minus)}`;
+            document.getElementById('summary').textContent = summaryText;
+        }
+
+        function filterTable() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchID = document.getElementById('searchID').value;
+            const searchDate = document.getElementById('searchDate').value;
+            const searchUsername = document.getElementById('searchUsername').value.toLowerCase();
+            const rows = document.querySelectorAll('#setoranTable tbody tr');
+
+            let totalNominal = 0;
+            let totalCash = 0;
+            let totalQRIS = 0;
+            let totalSelisihPlus = 0;
+            let totalSelisihMinus = 0;
+            let visibleRows = 0;
+            let statusPlus = 0;
+            let statusMinus = 0;
+
+            rows.forEach(row => {
+                const cells = row.getElementsByTagName('td');
+                const id = cells[1].textContent;
+                const date = cells[2].textContent;
+                const username = cells[4].textContent.toLowerCase();
+                const status = cells[9].textContent;
+                const text = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
+                
+                const dateInRange = (!startDate || !endDate) ? true : 
+                    (date >= startDate && date <= endDate);
+                const textMatch = !searchText || text.includes(searchText);
+                const statusMatch = !statusFilter || status === statusFilter;
+                const idMatch = !searchID || id === searchID;
+                const dateMatch = !searchDate || date === searchDate;
+                const usernameMatch = !searchUsername || username.includes(searchUsername);
+                const visible = dateInRange && textMatch && statusMatch && idMatch && dateMatch && usernameMatch;
+                
+                row.style.display = visible ? '' : 'none';
+
+                if (visible) {
+                    visibleRows++;
+                    totalNominal += parseNumber(cells[5].textContent);
+                    totalCash += parseNumber(cells[6].textContent);
+                    totalQRIS += parseNumber(cells[7].textContent);
+                    
+                    const selisih = parseNumber(cells[8].textContent);
+                    if (status === 'Plus') {
+                        totalSelisihPlus += Math.abs(selisih);
+                        statusPlus++;
+                    }
+                    if (status === 'Minus') {
+                        totalSelisihMinus += Math.abs(selisih);
+                        statusMinus++;
+                    }
+                }
+            });
+
+            const avgNominal = visibleRows > 0 ? totalNominal / visibleRows : 0;
+            updateTotals(totalNominal, totalCash, totalQRIS, totalSelisihPlus, totalSelisihMinus, visibleRows, avgNominal, statusPlus, statusMinus);
+            updateSummary(visibleRows, totalSelisihPlus, totalSelisihMinus);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('searchID').value = '';
+            document.getElementById('searchDate').value = '';
+            document.getElementById('searchUsername').value = '';
+            filterTable();
+        }
+
+        function displaySetoran() {
+            if (!checkLogin()) return;
+            showLoading();
+            try {
+                const laporanSetoran = JSON.parse(localStorage.getItem('laporanSetoran')) || [];
+                const tableBody = document.querySelector('#setoranTable tbody');
+                tableBody.innerHTML = '';
+
+                let totalNominal = 0;
+                let totalCash = 0;
+                let totalQRIS = 0;
+                let totalSelisihPlus = 0;
+                let totalSelisihMinus = 0;
+                let statusPlus = 0;
+                let statusMinus = 0;
+
+                laporanSetoran.forEach((setoran, index) => {
+                    setoran.nominalSetoran = isNaN(setoran.nominalSetoran) ? 0 : setoran.nominalSetoran;
+                    setoran.totalCash = isNaN(setoran.totalCash) ? 0 : setoran.totalCash;
+                    setoran.totalQRIS = isNaN(setoran.totalQRIS) ? 0 : setoran.totalQRIS;
+                    setoran.varian = isNaN(setoran.varian) ? 0 : setoran.varian;
+
+                    const row = createTableRow(setoran, index);
+                    tableBody.appendChild(row);
+
+                    totalNominal += setoran.nominalSetoran;
+                    totalCash += setoran.totalCash;
+                    totalQRIS += setoran.totalQRIS;
+                    
+                    if (setoran.status === 'Plus') {
+                        totalSelisihPlus += Math.abs(setoran.varian);
+                        statusPlus++;
+                    }
+                    if (setoran.status === 'Minus') {
+                        totalSelisihMinus += Math.abs(setoran.varian);
+                        statusMinus++;
+                    }
+                });
+
+                const avgNominal = laporanSetoran.length > 0 ? totalNominal / laporanSetoran.length : 0;
+                updateTotals(totalNominal, totalCash, totalQRIS, totalSelisihPlus, totalSelisihMinus, laporanSetoran.length, avgNominal, statusPlus, statusMinus);
+                updateSummary(laporanSetoran.length, totalSelisihPlus, totalSelisihMinus);
+                
+                addSortHandlers();
+                addEditHandlers();
+                addCheckboxHandlers();
+            } catch (error) {
+                console.error('Error displaying setoran:', error);
+                showError('Terjadi kesalahan saat menampilkan data.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function createTableRow(setoran, index) {
+            const row = document.createElement('tr');
+            row.className = index % 2 === 0 ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700' : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600';
+            row.dataset.index = index;
+
+            const cells = [
+                { 
+                    html: `<input type="checkbox" class="row-checkbox" data-index="${index}" aria-label="Select row ${index + 1}">`, 
+                    class: '' 
+                },
+                { text: (index + 1).toString(), class: '' },
+                { text: setoran.tanggal, class: '' },
+                { text: setoran.waktu ? setoran.waktu.split(', ')[1] : 'N/A', class: '' },
+                { text: setoran.username, class: 'font-medium' },
+                { 
+                    html: `<span class="editable" data-field="nominalSetoran">${formatRupiah(setoran.nominalSetoran)}</span>`, 
+                    class: 'text-right' 
+                },
+                { 
+                    html: `<span class="editable" data-field="totalCash">${formatRupiah(setoran.totalCash)}</span>`, 
+                    class: 'text-right' 
+                },
+                { 
+                    html: `<span class="editable" data-field="totalQRIS">${formatRupiah(setoran.totalQRIS)}</span>`, 
+                    class: 'text-right' 
+                },
+                { text: formatRupiah(setoran.varian), class: 'text-right' },
+                { 
+                    text: setoran.status,
+                    class: `font-medium ${getStatusColor(setoran.status)}`
+                }
+            ];
+
+            cells.forEach(cell => {
+                const td = document.createElement('td');
+                td.className = `px-6 py-4 whitespace-nowrap ${cell.class}`;
+                if (cell.html) {
+                    td.innerHTML = cell.html;
+                } else {
+                    td.textContent = cell.text;
+                }
+                row.appendChild(td);
+            });
+
+            return row;
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'Plus': return 'text-green-600 dark:text-green-400';
+                case 'Minus': return 'text-red-600 dark:text-red-400';
+                default: return 'text-gray-600 dark:text-gray-400';
+            }
+        }
+
+        function addSortHandlers() {
+            const headers = document.querySelectorAll('#setoranTable th');
+            headers.forEach((header, index) => {
+                if (index === 0) return; // Skip checkbox column
+                header.classList.add('group', 'cursor-pointer');
+                header.innerHTML = `
+                    <span>${header.textContent}</span>
+                    <i class="fas fa-sort text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 ml-2"></i>
+                `;
+                header.addEventListener('click', () => {
+                    sortTable(index);
+                });
+            });
+        }
+
+        function sortTable(column) {
+            const table = document.getElementById('setoranTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            if (sortConfig.column === column) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.column = column;
+                sortConfig.direction = 'asc';
+            }
+
+            rows.sort((a, b) => {
+                const aValue = a.cells[column].textContent;
+                const bValue = b.cells[column].textContent;
+                
+                let comparison;
+                if (column === 1) {
+                    comparison = parseInt(aValue) - parseInt(bValue);
+                } else if (column === 2) {
+                    comparison = new Date(aValue) - new Date(bValue);
+                } else if (column >= 5 && column <= 8) {
+                    comparison = parseNumber(aValue) - parseNumber(bValue);
+                } else {
+                    comparison = aValue.localeCompare(bValue);
+                }
+
+                return sortConfig.direction === 'asc' ? comparison : -comparison;
+            });
+
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+            updateSortIndicators(column);
+        }
+
+        function updateSortIndicators(activeColumn) {
+            const headers = document.querySelectorAll('#setoranTable th');
+            headers.forEach((header, index) => {
+                const icon = header.querySelector('i');
+                if (index === activeColumn) {
+                    icon.className = `fas fa-sort-${sortConfig.direction === 'asc' ? 'up' : 'down'} text-blue-500 dark:text-blue-300 ml-2`;
+                } else if (icon) {
+                    icon.className = 'fas fa-sort text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 ml-2';
+                }
+            });
+        }
+
+        function addEditHandlers() {
+            document.querySelectorAll('.editable').forEach(cell => {
+                cell.addEventListener('click', () => {
+                    const currentValue = cell.textContent.replace(/[^\d-]/g, '');
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.value = currentValue;
+                    input.className = 'border border-gray-300 rounded px-2 py-1 w-full';
+                    input.addEventListener('blur', () => saveEdit(cell, input));
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') saveEdit(cell, input);
+                    });
+                    cell.innerHTML = '';
+                    cell.appendChild(input);
+                    input.focus();
+                });
+            });
+        }
+
+        function saveEdit(cell, input) {
+            const newValue = parseInt(input.value) || 0;
+            const field = cell.dataset.field;
+            const row = cell.closest('tr');
+            const index = parseInt(row.dataset.index);
+            const laporanSetoran = JSON.parse(localStorage.getItem('laporanSetoran')) || [];
+            
+            laporanSetoran[index][field] = newValue;
+            laporanSetoran[index].varian = laporanSetoran[index].nominalSetoran - (laporanSetoran[index].totalCash + laporanSetoran[index].totalQRIS);
+            laporanSetoran[index].status = laporanSetoran[index].varian >= 0 ? 'Plus' : 'Minus';
+            
+            localStorage.setItem('laporanSetoran', JSON.stringify(laporanSetoran));
+            displaySetoran();
+            showSuccess('Data berhasil diperbarui!');
+        }
+
+        function addCheckboxHandlers() {
+            document.getElementById('selectAll').addEventListener('change', (e) => {
+                const checkboxes = document.querySelectorAll('.row-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = e.target.checked;
+                    const index = parseInt(checkbox.dataset.index);
+                    if (e.target.checked) {
+                        selectedRows.add(index);
+                    } else {
+                        selectedRows.delete(index);
+                    }
+                });
+                updateBulkActions();
+            });
+
+            document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const index = parseInt(checkbox.dataset.index);
+                    if (checkbox.checked) {
+                        selectedRows.add(index);
+                    } else {
+                        selectedRows.delete(index);
+                    }
+                    updateBulkActions();
+                });
+            });
+        }
+
+        function updateBulkActions() {
+            const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+            bulkDeleteBtn.disabled = selectedRows.size === 0;
+        }
+
+// PIN Modal Functions
+function openPinConfirmationModal() {
+    document.getElementById('pinConfirmationModal').classList.remove('hidden');
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinInput').focus();
+}
+
+function closePinConfirmationModal() {
+    document.getElementById('pinConfirmationModal').classList.add('hidden');
+}
+
+// Function to save deleted data to log
+function saveDeletedData(deletedItems) {
+    try {
+        const deletedLog = JSON.parse(localStorage.getItem('deletedSetoranLog')) || [];
+        const timestamp = new Date().toISOString();
+        const logEntry = {
+            timestamp,
+            deletedBy: localStorage.getItem('username') || 'Unknown',
+            items: deletedItems.map((item, index) => ({
+                ...item,
+                id: item.id || `DEL-${timestamp}-${index}` // Add ID if doesn't exist
+            }))
+        };
+        deletedLog.push(logEntry);
+        localStorage.setItem('deletedSetoranLog', JSON.stringify(deletedLog));
+        return true;
+    } catch (error) {
+        console.error('Error saving deleted data:', error);
+        showError('Gagal menyimpan log penghapusan.');
+        return false;
+    }
+}
+
+// Bulk Delete Function
+function bulkDelete() {
+    // Check if any rows are selected
+    if (selectedRows.size === 0) {
+        showError('Tidak ada data yang dipilih untuk dihapus.');
+        return;
+    }
+
+    // Display confirmation warning
+    if (!confirm('Apakah Anda yakin ingin menghapus data terpilih? Tindakan ini tidak dapat dibatalkan.')) {
+        return;
+    }
+
+    // Open PIN modal
+    openPinConfirmationModal();
+
+    // Remove any existing event listeners to prevent duplicates
+    const confirmPinBtn = document.getElementById('confirmPin');
+    const pinInput = document.getElementById('pinInput');
+    
+    // Clean up old event handlers before adding new ones
+    const newConfirmBtn = confirmPinBtn.cloneNode(true);
+    confirmPinBtn.parentNode.replaceChild(newConfirmBtn, confirmPinBtn);
+    
+    // Add event listener for PIN confirmation
+    newConfirmBtn.addEventListener('click', () => {
+        const pin = pinInput.value.trim();
+        if (pin === '451') {
+            showLoading();
+            try {
+                const laporanSetoran = JSON.parse(localStorage.getItem('laporanSetoran')) || [];
+                
+                // Get data to be deleted
+                const deletedItems = laporanSetoran.filter((_, index) => selectedRows.has(index));
+                
+                // Save deleted data to log
+                if (deletedItems.length > 0) {
+                    if (!saveDeletedData(deletedItems)) {
+                        throw new Error('Failed to save deletion log');
+                    }
+                }
+                
+                // Delete data from laporanSetoran
+                const newData = laporanSetoran.filter((_, index) => !selectedRows.has(index));
+                localStorage.setItem('laporanSetoran', JSON.stringify(newData));
+                selectedRows.clear();
+                displaySetoran();
+                closePinConfirmationModal();
+                showSuccess(`${deletedItems.length} data terpilih berhasil dihapus!`);
+            } catch (error) {
+                console.error('Error deleting data:', error);
+                showError('Terjadi kesalahan saat menghapus data: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        } else {
+            showError('PIN salah. Penghapusan dibatalkan.');
+            closePinConfirmationModal();
+        }
+    });
+
+    // Event listener for cancel button - clean up to prevent duplicates
+    const cancelBtn = document.getElementById('cancelPin');
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    newCancelBtn.addEventListener('click', () => {
+        closePinConfirmationModal();
+        showError('Penghapusan dibatalkan.');
+    });
+    
+    // Add event listener for Enter key in PIN input
+    pinInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            newConfirmBtn.click();
+        }
+        if (e.key === 'Escape') {
+            newCancelBtn.click();
+        }
+    });
+}
+
+// Format date for display
+function formatDetailDate(date) {
+    if (!date || !(date instanceof Date) || isNaN(date)) {
+        return 'Invalid Date';
+    }
+    
+    const options = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    };
+    
+    return date.toLocaleDateString('id-ID', options);
+}
+
+// View Deleted Log Function
+function viewDeletedLog() {
+    // Get deleted log data
+    const deletedLog = JSON.parse(localStorage.getItem('deletedSetoranLog')) || [];
+    if (deletedLog.length === 0) {
+        showError('Belum ada data yang dihapus.');
+        return;
+    }
+
+    // Remove any existing log modal to prevent duplicates
+    const existingModal = document.querySelector('.log-modal-container');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Create modal log
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 log-modal-container';
+    modal.innerHTML = `
+        <div class="log-modal bg-white dark:bg-gray-800 p-6 w-full max-w-5xl animate-scale-in rounded-lg shadow-lg overflow-hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Log Penghapusan</h3>
+                <button id="closeLogModal" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="log-filter-bar flex flex-col sm:flex-row gap-4 mb-6">
+                <div class="w-full sm:w-1/2">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Cari Pengguna</label>
+                    <input 
+                        type="text" 
+                        id="logUserFilter" 
+                        class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                        placeholder="Masukkan nama pengguna..."
+                    >
+                </div>
+                <div class="w-full sm:w-1/2">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Tanggal</label>
+                    <input 
+                        type="date" 
+                        id="logDateFilter" 
+                        class="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 w-full"
+                    >
+                </div>
+                <button 
+                    id="resetLogFilters" 
+                    class="btn-neumorphic px-4 py-2.5 text-gray-600 dark:text-gray-300 self-end"
+                >
+                    <i class="fas fa-undo mr-2"></i> Reset
+                </button>
+            </div>
+
+            <!-- Export Button -->
+            <div class="mb-4">
+                <button id="exportLogBtn" class="btn-primary bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white">
+                    <i class="fas fa-file-export mr-2"></i> Export Log (CSV)
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="log-table-container overflow-auto max-h-[60vh]">
+                <table id="logTable" class="min-w-full divide-y divide-gray-200 dark:divide-gray-600 log-table">
+                    <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase cursor-pointer" data-sort="timestamp">
+                                Waktu <i class="fas fa-sort ml-2"></i>
+                            </th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase cursor-pointer" data-sort="deletedBy">
+                                Dihapus Oleh <i class="fas fa-sort ml-2"></i>
+                            </th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">
+                                Data Dihapus
+                            </th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">
+                                Aksi
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                        ${renderLogRows(deletedLog)}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                <p>Total: ${deletedLog.length} catatan log</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Close modal with animation
+    const closeModal = () => {
+        const modalElement = document.querySelector('.log-modal');
+        modalElement.classList.remove('animate-scale-in');
+        modalElement.classList.add('animate-scale-out');
+        setTimeout(() => modal.remove(), 300);
+    };
+
+    // Close button event
+    modal.querySelector('#closeLogModal').addEventListener('click', closeModal);
+    
+    // Close on outside click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.querySelector('.log-modal-container')) {
+            closeModal();
+        }
+    });
+
+    // Sort table on header click
+    modal.querySelectorAll('#logTable th[data-sort]').forEach(header => {
+        header.addEventListener('click', () => {
+            const sortKey = header.dataset.sort;
+            sortLogTable(sortKey);
+        });
+    });
+
+    // Filter event listeners
+    const userFilter = document.getElementById('logUserFilter');
+    const dateFilter = document.getElementById('logDateFilter');
+    
+    userFilter.addEventListener('input', filterLogTable);
+    dateFilter.addEventListener('change', filterLogTable);
+    document.getElementById('resetLogFilters').addEventListener('click', resetLogFilters);
+
+    // Toggle detail rows
+    modal.querySelectorAll('.toggle-details').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const icon = e.currentTarget.querySelector('i');
+            const row = e.currentTarget.closest('tr').nextElementSibling;
+            
+            if (row && row.classList.contains('log-details')) {
+                row.classList.toggle('open');
+                if (row.classList.contains('open')) {
+                    row.style.display = 'table-row';
+                    icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                } else {
+                    row.style.display = 'none';
+                    icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                }
+            }
+        });
+    });
+    
+    // Hide all detail rows initially
+    modal.querySelectorAll('.log-details').forEach(row => {
+        row.style.display = 'none';
+    });
+    
+    // Export button handler
+    document.getElementById('exportLogBtn').addEventListener('click', () => {
+        exportLogToCsv(deletedLog);
+    });
+}
+
+// Render log rows
+function renderLogRows(logs) {
+    if (!logs || logs.length === 0) {
+        return '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Tidak ada data yang tersedia</td></tr>';
+    }
+    
+    return logs.map((log, index) => {
+        // Ensure we have valid timestamp
+        const timestamp = log.timestamp ? new Date(log.timestamp) : new Date();
+        const formattedDate = formatDetailDate(timestamp);
+        
+        return `
+        <tr class="${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-gray-100 dark:hover:bg-gray-600" data-index="${index}">
+            <td class="px-6 py-4 whitespace-nowrap" data-timestamp="${log.timestamp}">${formattedDate}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${log.deletedBy || 'Unknown'}</td>
+            <td class="px-6 py-4">
+                ${log.items ? log.items.length : 0} item${log.items && log.items.length !== 1 ? 's' : ''} dihapus
+            </td>
+            <td class="px-6 py-4">
+                <button class="toggle-details btn-neumorphic px-3 py-1 text-blue-600 dark:text-blue-400 flex items-center">
+                    <i class="fas fa-chevron-down mr-2"></i> Detail
+                </button>
+            </td>
+        </tr>
+        <tr class="log-details" data-parent-index="${index}">
+            <td colspan="4" class="px-6 py-4">
+                <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Detail Data Dihapus</h4>
+                    ${renderDeletedItems(log.items)}
+                </div>
+            </td>
+        </tr>
+    `}).join('');
+}
+
+// Render deleted items
+function renderDeletedItems(items) {
+    if (!items || items.length === 0) {
+        return '<p class="text-gray-500 dark:text-gray-400">Tidak ada detail item yang tersedia</p>';
+    }
+    
+    return `
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead>
+                    <tr>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">ID</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">Tanggal</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">Kasir</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">Nominal</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">Cash</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">QRIS</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">Selisih</th>
+                        <th class="px-3 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${items.map((item, idx) => `
+                        <tr class="${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'}">
+                            <td class="px-3 py-2 text-sm">${item.id || 'N/A'}</td>
+                            <td class="px-3 py-2 text-sm">${item.tanggal || 'N/A'}</td>
+                            <td class="px-3 py-2 text-sm">${item.username || 'N/A'}</td>
+                            <td class="px-3 py-2 text-sm">${formatRupiah(item.nominalSetoran) || 'Rp0'}</td>
+                            <td class="px-3 py-2 text-sm">${formatRupiah(item.totalCash) || 'Rp0'}</td>
+                            <td class="px-3 py-2 text-sm">${formatRupiah(item.totalQRIS) || 'Rp0'}</td>
+                            <td class="px-3 py-2 text-sm">${formatRupiah(item.varian) || 'Rp0'}</td>
+                            <td class="px-3 py-2 text-sm">
+                                <span class="${item.status === 'Plus' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
+                                    ${item.status || 'N/A'}
+                                </span>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+// Filter log table
+// Helper function to validate and parse date
+function isValidDate(timestamp) {
+    const date = new Date(timestamp);
+    return !isNaN(date.getTime()); // Returns true if the date is valid
+}
+
+// Filter log table
+function filterLogTable() {
+    const userFilter = document.getElementById('logUserFilter').value.toLowerCase();
+    const dateFilter = document.getElementById('logDateFilter').value;
+    const table = document.getElementById('logTable');
+    
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tbody tr:not(.log-details)');
+
+    rows.forEach(row => {
+        const detailRow = table.querySelector(`tr.log-details[data-parent-index="${row.dataset.index}"]`);
+        const user = row.cells[1].textContent.toLowerCase();
+        const timestampCell = row.cells[0];
+        const timestamp = timestampCell.dataset.timestamp || timestampCell.textContent;
+        
+        let dateStr = '';
+        if (isValidDate(timestamp)) {
+            const date = new Date(timestamp);
+            dateStr = date.toISOString().split('T')[0];
+        } else {
+            console.warn(`Invalid timestamp in row: ${timestamp}`);
+            // Optionally skip this row or set a default date
+            row.style.display = 'none'; // Hide rows with invalid dates
+            if (detailRow) detailRow.style.display = 'none';
+            return;
+        }
+        
+        const userMatch = user.includes(userFilter);
+        const dateMatch = !dateFilter || dateStr === dateFilter;
+        const visible = userMatch && dateMatch;
+
+        row.style.display = visible ? '' : 'none';
+        if (detailRow) {
+            detailRow.style.display = visible && detailRow.classList.contains('open') ? 'table-row' : 'none';
+        }
+    });
+    
+    // Update counter
+    updateVisibleRowCount();
+}
+
+// Sort log table
+function sortLogTable(column) {
+    const table = document.getElementById('logTable');
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr:not(.log-details)'));
+    const detailRows = {};
+    
+    // Store detail rows by parent index
+    tbody.querySelectorAll('tr.log-details').forEach(detail => {
+        detailRows[detail.dataset.parentIndex] = detail;
+    });
+
+    // Toggle sort direction if same column
+    if (logSortConfig.column === column) {
+        logSortConfig.direction = logSortConfig.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        logSortConfig.column = column;
+        logSortConfig.direction = 'asc';
+    }
+
+    // Perform sort
+    rows.sort((a, b) => {
+        let aValue, bValue;
+        
+        if (column === 'timestamp') {
+            const aTimestamp = a.cells[0].dataset.timestamp || a.cells[0].textContent;
+            const bTimestamp = b.cells[0].dataset.timestamp || b.cells[0].textContent;
+            
+            // Handle invalid timestamps
+            const aValid = isValidDate(aTimestamp);
+            const bValid = isValidDate(bTimestamp);
+            
+            if (!aValid && !bValid) return 0; // Both invalid, consider equal
+            if (!aValid) return 1; // Invalid goes to the end
+            if (!bValid) return -1;
+            
+            aValue = new Date(aTimestamp).getTime();
+            bValue = new Date(bTimestamp).getTime();
+        } else {
+            aValue = a.cells[column === 'deletedBy' ? 1 : 0].textContent.trim().toLowerCase();
+            bValue = b.cells[column === 'deletedBy' ? 1 : 0].textContent.trim().toLowerCase();
+        }
+        
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+            return logSortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+        } else {
+            return logSortConfig.direction === 'asc' ? 
+                aValue.localeCompare(bValue) : 
+                bValue.localeCompare(bValue);
+        }
+    });
+
+    // Re-order the table
+    tbody.innerHTML = '';
+    rows.forEach((row, newIndex) => {
+        // Update row data index
+        const oldIndex = row.dataset.index;
+        row.dataset.index = newIndex;
+        
+        tbody.appendChild(row);
+        
+        // Append detail row if exists
+        if (detailRows[oldIndex]) {
+            const detailRow = detailRows[oldIndex];
+            detailRow.dataset.parentIndex = newIndex;
+            tbody.appendChild(detailRow);
+        }
+    });
+
+    // Update sort indicators
+    table.querySelectorAll('th[data-sort]').forEach(header => {
+        const icon = header.querySelector('i');
+        if (header.dataset.sort === column) {
+            icon.className = `fas fa-sort-${logSortConfig.direction === 'asc' ? 'up' : 'down'} ml-2 text-blue-500 dark:text-blue-300`;
+        } else {
+            icon.className = 'fas fa-sort ml-2 text-gray-400';
+        }
+    });
+}
+
+// Reset filters and updateVisibleRowCount remain unchanged
+function resetLogFilters() {
+    const userFilter = document.getElementById('logUserFilter');
+    const dateFilter = document.getElementById('logDateFilter');
+    
+    if (userFilter) userFilter.value = '';
+    if (dateFilter) dateFilter.value = '';
+    
+    filterLogTable();
+}
+
+function updateVisibleRowCount() {
+    const table = document.getElementById('logTable');
+    if (!table) return;
+    
+    const visibleRows = Array.from(table.querySelectorAll('tbody tr:not(.log-details)')).filter(row => 
+        row.style.display !== 'none'
+    ).length;
+    
+    const countDisplay = document.querySelector('.log-modal p');
+    if (countDisplay) {
+        const totalRows = JSON.parse(localStorage.getItem('deletedSetoranLog') || '[]').length;
+        countDisplay.textContent = `Menampilkan ${visibleRows} dari ${totalRows} catatan log`;
+    }
+}
+
+// Sort variables
+let logSortConfig = { column: 'timestamp', direction: 'desc' };
+
+// Sort log table
+function sortLogTable(column) {
+    const table = document.getElementById('logTable');
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr:not(.log-details)'));
+    const detailRows = {};
+    
+    // Store detail rows by parent index
+    tbody.querySelectorAll('tr.log-details').forEach(detail => {
+        detailRows[detail.dataset.parentIndex] = detail;
+    });
+
+    // Toggle sort direction if same column
+    if (logSortConfig.column === column) {
+        logSortConfig.direction = logSortConfig.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        logSortConfig.column = column;
+        logSortConfig.direction = 'asc';
+    }
+
+    // Perform sort
+    rows.sort((a, b) => {
+        let aValue, bValue;
+        
+        if (column === 'timestamp') {
+            aValue = new Date(a.cells[0].dataset.timestamp || a.cells[0].textContent).getTime();
+            bValue = new Date(b.cells[0].dataset.timestamp || b.cells[0].textContent).getTime();
+        } else {
+            aValue = a.cells[column === 'deletedBy' ? 1 : 0].textContent.trim().toLowerCase();
+            bValue = b.cells[column === 'deletedBy' ? 1 : 0].textContent.trim().toLowerCase();
+        }
+        
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+            return logSortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+        } else {
+            return logSortConfig.direction === 'asc' ? 
+                aValue.localeCompare(bValue) : 
+                bValue.localeCompare(aValue);
+        }
+    });
+
+    // Re-order the table
+    tbody.innerHTML = '';
+    rows.forEach((row, newIndex) => {
+        // Update row data index
+        const oldIndex = row.dataset.index;
+        row.dataset.index = newIndex;
+        
+        tbody.appendChild(row);
+        
+        // Append detail row if exists
+        if (detailRows[oldIndex]) {
+            const detailRow = detailRows[oldIndex];
+            detailRow.dataset.parentIndex = newIndex;
+            tbody.appendChild(detailRow);
+        }
+    });
+
+    // Update sort indicators
+    table.querySelectorAll('th[data-sort]').forEach(header => {
+        const icon = header.querySelector('i');
+        if (header.dataset.sort === column) {
+            icon.className = `fas fa-sort-${logSortConfig.direction === 'asc' ? 'up' : 'down'} ml-2 text-blue-500 dark:text-blue-300`;
+        } else {
+            icon.className = 'fas fa-sort ml-2 text-gray-400';
+        }
+    });
+}
+
+// Export log to CSV
+function exportLogToCsv(logs) {
+    if (!logs || logs.length === 0) {
+        showError('Tidak ada data untuk diekspor');
+        return;
+    }
+    
+    try {
+        // Flatten log structure for CSV
+        const flattenedData = [];
+        
+        logs.forEach(log => {
+            const baseData = {
+                timestamp: new Date(log.timestamp).toLocaleString(),
+                deletedBy: log.deletedBy || 'Unknown'
+            };
+            
+            if (log.items && log.items.length > 0) {
+                log.items.forEach(item => {
+                    flattenedData.push({
+                        ...baseData,
+                        id: item.id || 'N/A',
+                        tanggal: item.tanggal || 'N/A',
+                        kasir: item.username || 'N/A',
+                        nominal: item.nominalSetoran || 0,
+                        cash: item.totalCash || 0,
+                        qris: item.totalQRIS || 0,
+                        selisih: item.varian || 0,
+                        status: item.status || 'N/A'
+                    });
+                });
+            } else {
+                flattenedData.push({
+                    ...baseData,
+                    id: 'N/A',
+                    tanggal: 'N/A',
+                    kasir: 'N/A',
+                    nominal: 0,
+                    cash: 0,
+                    qris: 0,
+                    selisih: 0,
+                    status: 'N/A'
+                });
+            }
+        });
+        
+        // Create CSV content
+        const headers = ['Timestamp', 'Dihapus Oleh', 'ID', 'Tanggal', 'Kasir', 'Nominal', 'Cash', 'QRIS', 'Selisih', 'Status'];
+        let csvContent = headers.join(',') + '\n';
+        
+        flattenedData.forEach(item => {
+            const values = [
+                `"${item.timestamp}"`,
+                `"${item.deletedBy}"`,
+                `"${item.id}"`,
+                `"${item.tanggal}"`,
+                `"${item.kasir}"`,
+                item.nominal,
+                item.cash,
+                item.qris,
+                item.selisih,
+                `"${item.status}"`
+            ];
+            csvContent += values.join(',') + '\n';
+        });
+        
+        // Create download link
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `deleted_log_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showSuccess('Log berhasil diekspor ke CSV');
+    } catch (error) {
+        console.error('Error exporting CSV:', error);
+        showError('Terjadi kesalahan saat mengekspor data');
+    }
+}
+
+// Add event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const viewDeletedLogBtn = document.getElementById('viewDeletedLog');
+    if (viewDeletedLogBtn) {
+        viewDeletedLogBtn.addEventListener('click', viewDeletedLog);
+    }
+    
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.addEventListener('click', bulkDelete);
+    }
+});
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+     
+     
+     
+     
+     
+        // Chart Functions
+        function renderCharts(nominal, cash, qris, statusPlus, statusMinus) {
+            if (!window.Chart) {
+                console.error('Chart.js not loaded');
+                showError('Gagal memuat grafik. Pastikan Chart.js tersedia.');
+                return;
+            }
+
+            // Summary Chart (Bar)
+            const summaryCtx = document.getElementById('summaryChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(summaryCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Nominal', 'Cash', 'QRIS'],
+                    datasets: [{
+                        label: 'Jumlah (Rp)',
+                        data: [nominal, cash, qris],
+                        backgroundColor: ['#34d399', '#3b82f6', '#f43f5e'],
+                        borderColor: ['#10b981', '#2563eb', '#e11d48'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatRupiah(value);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatRupiah(context.parsed.y);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Status Chart (Pie)
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            if (statusChartInstance) statusChartInstance.destroy();
+            statusChartInstance = new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Plus', 'Minus'],
+                    datasets: [{
+                        data: [statusPlus, statusMinus],
+                        backgroundColor: ['#34d399', '#f43f5e'],
+                        borderColor: ['#10b981', '#e11d48'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.parsed}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+
+async function downloadExcel() {
+    if (!window.XLSX) {
+        console.error('SheetJS not loaded');
+        showError('Gagal mengunduh Excel. Pastikan SheetJS tersedia.');
+        return;
+    }
+
+    showLoading();
+    try {
+        const selectedColumns = getSelectedColumns();
+        const table = document.getElementById('setoranTable');
+        const visibleRows = Array.from(table.querySelectorAll('tbody tr'))
+            .filter(row => row.style.display !== 'none');
+        
+        const wb = XLSX.utils.book_new();
+        
+        const styles = {
+            headerStyle: {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "2980B9" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                    top: { style: "thin" },
+                    bottom: { style: "thin" },
+                    left: { style: "thin" },
+                    right: { style: "thin" }
+                }
+            },
+            titleStyle: {
+                font: { bold: true, size: 14 },
+                alignment: { horizontal: "left" }
+            },
+            dateStyle: {
+                font: { size: 10 },
+                alignment: { horizontal: "left" }
+            },
+            footerStyle: {
+                font: { bold: true },
+                fill: { fgColor: { rgb: "BDC3C7" } },
+                border: {
+                    top: { style: "thin" },
+                    bottom: { style: "double" }
+                }
+            }
+        };
+
+        const rows = [
+            [{ v: 'LAPORAN DATA SETORAN', s: styles.titleStyle }],
+            [{ v: getLaporanPeriode(), s: styles.dateStyle }],
+            [{ v: `Tanggal Unduh: ${formatDetailDate(new Date())}`, s: styles.dateStyle }],
+            []
+        ];
+
+        const headers = Array.from(table.querySelectorAll('thead th'))
+            .filter((_, index) => selectedColumns.includes(index))
+            .map(header => ({
+                v: header.querySelector('span')?.textContent || header.textContent,
+                s: styles.headerStyle
+            }));
+        rows.push(headers);
+
+        visibleRows.forEach(row => {
+            const rowData = Array.from(row.cells)
+                .filter((_, index) => selectedColumns.includes(index))
+                .map((cell, index) => {
+                    let value = cell.textContent.trim();
+                    let style = {
+                        alignment: { 
+                            horizontal: index <= 3 ? "center" : 
+                                       index >= 5 && index <= 8 ? "right" : "left"
+                        }
+                    };
+                    if (value.includes('Rp')) {
+                        return {
+                            v: Number(value.replace(/[^\d-]/g, '')),
+                            s: style,
+                            z: '#,##0'
+                        };
+                    }
+                    if (selectedColumns[index] === 9) {
+                        style.alignment.horizontal = "center";
+                        style.font = {
+                            color: { 
+                                rgb: value === 'Plus' ? "2ECC71" : 
+                                     value === 'Minus' ? "E74C3C" : "000000"
+                            }
+                        };
+                    }
+                    return { v: value, s: style };
+                });
+            rows.push(rowData);
+        });
+
+        const footerData = Array.from(table.querySelectorAll('tfoot td'))
+            .filter((_, index) => selectedColumns.includes(index))
+            .map((cell, index) => {
+                let value = cell.textContent.trim();
+                return {
+                    v: value.includes('Rp') ? Number(value.replace(/[^\d-]/g, '')) : value,
+                    s: styles.footerStyle,
+                    z: value.includes('Rp') ? '#,##0' : undefined
+                };
+            });
+        rows.push(footerData);
+
+        rows.push([]);
+        rows.push([{ 
+            v: document.getElementById('summary').textContent,
+            s: { font: { bold: true } }
+        }]);
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = selectedColumns.map(col => ({
+            wch: [0, 8, 12, 10, 30, 15, 15, 15, 15, 10][col]
+        }));
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Laporan Setoran');
+        const excelBuffer = XLSX.write(wb, { 
+            bookType: 'xlsx', 
+            type: 'array',
+            bookSST: false
+        });
+        
+        const blob = new Blob([excelBuffer], { 
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Laporan_Setoran_${formatDate(new Date())}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+
+        showSuccess('File Excel berhasil diunduh!');
+    } catch (error) {
+        console.error('Error downloading Excel:', error);
+        showError('Terjadi kesalahan saat mengunduh file Excel.');
+    } finally {
+        hideLoading();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Export Functions
+function openExportModal() {
+    document.getElementById('exportModal').classList.remove('hidden');
+    // Reset pratinjau
+    const previewIframe = document.getElementById('pdfPreview');
+    const placeholder = document.getElementById('pdfPreviewPlaceholder');
+    previewIframe.src = '';
+    previewIframe.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').classList.add('hidden');
+}
+
+function getSelectedColumns() {
+    return Array.from(document.querySelectorAll('.export-column:checked'))
+        .map(input => parseInt(input.value));
+}
+
+async function generatePDF(isPreview = false) {
+    if (!window.jspdf) {
+        console.error('jsPDF not loaded');
+        showError('Gagal memuat PDF. Pastikan jsPDF tersedia.');
+        return;
+    }
+
+    showLoading();
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+
+        // Define Color Palette
+        const primaryColor = [26, 82, 118]; // Darker blue
+        const secondaryColor = [52, 152, 219]; // Lighter blue
+        const accentColor = [46, 204, 113]; // Green for positive
+        const errorColor = [231, 76, 60]; // Red for negative
+        const textColor = [44, 62, 80]; // Dark gray for text
+        const bgColor = [245, 248, 250]; // Light gray background
+
+        // Header with Gradient and Logo Placeholder
+        const gradientHeight = 25;
+        doc.setFillColor(...primaryColor);
+        doc.rect(0, 0, 297, gradientHeight, 'F');
+        doc.setFillColor(...secondaryColor);
+        doc.rect(0, gradientHeight, 297, 2, 'F'); // Gradient transition
+
+        // Add Logo (Placeholder - Replace with actual logo)
+        // const logo = 'data:image/png;base64,...'; // Replace with base64 logo
+        // doc.addImage(logo, 'PNG', 14, 5, 30, 15);
+
+        doc.setFont('helvetica', 'bold'); // Fallback; ideally use 'Roboto'
+        doc.setFontSize(22);
+        doc.setTextColor(255, 255, 255);
+        doc.text('Laporan Data Setoran', 14, 18);
+
+        // Subheader (Periode dan Tanggal)
+        doc.setFontSize(10);
+        doc.setTextColor(200, 200, 200);
+        doc.setFont('helvetica', 'normal');
+        doc.text(getLaporanPeriode(), 14, 32);
+        doc.text(`Dicetak pada: ${formatDetailDate(new Date())}`, 14, 38);
+
+        // Subtle Separator Line
+        doc.setDrawColor(200);
+        doc.setLineWidth(0.3);
+        doc.line(14, 42, 283, 42);
+
+        // Data Table
+        const selectedColumns = getSelectedColumns();
+        const table = document.getElementById('setoranTable');
+        const visibleData = [];
+
+        // Table Headers
+        const headers = Array.from(table.querySelectorAll('thead th'))
+            .filter((_, index) => selectedColumns.includes(index))
+            .map(header => header.querySelector('span')?.textContent || header.textContent);
+        visibleData.push(headers);
+
+        // Table Rows
+        const rows = Array.from(table.querySelectorAll('tbody tr'))
+            .filter(row => row.style.display !== 'none')
+            .map(row => Array.from(row.cells)
+                .filter((_, index) => selectedColumns.includes(index))
+                .map(cell => {
+                    let value = cell.textContent;
+                    if (value.includes('Rp')) {
+                        return value.replace('Rp', '').trim().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                    }
+                    return value;
+                }));
+        visibleData.push(...rows);
+
+        // Footer Row (Total)
+        const footerData = Array(selectedColumns.length).fill('');
+        if (selectedColumns.includes(5)) {
+            footerData[selectedColumns.indexOf(5)] = document.getElementById('totalNominal').textContent.replace('Rp', '').trim().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        if (selectedColumns.includes(6)) {
+            footerData[selectedColumns.indexOf(6)] = document.getElementById('totalCash').textContent.replace('Rp', '').trim().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        if (selectedColumns.includes(7)) {
+            footerData[selectedColumns.indexOf(7)] = document.getElementById('totalQRIS').textContent.replace('Rp', '').trim().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        if (selectedColumns.includes(8)) {
+            const totalSelisih = document.getElementById('totalSelisih').textContent.split(' / ');
+            footerData[selectedColumns.indexOf(8)] = `${totalSelisih[0].replace('Rp', '').trim().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} / ${totalSelisih[1].replace('Rp', '').trim().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+        }
+
+        // Table Styling with AutoTable
+        doc.autoTable({
+            head: [visibleData[0]],
+            body: visibleData.slice(1),
+            foot: [footerData],
+            startY: 48,
+            theme: 'grid',
+            styles: {
+                fontSize: 9,
+                cellPadding: 4,
+                lineWidth: 0.1,
+                lineColor: [200, 200, 200],
+                textColor: textColor,
+                valign: 'middle',
+                font: 'helvetica', // Ideally 'Roboto'
+                overflow: 'linebreak'
+            },
+            headStyles: {
+                fillColor: primaryColor,
+                textColor: 255,
+                fontSize: 10,
+                fontStyle: 'bold',
+                halign: 'center',
+                minCellHeight: 12,
+                lineWidth: 0.2
+            },
+            footStyles: {
+                fillColor: [220, 220, 220],
+                textColor: textColor,
+                fontSize: 10,
+                fontStyle: 'bold',
+                halign: 'right',
+                minCellHeight: 12
+            },
+            bodyStyles: {
+                fillColor: [255, 255, 255],
+                alternateRowStyles: {
+                    fillColor: bgColor
+                }
+            },
+            columnStyles: Object.fromEntries(
+                selectedColumns.map((col, idx) => [
+                    idx,
+                    {
+                        halign: col <= 3 ? 'center' : col >= 5 && col <= 8 ? 'right' : 'left',
+                        cellWidth: [0, 15, 25, 20, 'auto', 30, 30, 30, 30, 20][col]
+                    }
+                ])
+            ),
+            didDrawCell: (data) => {
+                if (data.section === 'body' && data.column.index === selectedColumns.indexOf(9)) {
+                    const status = data.cell.raw;
+                    if (status === 'Plus') {
+                        doc.setTextColor(...accentColor);
+                    } else if (status === 'Minus') {
+                        doc.setTextColor(...errorColor);
+                    }
+                } else {
+                    doc.setTextColor(...textColor);
+                }
+            },
+            margin: { left: 14, right: 14 },
+            didDrawPage: () => {
+                // Add Watermark (Optional)
+                doc.setFontSize(40);
+                doc.setTextColor(200, 200, 200, 0.2); // Semi-transparent
+                doc.text('', 100, 150, { angle: 45 });
+            }
+        });
+
+        // Summary Section with Bordered Box
+        const summary = document.getElementById('summary').textContent;
+        const finalY = doc.previousAutoTable.finalY + 15;
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(14, finalY, 269, 20, 3, 3, 'S'); // Rounded rectangle
+        doc.setTextColor(...textColor);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Ringkasan', 16, finalY + 5);
+        doc.setFont('helvetica', 'normal');
+        doc.text(summary, 16, finalY + 12);
+
+        // Footer with Branding
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            // Footer Bar
+            doc.setFillColor(...bgColor);
+            doc.rect(0, doc.internal.pageSize.height - 15, 297, 15, 'F');
+            doc.text(
+                `Halaman ${i} dari ${pageCount}`,
+                doc.internal.pageSize.width - 20,
+                doc.internal.pageSize.height - 5,
+                { align: 'right' }
+            );
+            doc.text(
+                `Laporan Setoran - ${formatDetailDate(new Date())} | Powered by xAI`,
+                14,
+                doc.internal.pageSize.height - 5
+            );
+        }
+
+        if (isPreview) {
+            const pdfDataUri = doc.output('datauristring');
+            const previewIframe = document.getElementById('pdfPreview');
+            const placeholder = document.getElementById('pdfPreviewPlaceholder');
+            previewIframe.src = pdfDataUri;
+            previewIframe.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+            showSuccess('Pratinjau PDF berhasil dimuat!');
+        } else {
+            doc.save(`Laporan_Setoran_${formatDate(new Date())}.pdf`);
+            showSuccess('File PDF berhasil diunduh!');
+        }
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        showError('Terjadi kesalahan saat memuat PDF.');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function previewPDF() {
+    await generatePDF(true);
+}
+
+async function downloadPDF() {
+    await generatePDF(false);
+}
+
+async function downloadExcel() {
+    if (!window.XLSX) {
+        console.error('SheetJS not loaded');
+        showError('Gagal mengunduh Excel. Pastikan SheetJS tersedia.');
+        return;
+    }
+
+    showLoading();
+    try {
+        const selectedColumns = getSelectedColumns();
+        const table = document.getElementById('setoranTable');
+        const visibleRows = Array.from(table.querySelectorAll('tbody tr'))
+            .filter(row => row.style.display !== 'none');
+        
+        const wb = XLSX.utils.book_new();
+        
+        const styles = {
+            headerStyle: {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "2980B9" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                    top: { style: "thin" },
+                    bottom: { style: "thin" },
+                    left: { style: "thin" },
+                    right: { style: "thin" }
+                }
+            },
+            titleStyle: {
+                font: { bold: true, size: 14 },
+                alignment: { horizontal: "left" }
+            },
+            dateStyle: {
+                font: { size: 10 },
+                alignment: { horizontal: "left" }
+            },
+            footerStyle: {
+                font: { bold: true },
+                fill: { fgColor: { rgb: "BDC3C7" } },
+                border: {
+                    top: { style: "thin" },
+                    bottom: { style: "double" }
+                }
+            }
+        };
+
+        const rows = [
+            [{ v: 'LAPORAN DATA SETORAN', s: styles.titleStyle }],
+            [{ v: getLaporanPeriode(), s: styles.dateStyle }],
+            [{ v: `Tanggal Unduh: ${formatDetailDate(new Date())}`, s: styles.dateStyle }],
+            []
+        ];
+
+        const headers = Array.from(table.querySelectorAll('thead th'))
+            .filter((_, index) => selectedColumns.includes(index))
+            .map(header => ({
+                v: header.querySelector('span')?.textContent || header.textContent,
+                s: styles.headerStyle
+            }));
+        rows.push(headers);
+
+        visibleRows.forEach(row => {
+            const rowData = Array.from(row.cells)
+                .filter((_, index) => selectedColumns.includes(index))
+                .map((cell, index) => {
+                    let value = cell.textContent.trim();
+                    let style = {
+                        alignment: { 
+                            horizontal: index <= 3 ? "center" : 
+                                       index >= 5 && index <= 8 ? "right" : "left"
+                        }
+                    };
+                    if (value.includes('Rp')) {
+                        return {
+                            v: Number(value.replace(/[^\d-]/g, '')),
+                            s: style,
+                            z: '#,##0'
+                        };
+                    }
+                    if (selectedColumns[index] === 9) {
+                        style.alignment.horizontal = "center";
+                        style.font = {
+                            color: { 
+                                rgb: value === 'Plus' ? "2ECC71" : 
+                                     value === 'Minus' ? "E74C3C" : "000000"
+                            }
+                        };
+                    }
+                    return { v: value, s: style };
+                });
+            rows.push(rowData);
+        });
+
+        const footerData = Array(selectedColumns.length).fill({ v: '', s: styles.footerStyle });
+        if (selectedColumns.includes(5)) {
+            footerData[selectedColumns.indexOf(5)] = {
+                v: Number(document.getElementById('totalNominal').textContent.replace(/[^\d-]/g, '')),
+                s: styles.footerStyle,
+                z: '#,##0'
+            };
+        }
+        if (selectedColumns.includes(6)) {
+            footerData[selectedColumns.indexOf(6)] = {
+                v: Number(document.getElementById('totalCash').textContent.replace(/[^\d-]/g, '')),
+                s: styles.footerStyle,
+                z: '#,##0'
+            };
+        }
+        if (selectedColumns.includes(7)) {
+            footerData[selectedColumns.indexOf(7)] = {
+                v: Number(document.getElementById('totalQRIS').textContent.replace(/[^\d-]/g, '')),
+                s: styles.footerStyle,
+                z: '#,##0'
+            };
+        }
+        if (selectedColumns.includes(8)) {
+            const totalSelisih = document.getElementById('totalSelisih').textContent.split(' / ');
+            footerData[selectedColumns.indexOf(8)] = {
+                v: totalSelisih.join(' / '),
+                s: styles.footerStyle
+            };
+        }
+        rows.push(footerData);
+
+        rows.push([]);
+        rows.push([{ 
+            v: document.getElementById('summary').textContent,
+            s: { font: { bold: true } }
+        }]);
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = selectedColumns.map(col => ({
+            wch: [0, 8, 12, 10, 30, 15, 15, 15, 15, 10][col]
+        }));
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Laporan Setoran');
+        const excelBuffer = XLSX.write(wb, { 
+            bookType: 'xlsx', 
+            type: 'array',
+            bookSST: false
+        });
+        
+        const blob = new Blob([excelBuffer], { 
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Laporan_Setoran_${formatDate(new Date())}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+
+        showSuccess('File Excel berhasil diunduh!');
+    } catch (error) {
+        console.error('Error downloading Excel:', error);
+        showError('Terjadi kesalahan saat mengunduh file Excel.');
+    } finally {
+        hideLoading();
+    }
+}
+
+// Event Listeners untuk Modal Ekspor
+document.getElementById('downloadExcelBtn').addEventListener('click', openExportModal);
+document.getElementById('downloadPDFBtn').addEventListener('click', openExportModal);
+document.getElementById('cancelExport').addEventListener('click', closeExportModal);
+document.getElementById('confirmExcel').addEventListener('click', () => {
+    closeExportModal();
+    downloadExcel();
+});
+document.getElementById('confirmPDF').addEventListener('click', () => {
+    closeExportModal();
+    downloadPDF();
+});
+document.getElementById('previewPDF').addEventListener('click', previewPDF);
+
+        // Backup/Restore Functions
+ function validateSetoranData(data) {
+    if (!Array.isArray(data)) return false;
+    return data.every(item => 
+        typeof item.tanggal === 'string' &&
+        typeof item.waktu === 'string' &&
+        typeof item.username === 'string' &&
+        typeof item.nominalSetoran === 'number' &&
+        typeof item.totalCash === 'number' &&
+        typeof item.totalQRIS === 'number' &&
+        typeof item.varian === 'number' &&
+        ['Plus', 'Minus'].includes(item.status)
+    );
+}
+
+function backupData() {
+    try {
+        const data = localStorage.getItem('laporanSetoran') || '[]';
+        const blob = new Blob([data], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `setoran_backup_${formatDate(new Date())}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        showSuccess('Backup data berhasil!');
+    } catch (error) {
+        console.error('Error backing up data:', error);
+        showError('Terjadi kesalahan saat backup data.');
+    }
+}
+
+function restoreData(event) {
+    try {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!validateSetoranData(data)) {
+                    showError('Data tidak valid. Pastikan format sesuai.');
+                    return;
+                }
+                localStorage.setItem('laporanSetoran', JSON.stringify(data));
+                displaySetoran();
+                showSuccess('Data berhasil direstore!');
+            } catch (error) {
+                showError('File tidak valid atau data korup.');
+            }
+        };
+        reader.readAsText(file);
+    } catch (error) {
+        console.error('Error restoring data:', error);
+        showError('Terjadi kesalahan saat restore data.');
+    }
+}
+
+// Export Scheduling
+function openScheduleModal() {
+    document.getElementById('scheduleModal').classList.remove('hidden');
+}
+
+function closeScheduleModal() {
+    document.getElementById('scheduleModal').classList.add('hidden');
+}
+
+function saveSchedule() {
+    const frequency = document.getElementById('scheduleFrequency').value;
+    const format = document.getElementById('scheduleFormat').value;
+    const schedules = JSON.parse(localStorage.getItem('exportSchedules')) || [];
+    schedules.push({ frequency, format, lastRun: null });
+    localStorage.setItem('exportSchedules', JSON.stringify(schedules));
+    closeScheduleModal();
+    showSuccess('Jadwal ekspor berhasil disimpan!');
+    runScheduledExports();
+}
+
+function runScheduledExports() {
+    const schedules = JSON.parse(localStorage.getItem('exportSchedules')) || [];
+    const now = new Date();
+    schedules.forEach(schedule => {
+        let shouldRun = false;
+        if (!schedule.lastRun) {
+            shouldRun = true;
+        } else {
+            const lastRun = new Date(schedule.lastRun);
+            if (schedule.frequency === 'daily' && now - lastRun >= 24 * 60 * 60 * 1000) {
+                shouldRun = true;
+            } else if (schedule.frequency === 'weekly' && now - lastRun >= 7 * 24 * 60 * 60 * 1000) {
+                shouldRun = true;
+            } else if (schedule.frequency === 'monthly' && now - lastRun >= 30 * 24 * 60 * 60 * 1000) {
+                shouldRun = true;
+            }
+        }
+        if (shouldRun) {
+            schedule.lastRun = now.toISOString();
+            localStorage.setItem('exportSchedules', JSON.stringify(schedules));
+            if (schedule.format === 'excel') {
+                downloadExcel();
+            } else {
+                downloadPDF();
+            }
+        }
+    });
+}
+
+
+
+function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    document.querySelector('#themeToggle i').className = isDark ? 'fas fa-sun text-yellow-400' : 'fas fa-moon text-gray-600';
+}
+
+// Event Listeners
+document.getElementById('logoutButton').addEventListener('click', logout);
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById('toggleSidebar').addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.toggle('hidden');
+});
+
+document.getElementById('toggleCharts').addEventListener('click', () => {
+    const chartsContainer = document.getElementById('chartsContainer');
+    chartsContainer.classList.toggle('hidden');
+    if (!chartsContainer.classList.contains('hidden')) {
+        const totals = document.querySelectorAll('#setoranTable tfoot td');
+        const statusPlus = document.querySelectorAll('#setoranTable tbody tr:not([style*="display: none"]) td:nth-child(10):not(.text-red-600)').length;
+        const statusMinus = document.querySelectorAll('#setoranTable tbody tr:not([style*="display: none"]) td:nth-child(10).text-red-600').length;
+        renderCharts(
+            parseNumber(totals[2].textContent),
+            parseNumber(totals[3].textContent),
+            parseNumber(totals[4].textContent),
+            statusPlus,
+            statusMinus
+        );
+    }
+});
+
+        // Event Listeners
+        document.getElementById('logoutButton').addEventListener('click', logout);
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+        document.getElementById('toggleSidebar').addEventListener('click', () => {
+            document.querySelector('.sidebar').classList.toggle('hidden');
+        });
+
+        document.getElementById('toggleCharts').addEventListener('click', () => {
+            const chartsContainer = document.getElementById('chartsContainer');
+            chartsContainer.classList.toggle('hidden');
+            if (!chartsContainer.classList.contains('hidden')) {
+                const totals = document.querySelectorAll('#setoranTable tfoot td');
+                const statusPlus = document.querySelectorAll('#setoranTable tbody tr:not([style*="display: none"]) td:nth-child(10):not(.text-red-600)').length;
+                const statusMinus = document.querySelectorAll('#setoranTable tbody tr:not([style*="display: none"]) td:nth-child(10).text-red-600').length;
+                renderCharts(
+                    parseNumber(totals[2].textContent),
+                    parseNumber(totals[3].textContent),
+                    parseNumber(totals[4].textContent),
+                    statusPlus,
+                    statusMinus
+                );
+            }
+        });
+
+        document.getElementById('downloadExcelBtn').addEventListener('click', openExportModal);
+        document.getElementById('downloadPDFBtn').addEventListener('click', openExportModal);
+        document.getElementById('scheduleExportBtn').addEventListener('click', openScheduleModal);
+        document.getElementById('cancelExport').addEventListener('click', closeExportModal);
+        document.getElementById('confirmExcel').addEventListener('click', () => {
+            closeExportModal();
+            downloadExcel();
+        });
+        document.getElementById('confirmPDF').addEventListener('click', () => {
+            closeExportModal();
+            downloadPDF();
+        });
+
+        document.getElementById('bulkDeleteBtn').addEventListener('click', bulkDelete);
+
+        document.getElementById('advancedSearchBtn').addEventListener('click', () => {
+            document.getElementById('advancedSearchModal').classList.remove('hidden');
+        });
+
+        document.getElementById('cancelSearch').addEventListener('click', () => {
+            document.getElementById('advancedSearchModal').classList.add('hidden');
+        });
+
+        document.getElementById('applySearch').addEventListener('click', () => {
+            document.getElementById('advancedSearchModal').classList.add('hidden');
+            filterTable();
+        });
+
+        document.getElementById('cancelSchedule').addEventListener('click', closeScheduleModal);
+
+        document.getElementById('saveSchedule').addEventListener('click', saveSchedule);
+
+        document.getElementById('openFilterDrawer').addEventListener('click', () => {
+            document.getElementById('filterDrawer').classList.add('open');
+        });
+
+        document.getElementById('closeFilterDrawer').addEventListener('click', () => {
+            document.getElementById('filterDrawer').classList.remove('open');
+        });
+
+        document.getElementById('applyMobileFilters').addEventListener('click', () => {
+            document.getElementById('startDate').value = document.getElementById('mobileStartDate').value;
+            document.getElementById('endDate').value = document.getElementById('mobileEndDate').value;
+            document.getElementById('statusFilter').value = document.getElementById('mobileStatusFilter').value;
+            document.getElementById('searchInput').value = document.getElementById('mobileSearchInput').value;
+            document.getElementById('filterDrawer').classList.remove('open');
+            filterTable();
+        });
+
+        // Scroll to Top
+        window.addEventListener('scroll', () => {
+            const scrollButton = document.getElementById('scrollToTop');
+            if (window.scrollY > 300) {
+                scrollButton.classList.remove('hidden');
+            } else {
+                scrollButton.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('scrollToTop').addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Initialize
+        function init() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.querySelector('#themeToggle i').className = 'fas fa-sun text-yellow-400';
+            }
+            checkLogin();
+            if (checkLogin()) {
+                displaySetoran();
+            }
+            
+        }
+
+        // Run initialization on load
+        window.onload = init;
+    </script>
+</body>
+</html>
